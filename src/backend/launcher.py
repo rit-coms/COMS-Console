@@ -9,3 +9,5 @@ for file in file_list:
     file_path = os.path.join(games_directory, file)
     game_inst = game.Game("", file_path, "")
     games[file] = game_inst
+
+print(games)
