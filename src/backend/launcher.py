@@ -11,3 +11,5 @@ for file in file_list:
     games[file] = game_inst
 
 print(games)
+for game_name, game_inst in games.items:
+    game_inst.launch()
