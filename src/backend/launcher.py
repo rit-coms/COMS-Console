@@ -2,7 +2,7 @@ import game
 import os
 
 games = {}
-games_directory = ""; # TODO need this
+games_directory = "/home/pi/ConsoleGames";
 file_list = os.listdir(games_directory) # create a list of each file (name) in the directory
 
 for file in file_list:
