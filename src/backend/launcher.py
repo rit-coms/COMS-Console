@@ -7,7 +7,7 @@ file_list = os.listdir(games_directory) # create a list of each file (name) in t
 
 for file in file_list:
     file_path = os.path.join(games_directory, file)
-    game_inst = game.Game("", file_path, "")
+    game_inst = game.Game("", file_path, "")  # create an instance of a Game object
     games[file] = game_inst
 
 print(games)
