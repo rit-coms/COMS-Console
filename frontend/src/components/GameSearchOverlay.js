@@ -4,10 +4,14 @@ import 'react-simple-keyboard/build/css/index.css';
 import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import GameModal from './GameInfoCard';
 
 function GameSearchOverlay ({games}) {
 	let [search, setSearch] = useState("")
 	let [searchResults, setSearchResults] = useState([]);
+
+	const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedGame, setSelectedGame] = useState(null);
 
 	const settings = {
 		dots: true,
@@ -45,18 +49,32 @@ function GameSearchOverlay ({games}) {
 
 		return searchResults;
 	}
+
+	const openModal = (game) => {
+        setSelectedGame(game);
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setSelectedGame(null);
+        setIsModalOpen(false);
+    };
 	
 	return (
 		<div>
 			<Slider {...settings}>
 				{searchResults.map((game, index) => (
-					<div key={index}>
-						<img height="120px" width="120px" src='https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2F7%2F74%2FWhite_domesticated_duck%2C_stretching.jpg&f=1&nofb=1&ipt=fe16a3ffa3dbfffac1161692adff97ed1ec76957bdad784cfdb37813d1a8a561&ipo=images'></img>
-						<h3>{game.name}</h3>
-						<p>{game.author}</p>
+					<div key={index} style={{textAlign: 'center', margin: 'auto', width: '50%' }}>
+						<img height="120px" width="120px" 
+						style={{ display: 'block', margin: 'auto' }}
+						src='https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2F7%2F74%2FWhite_domesticated_duck%2C_stretching.jpg&f=1&nofb=1&ipt=fe16a3ffa3dbfffac1161692adff97ed1ec76957bdad784cfdb37813d1a8a561&ipo=images'></img>
+						<h3 style={{textAlign: 'center', margin: 'auto', width: '50%' }}
+						onClick={() => openModal(game)}>{game.name}</h3>
+						<p style={{textAlign: 'center', margin: 'auto', width: '50%' }}>{game.author}</p>
 					</div>
 				))}
 			</Slider>
+			<GameModal isOpen={isModalOpen} onRequestClose={closeModal} game={selectedGame} />
 
 			<h1 style={{
 				"border-radius": "15px", 
