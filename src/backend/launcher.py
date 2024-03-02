@@ -33,8 +33,12 @@ def scan():
         if g_id not in old_data:
             old_data[g_id] = g.__dict__
     
+    all_games = []
+    for g_id, g in old_data.items():
+        all_games.append(g)
+    
     with open(r"C:\Users\BurgosAd1\Desktop\games.json", "w") as p:
-        json.dump(old_data, p, indent=4)
+        json.dump(all_games, p, indent=4)
 
 
 scan()
