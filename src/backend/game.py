@@ -2,7 +2,8 @@
 import subprocess
 
 class Game:
-    def __init__(self, title, file_path, author, summary, release_date, is_multiplayer, genres):
+    def __init__(self, id, title, file_path, author, summary, release_date, is_multiplayer, genres):
+        self.id = id
         self.title = title
         self.file_path = file_path
         self.author = author
