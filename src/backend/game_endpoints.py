@@ -15,8 +15,11 @@ def get_games():
     return games_data
 
 # launch a specified game
-# @app.get("/launch")
-# def launch(id: str):
-#     with open(file_path, "r") as file:
-#         games_data = json.load(file)
-#     for ()
+@app.get("/launch")
+def launch(id: str):
+    with open(file_path, "r") as file:
+        games_data = json.load(file)
+    for g in games_data:
+        if g['id'] == id:
+            game_inst = game.Game(g['id'], g['title'], g['file_path'], g['summary'], g['release_date'], g['is_multiplayer'])
+            game_inst.launch()
