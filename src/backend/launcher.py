@@ -3,14 +3,14 @@ import game
 import os
 import uuid
 
-# games_directory = "/home/pi/ConsoleGames"
-games_directory = r"C:\Users\awbus\OneDrive\Desktop\test"
+games_directory = "/home/pi/ConsoleGames"
+database_directory = "/home/pi/games.json"
 
 # adds new games in the games directory to the game_data json file
 def scan():
     old_data = {}
 
-    with open(r"C:\Users\awbus\OneDrive\Desktop\games.json", "r") as current:
+    with open(database_directory, "r") as current:
         try:
             old_data = json.load(current)
         except json.decoder.JSONDecodeError:
@@ -49,7 +49,7 @@ def scan():
     for g_id, g in games_new.items():
         all_games.append(g)
     
-    with open(r"C:\Users\awbus\OneDrive\Desktop\games.json", "w") as p:
+    with open(database_directory, "w") as p:
         json.dump(all_games, p, indent=4)
 
 
