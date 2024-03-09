@@ -21,5 +21,5 @@ def launch(id: str):
         games_data = json.load(file)
     for g in games_data:
         if g['id'] == id:
-            game_inst = game.Game(g['id'], g['title'], g['file_path'], g['summary'], g['release_date'], g['is_multiplayer'])
+            game_inst = game.Game(g['id'], g['title'], g['file_path'], g['summary'], g['author'], g['release_date'], g['is_multiplayer'])
             game_inst.launch()
