@@ -1,4 +1,3 @@
-
 import GameGallery from "../components/GameGallery"
 import { BiFilter } from "react-icons/bi"
 import { BiSortAlt2 } from "react-icons/bi"
