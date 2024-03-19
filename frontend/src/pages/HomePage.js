@@ -2,8 +2,8 @@ import GameGallery from "../components/GameGallery"
 import { BiFilter } from "react-icons/bi"
 import { BiSortAlt2 } from "react-icons/bi"
 import { BiSolidRightArrow } from "react-icons/bi"
-import { NavLink } from 'react-router-dom';
-
+import { NavLink } from 'react-router-dom'
+import { useContext } from "react"
 
 const filter = () => {
 	console.log("filter")
@@ -14,14 +14,14 @@ const sort = () => {
 }
 
 export default function HomePage() {
+
+
 	return (
 		<div>
 			{/* Search */}
 			<div style={{ display: 'inline' }}> 
 				<form autoComplete="off" style={{ display: 'inline' }}>
-					<NavLink to="/search">
-						<input type="text" placeholder="Search" name="search"/>
-					</NavLink>
+					<input type="text" placeholder="Search" name="search"/>
 				</form>
 			</div>
 
