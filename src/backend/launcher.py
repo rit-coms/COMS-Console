@@ -3,8 +3,8 @@ import game
 import os
 import uuid
 
+database_directory = "../data/games.json"
 games_directory = "/home/pi/ConsoleGames"
-database_directory = "/home/pi/games.json"
 
 # adds new games in the games directory to the game_data json file
 def scan():

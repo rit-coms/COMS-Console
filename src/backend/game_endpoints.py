@@ -4,7 +4,7 @@ import launcher
 import json
 
 app = FastAPI()
-file_path = r"C:\Users\awbus\OneDrive\Desktop\games.json"
+file_path = r"..\data\games.json"
 
 # get all of the games stored on the system
 @app.get("/games")
