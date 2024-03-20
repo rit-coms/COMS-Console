@@ -1,7 +1,6 @@
+import React, { useState } from 'react';
 import GameThumbnail from "./GameThumbnail";
-import '../styles/GameGallery.css'
-import {NavLink} from 'react-router-dom'
-
+import '../styles/GameGallery.css';
 
 export default function GameGallery() {
 
@@ -23,24 +22,28 @@ export default function GameGallery() {
 			"image": "./assets/placeholder.jpg"
 		}
 	]
+  
+  const [showFullGallery, setShowFullGallery] = useState(false);
+
+    const handleSeeAllClick = () => {
+        setShowFullGallery(!showFullGallery);
+    };
 
 	
 	
 	return (
-		<div className="game-gallery">
-			
-			<div className="card" style={{'backgroundColor':'#e6e6e6'}}>
-				See All
-			</div>
-			
-			
-			{/* For every game, add thumbnail */}
-			{
-				games.map(game => (
-					<GameThumbnail key={game.id}></GameThumbnail>
-				))
+        <div className="game-gallery">
+            <div className="card" style={{ 'backgroundColor': '#e6e6e6' }}>
+                <button onClick={handleSeeAllClick}>
+                    {showFullGallery ? 'Show Less' : 'See All'}
+                </button>
+            </div>
+
+			{showFullGallery
+				? games.map((game) => <div className="card" style={{ 'backgroundColor': '#e6e6e6' }}><GameThumbnail key={game}></GameThumbnail></div>)
+				: games.slice(0, 6).map((game) => <div className="card" style={{ 'backgroundColor': '#e6e6e6' }}><GameThumbnail key={game}></GameThumbnail></div>)
 			}
-			
-		</div>
-	)
+            
+        </div>
+    );
 }
