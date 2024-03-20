@@ -1,15 +1,19 @@
 .game-gallery {
     display: flex;
-    flex-wrap: wrap;
+    overflow-x: scroll;
     justify-content: flex-start;
     width: 100%;
     padding: 20px 0;
 }
 
-/* remove the scrollbar */
-::-webkit-scrollbar {
-    width: 0px;
+.wrap {
+    flex-wrap: wrap;
 }
+
+/* remove the scrollbar */
+/* ::-webkit-scrollbar {
+    width: 0px;
+} */
 
 .card {
     /* background-color: 'red'; */
