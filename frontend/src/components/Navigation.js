@@ -2,9 +2,7 @@ import { BsSliders2 } from "react-icons/bs";
 import { BsSortDown } from "react-icons/bs";
 import { BsTriangle } from "react-icons/bs";
 import React, { useState } from 'react';
-
 import '../styles/Navigation.css'
-
 import 'bootstrap/dist/css/bootstrap.min.css';
 import SearchModal from "./SearchModal";
 
