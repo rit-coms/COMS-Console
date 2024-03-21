@@ -2,8 +2,12 @@ import GameGallery from "../components/GameGallery"
 import { BiFilter } from "react-icons/bi"
 import { BiSortAlt2 } from "react-icons/bi"
 import { BiSolidRightArrow } from "react-icons/bi"
-import { NavLink } from 'react-router-dom'
-import { useContext } from "react"
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import React, { useState } from 'react';
+import GameSearchOverlay from '../components/GameSearchOverlay';
+import '../App.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 
 const filter = () => {
 	console.log("filter")
@@ -14,14 +18,58 @@ const sort = () => {
 }
 
 export default function HomePage() {
+	const [modal, setModal] = useState(false);
 
+  	const toggle = () => setModal(!modal);
+
+	const search = () => {
+		toggle();
+	}
+
+	const games = [
+		{
+			name: "QuackAttack",
+			author: "Zoe"
+		},
+		{
+			name: "BossDuck",
+			author: "Jeff"
+		},
+		{
+			name: "QuackQuackGo",
+			author: "Jeff"
+		},
+		{
+			name: "DuckRecker",
+			author: "Adrian"
+		},
+	];
 
 	return (
 		<div>
-			{/* Search */}
+
+			<Modal 
+				isOpen={modal} 
+				toggle={toggle} 
+				className="modal-fullscreen"
+			>
+				<ModalBody>
+					<GameSearchOverlay games={games}></GameSearchOverlay>
+				</ModalBody>
+				<ModalFooter>
+				<Button color="primary" onClick={search}>
+					Search
+				</Button>{' '}
+				<Button color="secondary" onClick={toggle}>
+					Cancel
+				</Button>
+				</ModalFooter>
+			</Modal>
+			
+
 			<div style={{ display: 'inline' }}> 
 				<form autoComplete="off" style={{ display: 'inline' }}>
-					<input type="text" placeholder="Search" name="search"/>
+					<input type="text" placeholder="Search" name="search" onClick={toggle}/>
 				</form>
 			</div>
 
