@@ -1,0 +1,33 @@
+.game-gallery {
+    display: flex;
+    overflow-x: scroll;
+    justify-content: flex-start;
+    width: 100%;
+    padding: 20px 0;
+}
+
+.wrap {
+    flex-wrap: wrap;
+}
+
+/* remove the scrollbar */
+/* ::-webkit-scrollbar {
+    width: 0px;
+} */
+
+.card {
+    /* background-color: 'red'; */
+    flex: 0 0 auto;
+    width: 300px;
+    height: 200px;
+    border-radius: 10px;
+    margin: 10px;
+    background-image: url('../assets/placeholder.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+}
+
+.card:first-child {
+    background-image: none;
+}
