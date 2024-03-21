@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import GameThumbnail from "./GameThumbnail";
+import { BsArrowLeft } from "react-icons/bs";
 import '../styles/GameGallery.css';
 
 export default function GameGallery() {
@@ -73,28 +74,49 @@ export default function GameGallery() {
     const handleSeeAllClick = () => {
         setShowFullGallery(!showFullGallery);
     };
-	
-	return (
-        <div className={showFullGallery ? 'game-gallery wrap' : 'game-gallery'}>
-            <div className="card" style={{ 'backgroundColor': '#e6e6e6' }}>
-                <button onClick={handleSeeAllClick}>
-                    {showFullGallery ? 'Show Less' : 'See All'}
-                </button>
-            </div>
 
-			{showFullGallery
-				? games.map((game) => 
-					<div className="card" style={{ 'backgroundColor': '#e6e6e6' }}>
-						<GameThumbnail key={game}></GameThumbnail>
-					</div>
-				)
-				// TODO reserve for previous 6 games played
-				: games.slice(0, 6).map((game) => 
-					<div className="card" style={{ 'backgroundColor': '#e6e6e6' }}>
-						<GameThumbnail key={game}></GameThumbnail>
-					</div>
-				)
+	return (
+		<div className='game-gallery'>
+			
+			{/* See All || null */}
+			{!showFullGallery ?
+				<div className="see-all-container" onClick={handleSeeAllClick}>
+					<div className='game-gallery-card see-all-button'>See All</div>	
+				</div>
+				: null
 			}
-        </div>
+
+			{/* Game Gallery View */}
+			<div className='game-gallery-container'>
+				{/* Back Button || null */}
+				{showFullGallery ?
+					<div className='game-gallery-text-container' onClick={handleSeeAllClick}>
+						<span className='back-button-title'>
+							<BsArrowLeft className='back-button-icon'/>
+							&nbsp; Back
+						</span>
+					</div>
+					: null
+				}
+
+				{/* Full Vertical Gallery || Select Horizontal Gallery */}
+				<div className={showFullGallery ? 'game-carousel full-gallery' : 'game-carousel'}>
+					{showFullGallery
+						? games.map((game) =>
+							<div className="game-gallery-card">
+								<GameThumbnail key={game}></GameThumbnail>
+							</div>
+						)
+						// TODO reserve for previous 6 games played
+						: games.slice(0, 6).map((game) =>
+							<div className="game-gallery-card">
+								<GameThumbnail key={game}></GameThumbnail>
+							</div>
+						)
+					}
+				</div>
+			</div>
+
+		</div>
     );
 }
