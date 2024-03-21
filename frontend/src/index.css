@@ -17,9 +17,9 @@ body {
     padding: 1.5rem;
   
     /* font family */
-    font-family: 'Poppins', sans-serif;
-    font-style: normal;
-    font-size: 48;
+    font-family: 'Poppins', sans-serif !important;
+    font-style: normal !important;
+    font-size: 48 !important;
   
     /* background */
     background: var(--white) url('./assets/background.png') fixed;
