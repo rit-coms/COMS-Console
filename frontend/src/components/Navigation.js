@@ -1,21 +1,16 @@
 import { BsSliders2 } from "react-icons/bs";
 import { BsSortDown } from "react-icons/bs";
 import { BsTriangle } from "react-icons/bs";
-import '../styles/Navigation.css'
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import React, { useState } from 'react';
-import GameSearchOverlay from '../components/GameSearchOverlay';
+
+import '../styles/Navigation.css'
+
 import 'bootstrap/dist/css/bootstrap.min.css';
+import SearchModal from "./SearchModal";
 
 export default function Navigation() {
 
-    const [modal, setModal] = useState(false);
-    const toggle = () => setModal(!modal);
-
-    const search = () => {
-        console.log("search")
-        toggle();
-    }
+    const [showModal, setShowModal] = useState(false)
 
     const filter = () => {
         console.log("filter")
@@ -25,65 +20,34 @@ export default function Navigation() {
         console.log("sort")
     }
 
-    const games = [
-        {
-            name: "QuackAttack",
-            author: "Zoe"
-        },
-        {
-            name: "BossDuck",
-            author: "Jeff"
-        },
-        {
-            name: "QuackQuackGo",
-            author: "Jeff"
-        },
-        {
-            name: "DuckRecker",
-            author: "Adrian"
-        },
-    ];
-    
     return (
-        // Navigation Bar
         <div>
-            <Modal 
-				isOpen={modal} 
-				toggle={toggle} 
-				className="modal-fullscreen"
-			>
-				<ModalBody>
-					<GameSearchOverlay games={games}></GameSearchOverlay>
-				</ModalBody>
-				<ModalFooter>
-				<Button color="primary" onClick={search}>
-					Search
-				</Button>{' '}
-				<Button color="secondary" onClick={toggle}>
-					Cancel
-				</Button>
-				</ModalFooter>
-			</Modal>
+            {/* Search Modal */}
+            <SearchModal showModal={showModal} toggleModal={() => setShowModal(false)} />
         
-        < nav className = "navigation-bar" >
-            {/* Search Bar */}
-            < div className = "mascot" ></div >
+            {/* Navigation Bar */}
+            <nav className="navigation-bar">
+                {/* Duck */}
+                <div className="mascot" ></div >
+
+                {/* Navigation Container */}
                 <div className="navigation-container">
 
-
+                    {/* Search Bar */}
                     <div className="search-bar">
-                        <div className="search-title" onClick={search}>
+                        <div className="search-title" onClick={() => setShowModal(!showModal)}>
                             Search
                         </div>
                         <BsTriangle className="search-icon no-fill-triangle" />
                     </div>
+
                     {/* Filter and Sort Buttons */}
                     <div className="search-query-buttons">
                         <BsSliders2 className="search-filter-button" onClick={filter} />
                         <BsSortDown className="search-sort-button" onClick={sort} />
                     </div>
                 </div>
-			</nav >
+            </nav>
         </div>
     )
 }
