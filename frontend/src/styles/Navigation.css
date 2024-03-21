@@ -6,6 +6,7 @@
     color: var(--cyan);
     justify-content: right;
     align-items: last baseline;
+    margin-bottom: 20px;
 
     .mascot {
         background-image: url('../assets/duck.png');
