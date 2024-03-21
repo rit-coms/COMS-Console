@@ -5,7 +5,8 @@
 /* GLOBAL ROOT VARIABLES */
 :root {
   --white: #FFFFFF;
-  /* scrollbar-gutter: stable; */
+  --off-white: #FFFDF8;
+  --cyan: #99D6DE;
 }
 
 /* GLOBAL BODY STYLES */

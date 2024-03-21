@@ -1,36 +1,40 @@
 import GameGallery from "../components/GameGallery"
-import { BiFilter } from "react-icons/bi"
-import { BiSortAlt2 } from "react-icons/bi"
-import { BiSolidRightArrow } from "react-icons/bi"
-import { NavLink } from 'react-router-dom'
-import { useContext } from "react"
-
-const filter = () => {
-	console.log("filter")
-}
-
-const sort = () => {
-	console.log("sort")
-}
+import { BsSliders2 } from "react-icons/bs";
+import { BsSortDown } from "react-icons/bs";
+import { BsTriangle } from "react-icons/bs";
+import '../styles/HomePage.css'
 
 export default function HomePage() {
 
+	const search = () => {
+		console.log("search")
+	}
+
+	const filter = () => {
+		console.log("filter")
+	}
+
+	const sort = () => {
+		console.log("sort")
+	}
 
 	return (
 		<div>
-			{/* Search */}
-			<div style={{ display: 'inline' }}> 
-				<form autoComplete="off" style={{ display: 'inline' }}>
-					<input type="text" placeholder="Search" name="search"/>
-				</form>
-			</div>
-
-			{/* Buttons: Right, Filter, Sort */}
-			<div style={{display:'inline'}}>
-				<button type="submit"><BiSolidRightArrow style={{ fontSize: '12px' }} /></button>
-				<BiFilter style={{ padding: '0px 10px', backgroundColor: '#e6e6e6', border: '1px solid' }} type="submit" onClick={filter} />
-				<BiSortAlt2 style={{ padding: '0px 10px', backgroundColor: '#e6e6e6', border: '1px solid' }} type="submit" onClick={sort} />
-			</div>
+			{/* Navigation Bar */}
+			<nav className="navigation-bar">
+				{/* Search Bar */}
+				<div className="search-bar">
+					<div className="search-title" onClick={search}>
+						Search
+						<BsTriangle className="search-icon no-fill-triangle" />
+					</div>
+				</div>
+				{/* Filter and Sort Buttons */}
+				<div className="search-query-buttons">
+					<BsSliders2 className="search-filter-button" onClick={filter} />
+					<BsSortDown className="search-sort-button" onClick={sort}/>
+				</div>
+			</nav>
 
 			<GameGallery />
 
