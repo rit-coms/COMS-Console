@@ -76,8 +76,8 @@ export default function HomePage() {
 					<div className="search-bar">
 						<div className="search-title" onClick={search}>
 							Search
-							<BsTriangle className="search-icon no-fill-triangle" />
 						</div>
+						<BsTriangle className="search-icon no-fill-triangle" />
 					</div>
 					{/* Filter and Sort Buttons */}
 					<div className="search-query-buttons">

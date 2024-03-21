@@ -24,20 +24,25 @@
         .search-bar {
             background-color: var(--off-white);
             display: flex;
+            align-items: center;
             margin-right: 15px;
             border-radius: 6px;
             border: 3px solid var(--cyan);
 
             .search-title {
-                width: 400px;
-                padding: 7px;
+                width: 500px;
+                padding: 10px;
+                font-size: 28px;
             }
 
             .search-icon {
                 rotate: 90deg;
                 float: right;
-                font-size: 22px;
+                font-size: 35px;
+                margin-right: 15px;
             }
+
+            
         }
 
         .search-bar:hover {
@@ -46,7 +51,7 @@
 
         .search-query-buttons {
             display: flex;
-            font-size: 44px;
+            font-size: 67px;
 
             .search-filter-button:hover {
                 cursor: pointer;
