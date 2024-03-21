@@ -3,14 +3,26 @@ import { BsSliders2 } from "react-icons/bs";
 import { BsSortDown } from "react-icons/bs";
 import { BsTriangle } from "react-icons/bs";
 import '../styles/HomePage.css'
+import { BiFilter } from "react-icons/bi"
+import { BiSortAlt2 } from "react-icons/bi"
+import { BiSolidRightArrow } from "react-icons/bi"
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import React, { useState } from 'react';
+import GameSearchOverlay from '../components/GameSearchOverlay';
+import '../App.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default function HomePage() {
-
-	const search = () => {
+  
+  const [modal, setModal] = useState(false);
+  const toggle = () => setModal(!modal);
+  
+  const search = () => {
 		console.log("search")
+    toggle();
 	}
-
-	const filter = () => {
+  
+  const filter = () => {
 		console.log("filter")
 	}
 
@@ -18,8 +30,46 @@ export default function HomePage() {
 		console.log("sort")
 	}
 
+	const games = [
+		{
+			name: "QuackAttack",
+			author: "Zoe"
+		},
+		{
+			name: "BossDuck",
+			author: "Jeff"
+		},
+		{
+			name: "QuackQuackGo",
+			author: "Jeff"
+		},
+		{
+			name: "DuckRecker",
+			author: "Adrian"
+		},
+	];
+
 	return (
 		<div>
+
+			<Modal 
+				isOpen={modal} 
+				toggle={toggle} 
+				className="modal-fullscreen"
+			>
+				<ModalBody>
+					<GameSearchOverlay games={games}></GameSearchOverlay>
+				</ModalBody>
+				<ModalFooter>
+				<Button color="primary" onClick={search}>
+					Search
+				</Button>{' '}
+				<Button color="secondary" onClick={toggle}>
+					Cancel
+				</Button>
+				</ModalFooter>
+			</Modal>
+			
 			{/* Navigation Bar */}
 			<nav className="navigation-bar">
 				{/* Search Bar */}
