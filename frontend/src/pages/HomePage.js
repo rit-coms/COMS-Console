@@ -3,26 +3,22 @@ import { BsSliders2 } from "react-icons/bs";
 import { BsSortDown } from "react-icons/bs";
 import { BsTriangle } from "react-icons/bs";
 import '../styles/HomePage.css'
-import { BiFilter } from "react-icons/bi"
-import { BiSortAlt2 } from "react-icons/bi"
-import { BiSolidRightArrow } from "react-icons/bi"
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import React, { useState } from 'react';
 import GameSearchOverlay from '../components/GameSearchOverlay';
-import '../App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default function HomePage() {
   
-  const [modal, setModal] = useState(false);
-  const toggle = () => setModal(!modal);
+	const [modal, setModal] = useState(false);
+	const toggle = () => setModal(!modal);
   
-  const search = () => {
+	const search = () => {
 		console.log("search")
-    toggle();
+    	toggle();
 	}
   
-  const filter = () => {
+	const filter = () => {
 		console.log("filter")
 	}
 
@@ -73,16 +69,21 @@ export default function HomePage() {
 			{/* Navigation Bar */}
 			<nav className="navigation-bar">
 				{/* Search Bar */}
-				<div className="search-bar">
-					<div className="search-title" onClick={search}>
-						Search
-						<BsTriangle className="search-icon no-fill-triangle" />
+				<div className="mascot"></div>
+				<div className="navigation-container">
+
+					
+					<div className="search-bar">
+						<div className="search-title" onClick={search}>
+							Search
+							<BsTriangle className="search-icon no-fill-triangle" />
+						</div>
 					</div>
-				</div>
-				{/* Filter and Sort Buttons */}
-				<div className="search-query-buttons">
-					<BsSliders2 className="search-filter-button" onClick={filter} />
-					<BsSortDown className="search-sort-button" onClick={sort}/>
+					{/* Filter and Sort Buttons */}
+					<div className="search-query-buttons">
+						<BsSliders2 className="search-filter-button" onClick={filter} />
+						<BsSortDown className="search-sort-button" onClick={sort}/>
+					</div>
 				</div>
 			</nav>
 
