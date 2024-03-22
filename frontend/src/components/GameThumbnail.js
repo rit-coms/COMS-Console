@@ -1,7 +1,11 @@
-export default function GameThumbnail() {
+
+import '../styles/GameThumbnail.css'
+
+export default function GameThumbnail({game}) {
+	
 	return (
-		<div>
-			<h2>Add GameThumbnail template code here!</h2>
+		<div className='game-thumbnail' onClick={() => console.log(game.title)}>
+			<h3>{game.title}</h3>
 		</div>
 	)
 }

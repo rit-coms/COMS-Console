@@ -104,13 +104,13 @@ export default function GameGallery() {
 					{showFullGallery
 						? games.map((game) =>
 							<div className="game-gallery-card">
-								<GameThumbnail key={game}></GameThumbnail>
+								<GameThumbnail key={game.id} game={game}></GameThumbnail>
 							</div>
 						)
 						// TODO reserve for previous 6 games played
 						: games.slice(0, 6).map((game) =>
 							<div className="game-gallery-card">
-								<GameThumbnail key={game}></GameThumbnail>
+								<GameThumbnail key={game.id} game={game}></GameThumbnail>
 							</div>
 						)
 					}
