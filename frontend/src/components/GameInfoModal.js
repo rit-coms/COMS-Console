@@ -8,13 +8,6 @@ const GameInfoModal = ({ isOpen, toggleModal, game }) => {
 	// to suppress warning error
 	Modal.setAppElement('#root')
 
-	console.log("URL: ", game.image)
-	console.log("IS PLACEHOLDER IMG: ", game.image.indexOf('placeholder') > 0)
-	console.log("IS IMG FORMAT: ", game.image.indexOf('.png') > 0 || game.image.indexOf('.jpg') > 0)
-	console.log("-----------------")
-	console.log(game.image.indexOf('placeholder') < 0 && game.image.indexOf('.jpg') > 0)
-	console.log("************")
-
 	const playGame = () => {
 		console.log("PLAY: ", game.title)
 	}
@@ -26,29 +19,36 @@ const GameInfoModal = ({ isOpen, toggleModal, game }) => {
 			className='game-info-modal'
 			overlayClassName='game-info-modal-overlay'
 		>
-			{/* header, body, footer */}
 			<div className='game-info-modal-container'>
 
 				{/* Close Button */}
 				<BsXLg className='game-info-modal-close' onClick={toggleModal} />
 				
+				{/* Modal Body */}
 				<div className='game-info-modal-body'>
+
+					{/* Game Image */}
 					<div className='game-info-modal-image'>
 						{
 							(game.image.indexOf('placeholder') < 0 && game.image.indexOf('.jpg') > 0) ?
 								<img className='game-image' src={game.image} />
 							: 
+								// default is placeholder image
 								<img className='game-image' />
 						}
 					</div>
+
+					{/* Game Details */}
 					<div className='game-info-modal-game-details'>
 
+						{/* Header */}
 						<div className='game-info-modal-header'>
 							<h3 className='game-title'>{game.title}</h3>
 							<span className='game-author'><i>{game.author}</i></span> <br />
 							<span className='game-release-date'>{game.release_date}</span>
 						</div>
 
+						{/* Attributes */}
 						<div className='game-info-modal-attributes'>
 							{game.is_multiplayer ?
 								<div className='game-info-modal-pill'>multiplayer</div>
@@ -57,9 +57,11 @@ const GameInfoModal = ({ isOpen, toggleModal, game }) => {
 							<div className='game-info-modal-pill'>genre</div>
 						</div>
 
+						{/* Summary */}
 						<div className='game-info-modal-summary'>
 							{
 								game.summary == "" ?
+									// default is lorem ipsum
 									<p>
 										Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
 										Duis ac orci sed purus pellentesque cursus ut nec leo. 
@@ -75,6 +77,8 @@ const GameInfoModal = ({ isOpen, toggleModal, game }) => {
 						</div>
 					</div>
 				</div>
+
+				{/* Footer */}
 				<div className='game-info-modal-footer'>
 					<div className='game-info-modal-play-button' onClick={toggleModal}>
 						<div className='game-info-modal-play-text' onClick={playGame}>
@@ -82,6 +86,7 @@ const GameInfoModal = ({ isOpen, toggleModal, game }) => {
 						</div>
 					</div>
 				</div>
+
 			</div>
 		</Modal>	
     );
