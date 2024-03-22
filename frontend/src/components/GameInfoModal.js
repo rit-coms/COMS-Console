@@ -12,7 +12,7 @@ const GameInfoModal = ({ isOpen, toggleModal, game }) => {
 	console.log("IS PLACEHOLDER IMG: ", game.image.indexOf('placeholder') > 0)
 	console.log("IS IMG FORMAT: ", game.image.indexOf('.png') > 0 || game.image.indexOf('.jpg') > 0)
 	console.log("-----------------")
-	console.log(game.image.indexOf('placeholder') < 0 && (game.image.indexOf('.png') > 0 || game.image.indexOf('.jpg') > 0))
+	console.log(game.image.indexOf('placeholder') < 0 && game.image.indexOf('.jpg') > 0)
 	console.log("************")
 
 	const playGame = () => {
@@ -35,8 +35,7 @@ const GameInfoModal = ({ isOpen, toggleModal, game }) => {
 				<div className='game-info-modal-body'>
 					<div className='game-info-modal-image'>
 						{
-							(game.image.indexOf('placeholder') < 0 && 
-							(game.image.indexOf('.png') > 0 || game.image.indexOf('.jpg') > 0)) ?
+							(game.image.indexOf('placeholder') < 0 && game.image.indexOf('.jpg') > 0) ?
 								<img className='game-image' src={game.image} />
 							: 
 								<img className='game-image' />
