@@ -4,7 +4,7 @@ import 'react-simple-keyboard/build/css/index.css';
 import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import GameModal from './GameInfoCard';
+import GameInfoModal from './GameInfoModal';
 
 function GameSearchOverlay ({games}) {
 	let [search, setSearch] = useState("")
@@ -74,7 +74,7 @@ function GameSearchOverlay ({games}) {
 					</div>
 				))}
 			</Slider>
-			<GameModal isOpen={isModalOpen} onRequestClose={closeModal} game={selectedGame} />
+			<GameInfoModal isOpen={isModalOpen} onRequestClose={closeModal} game={selectedGame} />
 
 			<h1 style={{
 				"border-radius": "15px", 

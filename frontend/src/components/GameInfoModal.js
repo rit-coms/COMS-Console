@@ -1,9 +1,9 @@
 import Modal from 'react-modal';
 import React, { useState } from 'react';
-import "./GameInfoCard.css";
+import "../styles/GameInfoModal.css"
 // if this doesnt work make sure you installed "npm install react-modal"
 
-const GameModal = ({ isOpen, onRequestClose, game }) => {
+const GameInfoModal = ({ isOpen, onRequestClose, game }) => {
 	const modalStyles = {
         content: {
 			display: 'flex',
@@ -80,6 +80,6 @@ const GameModal = ({ isOpen, onRequestClose, game }) => {
     );
 };
 
-export default GameModal;
+export default GameInfoModal;
 
 //		This is the game information card that will pop up when a game is selected from the game gallery
