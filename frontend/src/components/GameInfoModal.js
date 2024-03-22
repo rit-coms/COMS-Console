@@ -1,9 +1,12 @@
 import Modal from 'react-modal';
 import React, { useState } from 'react';
 import "../styles/GameInfoModal.css"
-// if this doesnt work make sure you installed "npm install react-modal"
 
-const GameInfoModal = ({ isOpen, onRequestClose, game }) => {
+const GameInfoModal = ({ isOpen, toggleModal, game }) => {
+
+	// to suppress warning error
+	Modal.setAppElement('#root')
+	
 	const modalStyles = {
         content: {
 			display: 'flex',
@@ -17,7 +20,7 @@ const GameInfoModal = ({ isOpen, onRequestClose, game }) => {
 			transform: 'translate(-50%, -50%)',
 			borderRadius: '22px',
 			overflow: 'visible',
-			"min-width": '600px'
+			minWidth: '600px'
         },
     };
 
@@ -31,55 +34,42 @@ const GameInfoModal = ({ isOpen, onRequestClose, game }) => {
     };
 	
 	return (
-        <Modal
-            isOpen={isOpen}
-            onRequestClose={onRequestClose}
-            contentLabel="Game Details"
+		<Modal
+			isOpen={isOpen}
+			toggle={toggleModal}
 			style={modalStyles}
-        >
-            {game && (
+		>
+			<div>
+				<span 
+					role='button' onClick={toggleModal} 
+					style={closeButtonStyles}
+					aria-label='Close'
+				>
+					&#10006;
+				</span>
 				<div>
-					<span
-                        role="button"
-                        aria-label="Close"
-                        onClick={onRequestClose}
-                        style={closeButtonStyles}
-                    >
-                        &#10006;
-                    </span>
-                <div>
-					{/* <img height="120px" width="120px" 
-						style={{ display: 'block', margin: 'auto' }}
-						src='https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2F7%2F74%2FWhite_domesticated_duck%2C_stretching.jpg&f=1&nofb=1&ipt=fe16a3ffa3dbfffac1161692adff97ed1ec76957bdad784cfdb37813d1a8a561&ipo=images'>
-					</img> */}
-					<div className="picture">
-					<img height="120px" width="120px" 
-						style={{ display: 'block', margin: 'auto' }}
-						src='https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2F7%2F74%2FWhite_domesticated_duck%2C_stretching.jpg&f=1&nofb=1&ipt=fe16a3ffa3dbfffac1161692adff97ed1ec76957bdad784cfdb37813d1a8a561&ipo=images'></img>
-					</div>
-					<div >
-					<div className="text-wrapper-2">{game.name}</div>
-					<div className="text-wrapper-3">{game.author}</div>
-					<div className="text-wrapper-4">Year uploaded</div>
-					<div className="rectangle-2" />
-					<div class="container">
-						<div className="rectangle-3" >Multiplayer</div>
-						<div className="rectangle-4">Genre</div>
-					</div>
-					<p className="text-wrapper">
-						Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis ac orci sed purus pellentesque cursus ut
-						nec leo. Phasellus at risus quis ante auctor facilisis. Fusce iaculis leo eget dui finibus, volutpat
-						tincidunt erat euismod.
-					</p>
-					<div className="text-wrapper-5">Play</div>
-					</div>
-                </div>
+					<img height='120px' width='120px' className='picture'
+						style={{display:'block', margin:'auto'}}
+						src='https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2F7%2F74%2FWhite_domesticated_duck%2C_stretching.jpg'
+					/>
 				</div>
-            )}
-        </Modal>
+				<div className='text-wrapper-2'>{game.title}</div>
+				<div className='text-wrapper-3'>{game.author}</div>
+				<div className='text-wrapper-4'>{game.release_date}</div>
+				<div className="rectangle-2" />
+				<div className="container">
+					<div className="rectangle-3" >Multiplayer</div>
+					<div className="rectangle-4">Genre</div>
+				</div>
+				<p className="text-wrapper">
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis ac orci sed purus pellentesque cursus ut
+					nec leo. Phasellus at risus quis ante auctor facilisis. Fusce iaculis leo eget dui finibus, volutpat
+					tincidunt erat euismod.
+				</p>
+				<div className="text-wrapper-5">Play</div>
+			</div>
+		</Modal>	
     );
 };
 
 export default GameInfoModal;
-
-//		This is the game information card that will pop up when a game is selected from the game gallery
