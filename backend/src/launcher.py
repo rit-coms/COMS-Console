@@ -3,8 +3,12 @@ import game
 import os
 import uuid
 
-database_directory = "../data/games.json"
-games_directory = "/home/pi/ConsoleGames"
+database_directory = r"C:\Users\awbus\OneDrive\Documents\GitHub\COMS-Console\data\games.json"
+# database_directory = "../data/games.json"
+# games_directory = "/home/pi/ConsoleGames"
+games_directory = r"C:\Users\awbus\OneDrive\Desktop\test"
+# cover_image_directory = "../data/cover_images"
+cover_image_directory = r"C:\Users\awbus\OneDrive\Documents\GitHub\COMS-Console\data\cover_images"
 
 # adds new games in the games directory to the game_data json file
 def scan():
@@ -28,7 +32,7 @@ def scan():
     for file in file_list:
         file_path = os.path.join(games_directory, file)
         if file_path not in old_data_dict:
-            game_inst = game.Game(str(uuid.uuid4()), file, file_path, '', '', 0, False)  # create an instance of a Game object
+            game_inst = game.Game(str(uuid.uuid4()), file, file_path, '', '', 0, False, [], '')  # create an instance of a Game object
             games[str(game_inst.file_path)] = game_inst
     
     # pick out the new games / take out the ones that already exist
@@ -36,10 +40,18 @@ def scan():
     games_old = {}
     for g_id, g in games.items():
         if g_id not in old_data_dict:
-            gameDict = {"title": g.title,'id': g.id, 'file_path': g.file_path, 'author': g.author, 'summary': g.summary, 'release_date': g.release_date, 'is_multiplayer': g.is_multiplayer}
+            # check for cover image
+            image_path = cover_image_directory + '\\' + g.title + '.jpg'
+            if os.path.exists(image_path):
+                g.cover_image = image_path
+            gameDict = {"title": g.title,'id': g.id, 'file_path': g.file_path, 'author': g.author, 'summary': g.summary, 'release_date': g.release_date, 'is_multiplayer': g.is_multiplayer, 'genres': g.genres, 'cover_image': g.cover_image}
             games_new[str(g.id)] = gameDict
     for g_id, g in old_data_dict.items():
-        gameDict = {"title": g.title,'id': g.id, 'file_path': g.file_path, 'author': g.author, 'summary': g.summary, 'release_date': g.release_date, 'is_multiplayer': g.is_multiplayer}
+        # check for cover image
+        image_path = cover_image_directory + '\\' + g.title + '.jpg'
+        if os.path.exists(image_path):
+            g.cover_image = image_path
+        gameDict = {"title": g.title,'id': g.id, 'file_path': g.file_path, 'author': g.author, 'summary': g.summary, 'release_date': g.release_date, 'is_multiplayer': g.is_multiplayer, 'genres': g.genres, 'cover_image': g.cover_image}
         games_old[str(g.id)] = gameDict
    
     # update the json file    
@@ -51,3 +63,5 @@ def scan():
     
     with open(database_directory, "w") as p:
         json.dump(all_games, p, indent=4)
+
+scan()
