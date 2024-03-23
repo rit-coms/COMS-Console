@@ -1,9 +1,42 @@
 
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-import GameSearchOverlay from '../components/GameSearchOverlay';
+// import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import Modal from 'react-modal';
+import '../styles/SearchModal.css'
+import { BsXLg } from "react-icons/bs";
+import GameSearch from './GameSearch';
+import { useState } from 'react';
 
 export default function SearchModal({showModal, toggleModal}) {
     
+    let [search, setSearch] = useState("")
+
+    const keyboardClick = (key) => {
+
+        if (key == 'space' && search.length == 0)
+            return
+        
+        if (key == 'del') {
+            setSearch(search.slice(0, -1))
+
+        } else if (key == 'space') {
+            setSearch(search += " ")
+
+        } else {
+            setSearch(search += key)
+
+        }
+    }
+
+    const submit = () => {
+        if (search != "")
+            console.log("final search", search)
+        clear()
+    }
+
+    const clear = () => {
+        setSearch("")
+    }
+
     const games = [
         {
             name: "QuackAttack",
@@ -24,23 +57,66 @@ export default function SearchModal({showModal, toggleModal}) {
     ];
 
     return (
-        <Modal 
+        <Modal
             isOpen={showModal}
-            toggle={toggleModal} 
-            className="modal-fullscreen search-modal"
+            toggle={toggleModal}
+            className='search-modal'
+            overlayClassName='search-modal-overlay'
         >
-            <ModalBody>
-                <GameSearchOverlay games={games}></GameSearchOverlay>
-            </ModalBody>
+            <div className='search-modal-container'>
+                
+                {/* Close Button */}
+                <span onClick={clear}>
+                    <BsXLg className='search-modal-close' onClick={toggleModal} />
+                </span>
 
-            <ModalFooter>
-                <Button color="primary" onClick={toggleModal}>
-                    Search
-                </Button>
-                <Button color="secondary" onClick={toggleModal}>
-                    Cancel
-                </Button>
-            </ModalFooter>
+                {/* Modal Body */}
+                <div className='search-modal-body'>
+
+                    {/* Search Bar */}
+                    <div className='search-bar'>
+                        {
+                            search != "" ?
+                                <span className='search-text'>
+                                    {search}
+                                </span>
+                            :
+                                <span className='search-placeholder'>
+                                    Enter a game or author name
+                                </span>
+                        }
+                    </div>
+
+                    {/* Keyboard */}
+                    <div className='search-keyboard'>
+                        <GameSearch keyboardClick={keyboardClick} />
+                    </div>
+
+                </div>
+
+                {/* Modal Footer */}
+                <div className='search-modal-footer'>
+
+                    {/* Cancel */}
+                    <span onClick={toggleModal}>
+                        <div className='search-modal-button cancel'
+                            onClick={clear}>
+                            Cancel
+                        </div>
+                    </span>
+
+                    {/* Submit */}
+                    <span onClick={toggleModal}>
+                        <div className='search-modal-button submit'
+                            onClick={submit}>
+                            Submit
+                        </div>
+                    </span>
+
+                </div>
+
+            </div>
         </Modal>
+
     )
 }
