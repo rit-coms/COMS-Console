@@ -3,12 +3,9 @@ import game
 import os
 import uuid
 
-database_directory = r"C:\Users\awbus\OneDrive\Documents\GitHub\COMS-Console\data\games.json"
-# database_directory = "../data/games.json"
-# games_directory = "/home/pi/ConsoleGames"
-games_directory = r"C:\Users\awbus\OneDrive\Desktop\test"
-# cover_image_directory = "../data/cover_images"
-cover_image_directory = r"C:\Users\awbus\OneDrive\Documents\GitHub\COMS-Console\data\cover_images"
+database_directory = "../data/games.json"
+games_directory = "/home/pi/ConsoleGames"
+cover_image_directory = "../data/cover_images"
 
 # adds new games in the games directory to the game_data json file
 def scan():
@@ -41,14 +38,14 @@ def scan():
     for g_id, g in games.items():
         if g_id not in old_data_dict:
             # check for cover image
-            image_path = cover_image_directory + '\\' + g.title + '.jpg'
+            image_path = cover_image_directory + '/' + g.title + '.jpg'
             if os.path.exists(image_path):
                 g.cover_image = image_path
             gameDict = {"title": g.title,'id': g.id, 'file_path': g.file_path, 'author': g.author, 'summary': g.summary, 'release_date': g.release_date, 'is_multiplayer': g.is_multiplayer, 'genres': g.genres, 'cover_image': g.cover_image}
             games_new[str(g.id)] = gameDict
     for g_id, g in old_data_dict.items():
         # check for cover image
-        image_path = cover_image_directory + '\\' + g.title + '.jpg'
+        image_path = cover_image_directory + '/' + g.title + '.jpg'
         if os.path.exists(image_path):
             g.cover_image = image_path
         gameDict = {"title": g.title,'id': g.id, 'file_path': g.file_path, 'author': g.author, 'summary': g.summary, 'release_date': g.release_date, 'is_multiplayer': g.is_multiplayer, 'genres': g.genres, 'cover_image': g.cover_image}
