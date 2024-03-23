@@ -60,5 +60,3 @@ def scan():
     
     with open(database_directory, "w") as p:
         json.dump(all_games, p, indent=4)
-
-scan()
