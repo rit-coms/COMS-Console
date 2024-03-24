@@ -42,25 +42,6 @@ export default function SearchModal({showModal, toggleModal}) {
         console.log("GET SEARCH RESULTS FOR: ", search)
     }
 
-    const games = [
-        {
-            name: "QuackAttack",
-            author: "Zoe"
-        },
-        {
-            name: "BossDuck",
-            author: "Jeff"
-        },
-        {
-            name: "QuackQuackGo",
-            author: "Jeff"
-        },
-        {
-            name: "DuckRecker",
-            author: "Adrian"
-        },
-    ];
-
     return (
         <Modal
             isOpen={showModal}
