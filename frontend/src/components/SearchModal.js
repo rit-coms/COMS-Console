@@ -1,5 +1,4 @@
 
-// import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import Modal from 'react-modal';
 import '../styles/SearchModal.css'
 import { BsXLg } from "react-icons/bs";
@@ -28,13 +27,19 @@ export default function SearchModal({showModal, toggleModal}) {
     }
 
     const submit = () => {
-        if (search != "")
-            console.log("final search", search)
+        if (search != "") {
+            setSearch(search.trim())
+            getSearchResults()
+        }
         clear()
     }
 
     const clear = () => {
         setSearch("")
+    }
+
+    const getSearchResults = () => {
+        console.log("GET SEARCH RESULTS FOR: ", search)
     }
 
     const games = [
