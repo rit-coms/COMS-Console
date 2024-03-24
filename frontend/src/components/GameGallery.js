@@ -3,6 +3,9 @@ import GameThumbnail from "./GameThumbnail";
 import { BsArrowLeft } from "react-icons/bs";
 import '../styles/GameGallery.css';
 import games from '../games.json'
+import { useContext } from 'react';
+import { SortContext } from '../context/SortContext';
+import * as Sort from '../utils/SortGames';
 
 export default function GameGallery() {
 
@@ -71,10 +74,30 @@ export default function GameGallery() {
 	// ]
   
 	const [showFullGallery, setShowFullGallery] = useState(false);
+	const {sort} = useContext(SortContext)
 
     const handleSeeAllClick = () => {
         setShowFullGallery(!showFullGallery);
     };
+
+	const sortGames = (games) => {
+		switch (sort) {
+			case "Name - Alphabetical":
+				return Sort.sortAlphabetical(games)
+			case "Name - Reverse Alphabetical":
+				return Sort.sortReverseAlphabetical(games)
+			case "Year - Newest to Oldest":
+				return Sort.sortLatestReleaseDate(games)
+			case "Year - Oldest to Newest":
+				return Sort.sortOldestReleaseDate(games)
+			case "Most Played":
+				return Sort.sortMostPlayed(games)
+			case "Least Played":
+				return Sort.sortLeastPlayed(games)
+			default:
+				return Sort.sortLastPlayed(games)
+		}
+	}
 
 	return (
 		<div className='game-gallery'>
@@ -91,9 +114,10 @@ export default function GameGallery() {
 
 			{/* Game Gallery View */}
 			<div className='game-gallery-container'>
+
 				{/* Back Button || null */}
 				{showFullGallery ?
-					<div className='game-gallery-text-container' onClick={handleSeeAllClick}>
+					<div className='game-gallery-back-container' onClick={handleSeeAllClick}>
 						<span className='back-button-title'>
 							<BsArrowLeft className='back-button-icon'/>
 							&nbsp; Back
@@ -102,24 +126,34 @@ export default function GameGallery() {
 					: null
 				}
 
+				{/* Sort Method || null */}
+				{
+					sort != 'None' && !showFullGallery ?
+						<div className='game-gallery-sort'>
+							<p>Sorting by: {sort}</p>
+						</div>
+					: null
+				}
+				
+
 				{/* Full Vertical Gallery || Select Horizontal Gallery */}
 				<div className={showFullGallery ? 'game-carousel full-gallery' : 'game-carousel'}>
 					{showFullGallery
-						? games.map((game) =>
+						? sortGames(games).map((game) =>
 							<div key={game.id} className="game-gallery-card">
 								<GameThumbnail key={game.id} game={game}></GameThumbnail>
 							</div>
 						)
 						// TODO reserve for previous 6 games played
-						: games.slice(0, 6).map((game) =>
+						: sortGames(games).slice(0, 6).map((game) =>
 							<div key={game.id} className="game-gallery-card">
 								<GameThumbnail key={game.id} game={game}></GameThumbnail>
 							</div>
 						)
 					}
 				</div>
-			</div>
 
+			</div>
 		</div>
     );
 }

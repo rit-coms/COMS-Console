@@ -46,7 +46,7 @@
         overflow-x: scroll;
         padding: 30px 0px 30px 0px;
 
-        .game-gallery-text-container {
+        .game-gallery-back-container {
             position: sticky;
             left: 0px;
             padding: 10px; 
@@ -55,8 +55,6 @@
 
         .back-button-title {
             background-color: var(--off-white);
-            display: flex;
-            justify-content: left;
             align-items: center;
             width: fit-content;
             padding: 10px 20px 10px 20px;
@@ -75,6 +73,16 @@
             cursor: pointer;
             padding: 12px 22px 12px 22px;
             box-shadow: 3px 3px 3px rgba(196, 196, 196, 0.5);
+        }
+
+        .game-gallery-sort {
+            color: var(--cyan);
+            display: flex;
+            font-size: 24px;
+            margin-left: 25px;
+            position: sticky;
+            left: 25px;
+            text-wrap: nowrap;
         }
 
         .game-carousel {
