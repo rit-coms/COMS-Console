@@ -10,9 +10,20 @@ export default function GameThumbnail({game}) {
 	return (
 		<>
 			<GameInfoModal isOpen={showDetails} toggleModal={() => setShowDetails(false)} game={game} />
-			<div className='game-thumbnail' onClick={() => setShowDetails(!showDetails)}>
-				<h3>{game.title}</h3>
-			</div>
+			{
+				(game.image.indexOf('placeholder') < 0 && game.image.indexOf('.jpg') > 0) ?
+					<div className='game-thumbnail' style={{ backgroundImage: `url(${game.image})` }}
+						onClick={() => setShowDetails(!showDetails)}
+					>
+						<h3>{game.title}</h3>
+					</div>
+				:
+					<div className='game-thumbnail'
+						onClick={() => setShowDetails(!showDetails)}
+					>
+						<h3>{game.title}</h3>
+					</div>
+			}
 		</>
 	)
 }
