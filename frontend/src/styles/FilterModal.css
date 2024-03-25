@@ -1,0 +1,134 @@
+
+.filter-modal-overlay {
+    background-color: rgba(0, 0, 0, 0.5);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.filter-modal {
+    background-color: var(--off-white);
+    padding: 30px;
+    display: 'flex';
+    align-items: center;
+    justify-content: center;
+    width: 50%;
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    border-radius: 0px 9px 9px 0px;
+    outline: none;
+    overflow: visible;
+    min-width: 600px;
+    color: var(--cyan);
+
+    .filter-modal-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        width: 100%;
+        height: 100%;
+
+        .filter-modal-back-container {
+            padding: 10px;
+        }
+        
+        .back-button-title {
+            align-items: center;
+            width: fit-content;
+            border-radius: 6px;
+            font-size: 16px;
+    
+            .back-button-icon {
+                justify-content: center;
+                font-size: 24px;
+            }
+        }
+        
+        .back-button-title:hover {
+            cursor: pointer;
+            font-size: 17px;
+        }
+
+        .filter-modal-body {
+            display: flex;
+            flex-direction: column;
+            justify-content: first baseline;
+            height: 100%;
+
+            .filter-modal-header {
+                padding: 10px;
+                font-size: 24px;
+                font-weight: 500;
+            }
+
+            .filter-modal-accordion {
+                padding: 10px;
+
+                .accordion-item-container {
+                    border-top: 1px solid;
+
+                    .accordion-title {
+                        padding: 10px 0px;
+                    }
+                    
+                    .accordion-item {
+                        padding: 10px;
+
+                        .radio-icon {
+                            margin-right: 10px;
+                            font-size: 12px;
+                        }
+                    }
+
+                    .accordion-item:hover {
+                        background-color: #C4C4C4;
+                        color: var(--off-white);
+                        cursor: pointer;
+                    }
+
+                    .selected {
+                        color: var(--off-white);
+                        background-color: var(--cyan);
+                    }
+                    
+                }    
+            } 
+        }
+
+        .filter-modal-footer {
+            display: flex;
+            justify-content: space-around;
+
+            .filter-modal-button {
+                background-color: var(--cyan);
+                width: 250px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 6px;
+                margin-left: 25px;
+            }
+
+            .filter-modal-button.cancel {
+                background-color: var(--off-white);
+                margin-left: 0;
+            }
+
+            .filter-modal-button.submit {
+                color: var(--off-white);
+            }
+
+            .filter-modal-button:hover {
+                cursor: pointer;
+                box-shadow: 3px 3px 3px rgba(196, 196, 196, 0.5);
+            }
+        }
+
+    }
+
+}
