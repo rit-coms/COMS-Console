@@ -2,46 +2,20 @@
 import Modal from 'react-modal';
 import { BsArrowLeft } from "react-icons/bs";
 import '../styles/FilterModal.css'
-import { useState } from 'react';
+import { useContext, useState } from 'react';
+import { FilterContext } from '../context/FilterContext';
 
 function FilterModal({showModal, toggleModal}) {
-    
 
-    // TODO: Make Context for filter
+    const {filter, updateFilter, clearFilter} = useContext(FilterContext)    
 
-    const [selected, setSelected] = useState({
-        players: "",
-        genre: "",
-        year: ""
-    })
-
-    const updateSelection = (accordion, option) => {
-        switch (accordion) {
-            case 'Players':
-                setSelected({...selected, players: option})
-                break
-            case 'Genre':
-                setSelected({ ...selected, genre: option })
-                break
-            case 'Year of Development':
-                setSelected({ ...selected, year: option })
-                break
-        } 
-    }
-
-    const clearSelection = () => {
-        setSelected({players:"", genre:"", year:""})
-    }
-
-    const submitSelection = () => {
+    const submitFilter = () => {
         getFilterResults()
-        clearSelection()
     }
 
     const getFilterResults = () => {
-        console.log("filter w: ", selected)
+        console.log("filter w: ", filter)
     }
-
 
     const accordionData = [
         {
@@ -70,7 +44,7 @@ function FilterModal({showModal, toggleModal}) {
                 {/* Back Button */}
                 <div className='filter-modal-back-container'>
                     <span className='back-button-title' onClick={toggleModal}>
-                        <span onClick={clearSelection}>
+                        <span onClick={clearFilter}>
                             <BsArrowLeft className='back-button-icon' />
                             &nbsp; Back
                         </span>
@@ -93,16 +67,11 @@ function FilterModal({showModal, toggleModal}) {
                                         {
                                             (accordion.options.map((option) => {
                                                 return (
-                                                    <div className={Object.values(selected).includes(option) ? 'accordion-item selected' : 'accordion-item'} 
-                                                        onClick={() => updateSelection(accordion.title, option)}
+                                                    <div className={Object.values(filter).includes(option) ? 'accordion-item selected' : 'accordion-item'} 
+                                                        onClick={() => updateFilter(accordion.title, option)}
                                                     >
                                                         <label>
-                                                            {/* { Object.values(selected).includes(option) ?
-                                                                <BsCircleFill className='radio-icon icon-selected' />
-                                                            :
-                                                                <BsCircle className='radio-icon' />
-                                                            } */}
-                                                                {option}
+                                                            {option}
                                                         </label>
                                                     </div>
                                                 )
@@ -119,7 +88,7 @@ function FilterModal({showModal, toggleModal}) {
                 <div className='filter-modal-footer'>
                     
                     {/* Cancel */}
-                    <span onClick={clearSelection}>
+                    <span onClick={clearFilter}>
                         <div className='filter-modal-button cancel'>
                             Clear Filters
                         </div>
@@ -128,7 +97,7 @@ function FilterModal({showModal, toggleModal}) {
                     {/* Submit */}
                     <span onClick={toggleModal}>
                         <div className='filter-modal-button submit'
-                            onClick={submitSelection}>
+                            onClick={submitFilter}>
                             Submit
                         </div>
                     </span>
