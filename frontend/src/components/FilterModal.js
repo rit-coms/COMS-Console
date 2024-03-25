@@ -7,15 +7,7 @@ import { FilterContext } from '../context/FilterContext';
 
 function FilterModal({showModal, toggleModal}) {
 
-    const {filter, updateFilter, clearFilter} = useContext(FilterContext)    
-
-    const submitFilter = () => {
-        getFilterResults()
-    }
-
-    const getFilterResults = () => {
-        console.log("filter w: ", filter)
-    }
+    const {filter, updateFilter, clearFilter, submitFilter} = useContext(FilterContext)    
 
     const accordionData = [
         {
@@ -60,14 +52,14 @@ function FilterModal({showModal, toggleModal}) {
                         {
                             accordionData.map((accordion) => {
                                 return (
-                                    <div className='accordion-item-container'>
+                                    <div key={accordion.title} className='accordion-item-container'>
                                         <div className='accordion-title'>
                                             {accordion.title}
                                         </div>
                                         {
                                             (accordion.options.map((option) => {
                                                 return (
-                                                    <div className={Object.values(filter).includes(option) ? 'accordion-item selected' : 'accordion-item'} 
+                                                    <div key={option} className={Object.values(filter).includes(option) ? 'accordion-item selected' : 'accordion-item'} 
                                                         onClick={() => updateFilter(accordion.title, option)}
                                                     >
                                                         <label>

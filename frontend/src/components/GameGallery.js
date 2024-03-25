@@ -5,7 +5,9 @@ import '../styles/GameGallery.css';
 import games from '../games.json'
 import { useContext } from 'react';
 import { SortContext } from '../context/SortContext';
-import * as Sort from '../utils/SortGames';
+import * as Sort from '../helpers/SortGames';
+import * as Filter from '../helpers/FilterGames';
+import { FilterContext } from '../context/FilterContext';
 
 export default function GameGallery() {
 
@@ -75,6 +77,7 @@ export default function GameGallery() {
   
 	const [showFullGallery, setShowFullGallery] = useState(false);
 	const {sort} = useContext(SortContext)
+	const {filter, hasFilter} = useContext(FilterContext)
 
     const handleSeeAllClick = () => {
         setShowFullGallery(!showFullGallery);
@@ -97,6 +100,37 @@ export default function GameGallery() {
 			default:
 				return Sort.sortLastPlayed(games)
 		}
+	}
+
+	const filterGames = (games) => {
+
+		if (!hasFilter)
+			return games
+
+		const filterString = JSON.stringify(filter).toLowerCase()
+		
+		if (filterString.includes('players')) {
+			return Filter.filterByPlayers(games, filter.players)
+		} else if (filterString.includes('genre')) {
+			return Filter.filterByGenre(games, filter.genre)
+		} else {
+			return Filter.filterByYear(games, filter.year)
+		}
+		
+	}
+
+	const getFilterType = () => {
+
+		const filterString = JSON.stringify(filter).toLowerCase()
+
+		if (filterString.includes('players')) {
+			return filter.players
+		} else if (filterString.includes('genre')) {
+			return filter.genre
+		} else {
+			return filter.year
+		}
+
 	}
 
 	return (
@@ -134,7 +168,15 @@ export default function GameGallery() {
 						</div>
 					: null
 				}
-				
+
+				{/* Filter Method || null  */}
+				{
+					hasFilter && !showFullGallery ?
+						<div className='game-gallery-sort'>
+							<p>Filtering by: {getFilterType()}</p>
+						</div>
+					: null
+				}
 
 				{/* Full Vertical Gallery || Select Horizontal Gallery */}
 				<div className={showFullGallery ? 'game-carousel full-gallery' : 'game-carousel'}>
@@ -144,8 +186,7 @@ export default function GameGallery() {
 								<GameThumbnail key={game.id} game={game}></GameThumbnail>
 							</div>
 						)
-						// TODO reserve for previous 6 games played
-						: sortGames(games).slice(0, 6).map((game) =>
+						: filterGames(sortGames(games)).slice(0, 6).map((game) =>
 							<div key={game.id} className="game-gallery-card">
 								<GameThumbnail key={game.id} game={game}></GameThumbnail>
 							</div>

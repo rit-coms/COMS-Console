@@ -12,6 +12,7 @@ export const FilterProvider = ({ children }) => {
     // })
 
     const [filter, setFilter] = useState({})
+    const [hasFilter, setHasFilter] = useState(false)
 
     const updateFilter = (accordion, option) => {
         switch (accordion) {
@@ -33,10 +34,17 @@ export const FilterProvider = ({ children }) => {
     const clearFilter = () => {
         // setFilter({ players: "", genre: "", year: "" })
         setFilter({})
+        setHasFilter(false)
+    }
+
+    const submitFilter = () => {
+        if (JSON.stringify(filter) == "{}")
+            return
+        setHasFilter(true)
     }
 
     const values = {
-        filter, updateFilter, clearFilter
+        filter, updateFilter, clearFilter, hasFilter, submitFilter, 
     }
 
     return (
