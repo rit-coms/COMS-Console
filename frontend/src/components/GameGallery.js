@@ -7,7 +7,9 @@ import { useContext } from 'react';
 import { SortContext } from '../context/SortContext';
 import * as Sort from '../helpers/SortGames';
 import * as Filter from '../helpers/FilterGames';
+import * as Search from '../helpers/SearchGames';
 import { FilterContext } from '../context/FilterContext';
+import { SearchContext } from '../context/SearchContext';
 
 export default function GameGallery() {
 
@@ -78,6 +80,7 @@ export default function GameGallery() {
 	const [showFullGallery, setShowFullGallery] = useState(false);
 	const {sort} = useContext(SortContext)
 	const {filter, hasFilter} = useContext(FilterContext)
+	const {search, hasSearch} = useContext(SearchContext)
 
     const handleSeeAllClick = () => {
         setShowFullGallery(!showFullGallery);
@@ -116,7 +119,7 @@ export default function GameGallery() {
 		} else {
 			return Filter.filterByYear(games, filter.year)
 		}
-		
+
 	}
 
 	const getFilterType = () => {
@@ -130,6 +133,14 @@ export default function GameGallery() {
 		} else {
 			return filter.year
 		}
+
+	}
+
+	const searchResults = (games) => {
+
+		if (search=="")
+			return games
+		return Search.searchBy(games, search)
 
 	}
 
@@ -178,15 +189,24 @@ export default function GameGallery() {
 					: null
 				}
 
+				{/* Search Method || null */}
+				{
+					hasSearch && !showFullGallery ?
+						<div className='game-gallery-sort'>
+							<p>Results for: "{search}"</p>
+						</div>
+					: null
+				}
+
 				{/* Full Vertical Gallery || Select Horizontal Gallery */}
 				<div className={showFullGallery ? 'game-carousel full-gallery' : 'game-carousel'}>
 					{showFullGallery
-						? sortGames(games).map((game) =>
+						? searchResults(filterGames(sortGames(games))).map((game) =>
 							<div key={game.id} className="game-gallery-card">
 								<GameThumbnail key={game.id} game={game}></GameThumbnail>
 							</div>
 						)
-						: filterGames(sortGames(games)).slice(0, 6).map((game) =>
+						: searchResults(filterGames(sortGames(games))).slice(0, 6).map((game) =>
 							<div key={game.id} className="game-gallery-card">
 								<GameThumbnail key={game.id} game={game}></GameThumbnail>
 							</div>

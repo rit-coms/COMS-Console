@@ -3,44 +3,12 @@ import Modal from 'react-modal';
 import '../styles/SearchModal.css'
 import { BsXLg } from "react-icons/bs";
 import GameSearch from './GameSearch';
-import { useState } from 'react';
+import { useContext } from 'react';
+import { SearchContext } from '../context/SearchContext';
 
 export default function SearchModal({showModal, toggleModal}) {
     
-    let [search, setSearch] = useState("")
-
-    const keyboardClick = (key) => {
-
-        if (key == 'space' && search.length == 0)
-            return
-        
-        if (key == 'del') {
-            setSearch(search.slice(0, -1))
-
-        } else if (key == 'space') {
-            setSearch(search += " ")
-
-        } else {
-            setSearch(search += key)
-
-        }
-    }
-
-    const submit = () => {
-        if (search != "") {
-            setSearch(search.trim())
-            getSearchResults()
-        }
-        clear()
-    }
-
-    const clear = () => {
-        setSearch("")
-    }
-
-    const getSearchResults = () => {
-        console.log("GET SEARCH RESULTS FOR: ", search)
-    }
+    let {search, keyboardClick, submit, clear} = useContext(SearchContext)
 
     return (
         <Modal
@@ -75,7 +43,7 @@ export default function SearchModal({showModal, toggleModal}) {
 
                     {/* Keyboard */}
                     <div className='search-keyboard'>
-                        <GameSearch keyboardClick={keyboardClick} />
+                        <GameSearch />
                     </div>
 
                 </div>

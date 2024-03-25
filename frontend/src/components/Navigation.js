@@ -1,6 +1,4 @@
-import { BsSliders2 } from "react-icons/bs";
-import { BsSortDown } from "react-icons/bs";
-import { BsTriangle } from "react-icons/bs";
+import { BsSliders2, BsSortDown, BsTriangle, BsXLg } from "react-icons/bs";
 import React, { useState } from 'react';
 import '../styles/Navigation.css'
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -8,12 +6,14 @@ import SearchModal from "./SearchModal";
 import { useContext } from "react";
 import { SortContext } from "../context/SortContext";
 import FilterModal from "./FilterModal";
+import { SearchContext } from "../context/SearchContext";
 
 export default function Navigation() {
 
     const [showSearchModal, setShowSearchModal] = useState(false)
     const [showFilterModal, setShowFilterModal] = useState(false)
     const {updateSort} = useContext(SortContext)
+    let {search, clear} = useContext(SearchContext)
 
     return (
         <div>
@@ -30,11 +30,20 @@ export default function Navigation() {
                 <div className="navigation-container">
 
                     {/* Search Bar */}
-                    <div className="search-bar">
+                    <div className="search-bar" onClick={clear}>
                         <div className="search-title" onClick={() => setShowSearchModal(!showSearchModal)}>
-                            Search
+                            {
+                                search != "" ?
+                                search : <span>Search</span>
+                            }
                         </div>
-                        <BsTriangle className="search-icon no-fill-triangle" />
+
+                        {
+                            search != ""
+                                ? <BsXLg className="search-icon" onClick={clear}/>
+                                : <BsTriangle className="search-icon no-fill-triangle" />
+                        }
+                        
                     </div>
 
                     {/* Filter and Sort Buttons */}
