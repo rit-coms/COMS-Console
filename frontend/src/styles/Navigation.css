@@ -1,0 +1,76 @@
+
+.navigation-bar {
+    height: 200px;
+    display: flex;
+    flex-direction: row;
+    color: var(--cyan);
+    justify-content: right;
+    align-items: last baseline;
+    margin-bottom: 20px;
+
+    .mascot {
+        background-image: url('../assets/duck.png');
+        background-size: cover;
+        width: 200px;
+        height: 200px;
+        display: block;
+        position: absolute;
+        z-index: -1;
+    }
+
+    .navigation-container {
+        display: flex;
+        justify-content: center;
+
+        .search-bar {
+            background-color: var(--off-white);
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+            border-radius: 6px;
+            border: 3px solid var(--cyan);
+
+            .search-title {
+                width: 500px;
+                padding: 10px;
+                font-size: 28px;
+            }
+
+            .search-icon {
+                rotate: 90deg;
+                float: right;
+                font-size: 35px;
+                margin-right: 15px;
+            }
+
+            
+        }
+
+        .search-bar:hover {
+            cursor: pointer;
+        }
+
+        .search-query-buttons {
+            display: flex;
+            font-size: 67px;
+
+            .search-filter-button:hover {
+                cursor: pointer;
+            }
+
+            .search-sort-button:hover {
+                cursor: pointer;
+            }
+        }
+
+        .search-query-buttons > * {
+            background-color: var(--off-white);
+            padding: 3px;
+            border: 1px solid;
+            border-radius: 6px;
+            border: 3px solid var(--cyan);
+            margin-right: 15px;
+        }
+    }
+
+}

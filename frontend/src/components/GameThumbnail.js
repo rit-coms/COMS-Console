@@ -1,7 +1,29 @@
-export default function GameThumbnail() {
+
+import { useState } from 'react'
+import '../styles/GameThumbnail.css'
+import GameInfoModal from './GameInfoModal'
+
+export default function GameThumbnail({game}) {
+	
+	const [showDetails, setShowDetails] = useState(false)
+
 	return (
-		<div>
-			<h2>Add GameThumbnail template code here!</h2>
-		</div>
+		<>
+			<GameInfoModal isOpen={showDetails} toggleModal={() => setShowDetails(false)} game={game} />
+			{
+				(game.image.indexOf('placeholder') < 0 && game.image.indexOf('.jpg') > 0) ?
+					<div className='game-thumbnail' style={{ backgroundImage: `url(${game.image})` }}
+						onClick={() => setShowDetails(!showDetails)}
+					>
+						<h3>{game.title}</h3>
+					</div>
+				:
+					<div className='game-thumbnail'
+						onClick={() => setShowDetails(!showDetails)}
+					>
+						<h3>{game.title}</h3>
+					</div>
+			}
+		</>
 	)
 }
