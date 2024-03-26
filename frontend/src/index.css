@@ -23,7 +23,7 @@ body {
   
     /* background */
     background: var(--white) url('./assets/background.png') fixed;
-    background-size: 90%;
+    background-size: cover;
     background-position: left 2em top 3rem;    
 
 }
