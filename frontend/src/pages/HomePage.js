@@ -1,3 +1,4 @@
+import Bubble from "../components/Bubble";
 import GameGallery from "../components/GameGallery"
 import Navigation from "../components/Navigation";
 import { FilterProvider } from "../context/FilterContext";
@@ -11,6 +12,7 @@ export default function HomePage() {
 			<SearchProvider>
 				<SortProvider>
 					<FilterProvider>
+						<Bubble />
 						<Navigation />
 						<GameGallery />
 					</FilterProvider>

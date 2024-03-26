@@ -23,6 +23,7 @@ export default function Navigation() {
 
             {/* Navigation Bar */}
             <nav className="navigation-bar">
+
                 {/* Duck */}
                 <div className="mascot" ></div >
 
