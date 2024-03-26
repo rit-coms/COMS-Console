@@ -1,6 +1,6 @@
 
 .game-thumbnail {
-    background-color: #C4C4C4;
+    background-color: var(--grey);
     background-image: url('../assets/placeholder.jpg');
     background-size: cover;
     width: 100%;

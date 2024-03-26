@@ -85,7 +85,7 @@
                     }
 
                     .accordion-item:hover {
-                        background-color: #C4C4C4;
+                        background-color: var(--grey);
                         color: var(--off-white);
                         cursor: pointer;
                     }
