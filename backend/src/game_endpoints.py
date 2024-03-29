@@ -5,6 +5,17 @@ import json
 
 app = FastAPI()
 file_path = r"..\data\games.json"
+# file_path = r"C:\Users\awbus\OneDrive\Desktop\games.json" -- WINDOWS
+
+# get an individual game by ID
+@app.get("/game")
+def get_game(id: str):
+    launcher.scan()
+    with open(file_path, "r") as file:
+        games_data = json.load(file)
+    for g in games_data:
+        if g['id'] == id:
+            return g
 
 # get all of the games stored on the system
 @app.get("/games")
