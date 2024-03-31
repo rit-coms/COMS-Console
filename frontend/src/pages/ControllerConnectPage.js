@@ -125,7 +125,6 @@ export default function ControllerConnectPage() {
         <div className="controller-connect-container">
 
             <div className="controller-connect-header">
-                <h1 className={currentPlayer == 1 ? 'red' : 'blue'}>{currentButton}</h1>
                 <span>Waiting for controller connection...</span>
             </div>
 
