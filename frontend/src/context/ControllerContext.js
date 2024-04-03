@@ -114,7 +114,7 @@ export const ControllerProvider = ({ children }) => {
             }
         }
 
-    }, [currentButton, currentPlayer, addController, deleteController, setCurrentButton])
+    }, [currentButton])
 
     // return values
     const values = {

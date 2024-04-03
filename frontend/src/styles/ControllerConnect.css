@@ -68,7 +68,6 @@
             .player-description:focus {
                 cursor: default;
                 outline: none;
-                border-style: dashed;
             }
 
             .player-description.connected {
@@ -82,7 +81,6 @@
                 color: var(--cyan);
                 cursor: pointer;
                 outline: none;
-                border-style: dashed;
             }
 
         }
@@ -115,8 +113,20 @@
             color: var(--cyan);
             cursor: pointer;
             outline: none;
-            border-style: dashed;
         }
     }
 
 }
+
+.player2 {
+    background-color: #f95369 !important;
+}
+
+.player1 {   
+    background-color: #249bdb !important;
+}
+
+.player1.player2 {
+    background: linear-gradient(110deg, #249bdb 50%, #f95369 50%) !important;
+}
+
