@@ -18,14 +18,37 @@ const getPageHierarchy = (page) => {
                 0: document.querySelectorAll('button.player-description'),
                 1: document.querySelectorAll('button.controller-submit')
             }
+
         case "home":
-            break
+            return {
+                0: document.querySelectorAll('button.search-bar, .search-button'),
+                1: document.querySelectorAll('.game-gallery-card')
+            }
+
         case "full game gallery":
             break
+
         case "search modal":
-            break
+            return {
+                0: document.querySelectorAll('.search-modal-close'),
+                1: document.querySelectorAll('div.search-bar'),
+                2: document.querySelectorAll('.row-0'),
+                3: document.querySelectorAll('.row-1'),
+                4: document.querySelectorAll('.row-2'),
+                5: document.querySelectorAll('.row-3'),
+                6: document.querySelectorAll('.search-modal-button')
+            }
+            
         case "filter modal":
-            break
+            return {
+                0: document.querySelectorAll('.filter-modal-back'),
+                1: document.querySelectorAll('.accordion-item'),
+                2: document.querySelectorAll('.filter-modal-button')
+            }
+
+        default:
+            return
+
     }
 
 }

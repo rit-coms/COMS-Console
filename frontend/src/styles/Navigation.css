@@ -24,6 +24,8 @@
 
         .search-bar {
             background-color: var(--off-white);
+            color: var(--cyan);
+            text-align: left;
             display: flex;
             align-items: center;
             margin-right: 15px;
@@ -74,3 +76,4 @@
     }
 
 }
+

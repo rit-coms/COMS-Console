@@ -17,13 +17,13 @@ function GameSearch() {
     return (
         <div className='keyboard-container'>
             {
-                keyboard.map((row) => {
+                keyboard.map((row, index) => {
                     return (
                         <div key={row} className='keyboard-row'>
                             {
                                 row.map((key) => {
                                     return (
-                                        <div key={key} className='keyboard-key'
+                                        <div key={key} className={'keyboard-key row-' + index}
                                             onClick={() => keyboardClick(key)}
                                         >
                                             {key}

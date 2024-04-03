@@ -31,7 +31,7 @@ export default function Navigation() {
                 <div className="navigation-container">
 
                     {/* Search Bar */}
-                    <div className="search-bar" onClick={clear}>
+                    <button className="search-bar" onClick={clear}>
                         <div className="search-title" onClick={() => setShowSearchModal(!showSearchModal)}>
                             {
                                 search != "" ?
@@ -45,12 +45,12 @@ export default function Navigation() {
                                 : <BsTriangle className="search-icon no-fill-triangle" />
                         }
                         
-                    </div>
+                    </button>
 
                     {/* Filter and Sort Buttons */}
                     <div className="search-query-buttons">
-                        <BsSliders2 className="search-filter-button" onClick={()=> setShowFilterModal(!showFilterModal)} />
-                        <BsSortDown className="search-sort-button" onClick={updateSort} />
+                        <BsSliders2 className="search-button search-filter-button" onClick={()=> setShowFilterModal(!showFilterModal)} />
+                        <BsSortDown className="search-button search-sort-button" onClick={updateSort} />
                     </div>
                 </div>
             </nav>

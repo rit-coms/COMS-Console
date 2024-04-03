@@ -35,7 +35,7 @@ function FilterModal({showModal, toggleModal}) {
 
                 {/* Back Button */}
                 <div className='filter-modal-back-container'>
-                    <span className='back-button-title' onClick={toggleModal}>
+                    <span className='back-button-title filter-modal-back' onClick={toggleModal}>
                         <span onClick={clearFilter}>
                             <BsArrowLeft className='back-button-icon' />
                             &nbsp; Back
