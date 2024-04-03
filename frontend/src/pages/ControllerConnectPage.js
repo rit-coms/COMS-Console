@@ -23,7 +23,6 @@ export default function ControllerConnectPage() {
     }, [])
 
     useEffect(() => {
-        console.log(pageIndex)
 
         if (_players.filter((player) => player != null).length > 0) {
 
