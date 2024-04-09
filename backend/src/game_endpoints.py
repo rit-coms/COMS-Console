@@ -1,11 +1,28 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import game
 import launcher
 import json
 
 app = FastAPI()
-file_path = r"..\data\games.json"
-# file_path = r"C:\Users\awbus\OneDrive\Desktop\games.json" -- WINDOWS
+#file_path = r"..\data\games.json"
+file_path = r"C:\Users\BuriskMe\COMS_Console\COMS-Console\frontend\src\data\games.json"  #WINDOWS
+
+origins = [
+    "http://localhost:3",
+    "http://localhost:1000",
+    "http://localhost:3000",
+    "http://127.0.0.1",
+    "http://127.0.0.1:8000"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # get an individual game by ID
 @app.get("/game")
