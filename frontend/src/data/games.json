@@ -1,0 +1,28 @@
+[
+    {
+        "title": "duckduckgoose.txt",
+        "id": "3f6cdcc3-df43-4b20-8bd8-ece8140028e4",
+        "file_path": "C:\\Users\\mpb31\\OneDrive\\Desktop\\test\\duckduckgoose.txt",
+        "author": "melissa",
+        "summary": "testtestsetsetsetsetsetsetsetsetsetsetsetsetsertsetsetsetse",
+        "release_date": 0,
+        "is_multiplayer": true,
+        "genres": [],
+        "cover_image": "C:\\Users\\mpb31\\OneDrive\\Desktop\\test\\duckduckgoose_image.jpg",
+        "times_played": 0,
+        "last_played": ""
+    },
+    {
+        "title": "duckball.txt",
+        "id": "ccbd8df7-38e9-420d-8727-d77602bdde5e",
+        "file_path": "C:\\Users\\mpb31\\OneDrive\\Desktop\\test\\duckball.txt",
+        "author": "melissa",
+        "summary": "DUCK BALL",
+        "release_date": 0,
+        "is_multiplayer": true,
+        "genres": [],
+        "cover_image": "C:\\Users\\mpb31\\OneDrive\\Desktop\\test\\duckduckgoose_image.jpg",
+        "times_played": 0,
+        "last_played": ""
+    }
+]

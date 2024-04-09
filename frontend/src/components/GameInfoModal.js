@@ -1,9 +1,9 @@
 import Modal from 'react-modal';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import "../styles/GameInfoModal.css"
 import { BsXLg } from "react-icons/bs";
 
-const GameInfoModal = ({ isOpen, toggleModal, game }) => {
+const GameInfoModal = ({ isOpen, toggleModal, game, gameInfo}) => {
 
 	// to suppress warning error
 	Modal.setAppElement('#root')
@@ -11,6 +11,7 @@ const GameInfoModal = ({ isOpen, toggleModal, game }) => {
 	const playGame = () => {
 		console.log("PLAY: ", game.title)
 	}
+	console.log(gameInfo['title'])
 	
 	return (
 		<Modal
@@ -30,8 +31,8 @@ const GameInfoModal = ({ isOpen, toggleModal, game }) => {
 					{/* Game Image */}
 					<div className='game-info-modal-image'>
 						{
-							(game.image.indexOf('placeholder') < 0 && game.image.indexOf('.jpg') > 0) ?
-								<img className='game-image' src={game.image} />
+							(game.cover_image.indexOf('placeholder') < 0 && game.cover_image.indexOf('.jpg') > 0) ?
+								<img className='game-image' src={game.cover_image} />
 							: 
 								// default is placeholder image
 								<img className='game-image' />
@@ -43,9 +44,11 @@ const GameInfoModal = ({ isOpen, toggleModal, game }) => {
 
 						{/* Header */}
 						<div className='game-info-modal-header'>
-							<h3 className='game-title'>{game.title}</h3>
-							<span className='game-author'><i>{game.author}</i></span> <br />
-							<span className='game-release-date'>{game.release_date}</span>
+							<h3 className='game-title'>{
+							//gameInfo['title']
+							}</h3>
+							<span className='game-author'><i></i></span> <br />
+							<span className='game-release-date'></span>
 						</div>
 
 						{/* Attributes */}
