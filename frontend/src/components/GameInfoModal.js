@@ -5,13 +5,19 @@ import { BsXLg } from "react-icons/bs";
 
 const GameInfoModal = ({ isOpen, toggleModal, game, gameInfo}) => {
 
+	let nullString = "{\"title\":\"placeholder\",\"id\":\"97b3efec-c3b5-4bbc-a4c9-d5aa4ad34d67\",\"file_path\":\"test\",\"author\":\"test\",\"summary\":\"testtestsetsetsetsetsetsetsetsetsetsetsetsetsertsetsetsetse\",\"release_date\":0,\"is_multiplayer\":true,\"genres\":[],\"cover_image\":\"test\",\"times_played\":0,\"last_played\":\"\"}";
+	const nullObj = JSON.parse(nullString);
+	if(!gameInfo)
+	{
+		gameInfo = nullObj;
+	}
+
 	// to suppress warning error
 	Modal.setAppElement('#root')
 
 	const playGame = () => {
 		console.log("PLAY: ", game.title)
 	}
-	console.log(gameInfo['title'])
 	
 	return (
 		<Modal
@@ -45,15 +51,15 @@ const GameInfoModal = ({ isOpen, toggleModal, game, gameInfo}) => {
 						{/* Header */}
 						<div className='game-info-modal-header'>
 							<h3 className='game-title'>{
-							//gameInfo['title']
+							gameInfo['title']
 							}</h3>
-							<span className='game-author'><i></i></span> <br />
-							<span className='game-release-date'></span>
+							<span className='game-author'><i>{gameInfo['author']}</i></span> <br />
+							<span className='game-release-date'>{gameInfo['release_date'].toString()}</span>
 						</div>
 
 						{/* Attributes */}
 						<div className='game-info-modal-attributes'>
-							{game.is_multiplayer ?
+							{Boolean(gameInfo['is_multiplayer']).valueOf() ?
 								<div className='game-info-modal-pill'>multiplayer</div>
 								: <div className='game-info-modal-pill'>single player</div>
 							}
@@ -63,7 +69,7 @@ const GameInfoModal = ({ isOpen, toggleModal, game, gameInfo}) => {
 						{/* Summary */}
 						<div className='game-info-modal-summary'>
 							{
-								game.summary == "" ?
+								gameInfo['summary'] == "" ?
 									// default is lorem ipsum
 									<p>
 										Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
@@ -75,7 +81,7 @@ const GameInfoModal = ({ isOpen, toggleModal, game, gameInfo}) => {
 										pharetra elit ut venenatis.
 									</p>
 								: 
-									<p>{game.summary}</p>
+									<p>{gameInfo['summary']}</p>
 							}
 						</div>
 					</div>
