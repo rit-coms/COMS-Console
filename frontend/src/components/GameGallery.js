@@ -9,7 +9,6 @@ import * as Filter from '../helpers/FilterGames';
 import * as Search from '../helpers/SearchGames';
 import { FilterContext } from '../context/FilterContext';
 import { SearchContext } from '../context/SearchContext';
-// import fetchGames from '../helpers/GetGames';
 
 function GameGallery() {
 
