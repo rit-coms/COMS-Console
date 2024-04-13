@@ -5,10 +5,12 @@ import { BsXLg } from "react-icons/bs";
 import GameSearch from './GameSearch';
 import { useContext } from 'react';
 import { SearchContext } from '../context/SearchContext';
+import { PageContext } from '../context/PageContext';
 
 export default function SearchModal({showModal, toggleModal}) {
     
-    let {search, keyboardClick, submit, clear} = useContext(SearchContext)
+    let { search, submit, clear } = useContext(SearchContext)
+    const { changePage } = useContext(PageContext)
 
     return (
         <Modal
@@ -20,8 +22,10 @@ export default function SearchModal({showModal, toggleModal}) {
             <div className='search-modal-container'>
                 
                 {/* Close Button */}
-                <span onClick={clear}>
-                    <BsXLg className='search-modal-close' onClick={toggleModal} />
+                <span onClick={() => changePage('home')}>
+                    <span onClick={toggleModal}>
+                        <button className='search-modal-close'><BsXLg onClick={clear}/></button>
+                    </span>
                 </span>
 
                 {/* Modal Body */}
@@ -52,19 +56,23 @@ export default function SearchModal({showModal, toggleModal}) {
                 <div className='search-modal-footer'>
 
                     {/* Cancel */}
-                    <span onClick={toggleModal}>
-                        <div className='search-modal-button cancel'
-                            onClick={clear}>
-                            Cancel
-                        </div>
+                    <span onClick={() => changePage('home')}>
+                        <span onClick={toggleModal}>
+                            <button className='search-modal-button cancel'
+                                onClick={clear}>
+                                Cancel
+                            </button>
+                        </span>
                     </span>
 
                     {/* Submit */}
-                    <span onClick={toggleModal}>
-                        <div className='search-modal-button submit'
-                            onClick={submit}>
-                            Submit
-                        </div>
+                    <span onClick={() => changePage('home')}>
+                        <span onClick={toggleModal}>
+                            <button className='search-modal-button submit'
+                                onClick={submit}>
+                                Submit
+                            </button>
+                        </span>
                     </span>
 
                 </div>
