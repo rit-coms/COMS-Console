@@ -11,17 +11,48 @@ import { PageContext } from "../context/PageContext";
 
 export default function HomePage() {
 
-	const {isConnected} = useContext(ControllerContext)
+	const {isConnected, players, currentButton} = useContext(ControllerContext)
+	const _players = Object.values(players['current']).slice(2, 4)
 
 	const {
-		changePage, modifyHierarchyIndex, modifyElementIndex,
-		pageIndex, focusElement, clickElement, clearClasslist, resetPageIndex
+		modifyHierarchyIndex, modifyElementIndex, pageHierarchy,
+		pageIndex, focusElement, clickElement, clearClasslist
 	} = useContext(PageContext)
 
 
 	useEffect(() => {
-		console.log("HOMEEE")
-	}, [])
+		console.log(pageHierarchy)
+		console.log("PAGEINDEX: ", pageIndex)
+	})
+
+	useEffect(() => {
+
+		if (_players.filter((player) => player != null).length > 0) {
+
+			clearClasslist()
+			focusElement()
+
+			switch (currentButton) {
+				case "DOWN":
+					modifyHierarchyIndex('increase')
+					break
+				case "UP":
+					modifyHierarchyIndex('decrease')
+					break
+				case "RIGHT":
+					modifyElementIndex('increase')
+					break
+				case "LEFT":
+					modifyElementIndex('decrease')
+					break
+				case "A":
+					clickElement()
+					break
+			}
+
+		}
+
+	}, [currentButton])
 
 
 	return (
