@@ -32,6 +32,8 @@
         height: 100%;
 
         .search-modal-close {
+            background-color: transparent;
+            border: none;
             display: flex;
             float: right;
             font-size: 24px;
@@ -84,6 +86,7 @@
 
                         .keyboard-key {
                             background-color: var(--off-white);
+                            color: var(--cyan);
                             display: flex;
                             justify-content: center;
                             align-items: center;
@@ -92,6 +95,7 @@
                             font-size: 24px;
                             border-radius: 6px;
                             margin-right: 10px;
+                            border: none;
                         }
 
                         .keyboard-key:last-child {
@@ -121,6 +125,7 @@
 
             .search-modal-button {
                 background-color: var(--cyan);
+                border: none;
                 width: 120px;
                 height: 40px;
                 display: flex;
@@ -132,6 +137,7 @@
 
             .search-modal-button.cancel {
                 background-color: var(--off-white);
+                color: var(--cyan);
             }
 
             .search-modal-button.submit {

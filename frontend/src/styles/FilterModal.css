@@ -34,23 +34,27 @@
 
         .filter-modal-back-container {
             padding: 10px;
-        }
+
+            .back-button-title {
+                background-color: var(--off-white);
+                border: none;
+                color: var(--cyan);
+                align-items: center;
+                width: fit-content;
+                border-radius: 6px;
+                font-size: 16px;
         
-        .back-button-title {
-            align-items: center;
-            width: fit-content;
-            border-radius: 6px;
-            font-size: 16px;
-    
-            .back-button-icon {
-                justify-content: center;
-                font-size: 24px;
+                .back-button-icon {
+                    justify-content: center;
+                    font-size: 24px;
+                }
             }
+
         }
         
         .back-button-title:hover {
             cursor: pointer;
-            font-size: 17px;
+            box-shadow: 3px 3px 3px rgba(196, 196, 196, 0.5);
         }
 
         .filter-modal-body {
@@ -67,9 +71,13 @@
 
             .filter-modal-accordion {
                 padding: 10px;
+                display: flex;
+                flex-direction: column;
 
                 .accordion-item-container {
                     border-top: 1px solid;
+                    display: flex;
+                    flex-direction: column;
 
                     .accordion-title {
                         padding: 10px 0px;
@@ -77,10 +85,10 @@
                     
                     .accordion-item {
                         padding: 10px;
+                        display: flex;
 
-                        .radio-icon {
-                            margin-right: 10px;
-                            font-size: 12px;
+                        .title:hover {
+                            cursor: pointer;
                         }
                     }
 
@@ -112,10 +120,12 @@
                 justify-content: center;
                 border-radius: 6px;
                 margin-left: 25px;
+                border: none;
             }
 
             .filter-modal-button.cancel {
                 background-color: var(--off-white);
+                color: var(--cyan);
                 margin-left: 0;
             }
 
