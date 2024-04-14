@@ -108,7 +108,7 @@
                         }
                     }
 
-                    .keyboard-row:first-child .keyboard-key:last-child {
+                    .keyboard-row:nth-child(3) .keyboard-key:first-child {
                         width: 120px;
                     }
 
