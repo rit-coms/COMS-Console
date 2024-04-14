@@ -42,8 +42,20 @@ const getPageHierarchy = (page) => {
         case "filter modal":
             return {
                 0: document.querySelectorAll('.filter-modal-back'),
-                1: document.querySelectorAll('.accordion-item'),
-                2: document.querySelectorAll('.filter-modal-button')
+                1: document.querySelectorAll('.filter-option-single-player'),
+                2: document.querySelectorAll('.filter-option-multiplayer'),
+                3: document.querySelectorAll('.filter-option-platformer'),
+                4: document.querySelectorAll('.filter-option-strategy'),
+                5: document.querySelectorAll('.filter-option-first-person-shooter'),
+                6: document.querySelectorAll('.filter-option-survival'),
+                7: document.querySelectorAll('.filter-option-2024'),
+                8: document.querySelectorAll('.filter-modal-button')
+            }
+
+        case "game info modal":
+            return {
+                0: document.querySelectorAll('.game-info-modal-close.true'),
+                1: document.querySelectorAll('.game-info-modal-play-button.true')
             }
 
         default:
@@ -75,8 +87,11 @@ export const PageProvider = ({ children }) => {
 
     // PAGE/SET PAGE FUNCTIONS
     const changePage = (page) => {
-        setPage(page)
-        setPageHierarchy(getPageHierarchy(page))
+        setTimeout(() => {
+            setPage(page)
+            resetPageIndex()
+            setPageHierarchy(getPageHierarchy(page))
+        }, 500)
     }
 
     // PAGE INDEX/SET PAGE INDEX FUNCTIONS
@@ -175,13 +190,13 @@ export const PageProvider = ({ children }) => {
     }
 
     const focusElement = () => {
-        (pageHierarchy[pageIndex[currentPlayer].hierarchyIndex][pageIndex[currentPlayer].elementIndex].classList.add('player'+currentPlayer))
+        if (pageHierarchy[pageIndex[currentPlayer].hierarchyIndex][pageIndex[currentPlayer].elementIndex]) {
+            (pageHierarchy[pageIndex[currentPlayer].hierarchyIndex][pageIndex[currentPlayer].elementIndex].classList.add('player'+currentPlayer))
+        }
     }
 
     const clickElement = () => {
-
         pageHierarchy[pageIndex[currentPlayer].hierarchyIndex][pageIndex[currentPlayer].elementIndex].click()
-
     }
 
     const clearClasslist = () => {
