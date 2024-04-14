@@ -23,11 +23,11 @@ function GameSearch() {
                             {
                                 row.map((key) => {
                                     return (
-                                        <div key={key} className={'keyboard-key row-' + index}
+                                        <button key={key} className={'keyboard-key row-' + index}
                                             onClick={() => keyboardClick(key)}
                                         >
                                             {key}
-                                        </div>
+                                        </button>
                                     )
                                 })
                             }
