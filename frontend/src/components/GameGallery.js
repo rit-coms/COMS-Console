@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import GameThumbnail from "./GameThumbnail";
 import { BsArrowLeft } from "react-icons/bs";
 import '../styles/GameGallery.css';
-import games from '../../../data/games.json'
+import games from '../games.json'
 import { useContext } from 'react';
 import { SortContext } from '../context/SortContext';
 import * as Sort from '../helpers/SortGames';
@@ -12,70 +12,6 @@ import { FilterContext } from '../context/FilterContext';
 import { SearchContext } from '../context/SearchContext';
 
 export default function GameGallery() {
-
-	// TODO: Make API call to get games
-	// let games = [
-	// 	{
-	// 		"id": "duck-duck-go",
-	// 		"title": "duck duck go",
-	// 		"image": "./assets/placeholder.jpg"
-	// 	},
-	// 	{
-	// 		"id": "go-duck",
-	// 		"title": "go duck",
-	// 		"image": "./assets/placeholder.jpg"
-	// 	},
-	// 	{
-	// 		"id": "snake-but-ducks",
-	// 		"title": "Snake! but ducks",
-	// 		"image": "./assets/placeholder.jpg"
-	// 	},
-	// 	{
-	// 		"id": "duck-duck-go6",
-	// 		"title": "duck duck go",
-	// 		"image": "./assets/placeholder.jpg"
-	// 	},
-	// 	{
-	// 		"id": "go-duck4",
-	// 		"title": "go duck",
-	// 		"image": "./assets/placeholder.jpg"
-	// 	},
-	// 	{
-	// 		"id": "snake-but-ducks9",
-	// 		"title": "Snake! but ducks",
-	// 		"image": "./assets/placeholder.jpg"
-	// 	},
-	// 	{
-	// 		"id": "duck-duck-go1",
-	// 		"title": "duck duck go",
-	// 		"image": "./assets/placeholder.jpg"
-	// 	},
-	// 	{
-	// 		"id": "go-duck2",
-	// 		"title": "go duck",
-	// 		"image": "./assets/placeholder.jpg"
-	// 	},
-	// 	{
-	// 		"id": "snake-but-ducks3",
-	// 		"title": "Snake! but ducks",
-	// 		"image": "./assets/placeholder.jpg"
-	// 	},
-	// 	{
-	// 		"id": "duck-duck-go11",
-	// 		"title": "duck duck go",
-	// 		"image": "./assets/placeholder.jpg"
-	// 	},
-	// 	{
-	// 		"id": "go-duck21",
-	// 		"title": "go duck",
-	// 		"image": "./assets/placeholder.jpg"
-	// 	},
-	// 	{
-	// 		"id": "snake-but-ducks31",
-	// 		"title": "Snake! but ducks",
-	// 		"image": "./assets/placeholder.jpg"
-	// 	}
-	// ]
   
 	const [showFullGallery, setShowFullGallery] = useState(false);
 	const {sort} = useContext(SortContext)
@@ -150,9 +86,9 @@ export default function GameGallery() {
 			{/* See All || null */}
 			{!showFullGallery ?
 				<div className="see-all-container" >
-					<div className='game-gallery-card see-all-button' onClick={handleSeeAllClick}>
+					<button className='game-gallery-card see-all-button' onClick={handleSeeAllClick}>
 						See All
-					</div>	
+					</button>	
 				</div>
 				: null
 			}
@@ -163,10 +99,10 @@ export default function GameGallery() {
 				{/* Back Button || null */}
 				{showFullGallery ?
 					<div className='game-gallery-back-container' onClick={handleSeeAllClick}>
-						<span className='back-button-title'>
+						<button className='back-button-title'>
 							<BsArrowLeft className='back-button-icon'/>
 							&nbsp; Back
-						</span>
+						</button>
 					</div>
 					: null
 				}
@@ -202,14 +138,14 @@ export default function GameGallery() {
 				<div className={showFullGallery ? 'game-carousel full-gallery' : 'game-carousel'}>
 					{showFullGallery
 						? searchResults(filterGames(sortGames(games))).map((game) =>
-							<div key={game.id} className="game-gallery-card">
-								<GameThumbnail key={game.id} game={game}></GameThumbnail>
-							</div>
+							<GameThumbnail key={game.id} game={game} 
+								className='game-gallery-card'
+							/>
 						)
 						: searchResults(filterGames(sortGames(games))).slice(0, 6).map((game) =>
-							<div key={game.id} className="game-gallery-card">
-								<GameThumbnail key={game.id} game={game}></GameThumbnail>
-							</div>
+							<GameThumbnail key={game.id} game={game}
+								className="game-gallery-card" 
+							/>
 						)
 					}
 				</div>

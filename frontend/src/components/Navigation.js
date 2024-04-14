@@ -17,6 +17,9 @@ export default function Navigation() {
     let { search, clear } = useContext(SearchContext)
     const { changePage } = useContext(PageContext)
 
+
+    // if i click a key, and close the modal, cancel the search
+
     return (
         <div>
             {/* Navigation Modals */}
@@ -33,31 +36,38 @@ export default function Navigation() {
                 <div className="navigation-container">
 
                     {/* Search Bar */}
-                    <span onClick={() => changePage('search modal')}>
-                        <button className="search-bar" onClick={() => setShowSearchModal(!showSearchModal)}>
-                            <div className="search-title" onClick={clear}>
-                                {
-                                    search != "" ?
-                                    search : <span>Search</span>
-                                }
-                            </div>
-
+                    <button className="search-bar" 
+                        onClick={() => {
+                            changePage('search modal')
+                            setShowSearchModal(!showSearchModal);
+                            clear()
+                        }}
+                    >
+                        <div className="search-title">
                             {
-                                search != ""
-                                    ? <BsXLg className="search-icon" onClick={clear}/>
-                                    : <BsTriangle className="search-icon no-fill-triangle" />
+                                search != "" ?
+                                search : <span>Search</span>
                             }
+                        </div>
                             
-                        </button>
-                    </span>
+                        {
+                            search != ""
+                                ? <BsXLg className="search-icon" onClick={clear}/>
+                                : <BsTriangle className="search-icon no-fill-triangle" />
+                        }
+                        
+                    </button>
 
                     {/* Filter and Sort Buttons */}
                     <div className="search-query-buttons">
-                        <span onClick={() => changePage('filter modal')}>
-                            <button className="search-button search-filter-button" onClick={() => setShowFilterModal(!showFilterModal)}>
-                                <BsSliders2 />
-                            </button>
-                        </span>
+                        <button className="search-button search-filter-button"
+                            onClick={() => {
+                                changePage('filter modal')
+                                setShowFilterModal(!showFilterModal)
+                            }}
+                        >
+                            <BsSliders2 />
+                        </button>
                         <button className="search-button search-sort-button" onClick={updateSort}>
                             <BsSortDown />
                         </button>
