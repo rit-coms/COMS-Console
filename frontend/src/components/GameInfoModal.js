@@ -22,7 +22,9 @@ const GameInfoModal = ({ isOpen, toggleModal, game }) => {
 			<div className='game-info-modal-container'>
 
 				{/* Close Button */}
-				<BsXLg className='game-info-modal-close' onClick={toggleModal} />
+				<button className={'game-info-modal-close ' + isOpen} onClick={toggleModal} >
+					<BsXLg />
+				</button>
 				
 				{/* Modal Body */}
 				<div className='game-info-modal-body'>
@@ -30,7 +32,7 @@ const GameInfoModal = ({ isOpen, toggleModal, game }) => {
 					{/* Game Image */}
 					<div className='game-info-modal-image'>
 						{
-							(game.image.indexOf('placeholder') < 0 && game.image.indexOf('.jpg') > 0) ?
+							(game.image.indexOf('placeholder') < 0) ?
 								<img className='game-image' src={game.image} />
 							: 
 								// default is placeholder image
@@ -80,11 +82,16 @@ const GameInfoModal = ({ isOpen, toggleModal, game }) => {
 
 				{/* Footer */}
 				<div className='game-info-modal-footer'>
-					<div className='game-info-modal-play-button' onClick={toggleModal}>
-						<div className='game-info-modal-play-text' onClick={playGame}>
+					<button className={'game-info-modal-play-button ' + isOpen} 
+						onClick={() => {
+							toggleModal()
+							playGame()
+						}}
+					>
+						<div className='game-info-modal-play-text'>
 							Play
 						</div>
-					</div>
+					</button>
 				</div>
 
 			</div>
