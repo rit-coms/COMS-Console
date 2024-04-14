@@ -17,9 +17,6 @@ export default function Navigation() {
     let { search, clear } = useContext(SearchContext)
     const { changePage } = useContext(PageContext)
 
-
-    // if i click a key, and close the modal, cancel the search
-
     return (
         <div>
             {/* Navigation Modals */}

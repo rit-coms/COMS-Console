@@ -74,7 +74,7 @@ export default function GameGallery() {
 
 	const searchResults = (games) => {
 
-		if (search=="")
+		if (!hasSearch || search=="")
 			return games
 		return Search.searchBy(games, search)
 
