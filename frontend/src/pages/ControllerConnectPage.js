@@ -1,5 +1,5 @@
 
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import '../styles/ControllerConnect.css'
 import { ControllerContext } from '../context/ControllerContext'
 import { PageContext } from '../context/PageContext'
@@ -14,7 +14,7 @@ export default function ControllerConnectPage() {
 
     const {
         changePage, modifyHierarchyIndex, modifyElementIndex,
-        pageIndex, focusElement, clickElement, clearClasslist, resetPageIndex
+        focusElement, clickElement, clearClasslist
     } = useContext(PageContext)
 
     // onload, change page
@@ -82,11 +82,14 @@ export default function ControllerConnectPage() {
             </div>
 
             <div className="controller-connect-footer">
-                <span onClick={resetPageIndex}>
-                    <button className='controller-submit' onClick={allControllersConnected}>
-                        Done
-                    </button>
-                </span>
+                <button className='controller-submit'
+                    onClick={() => {
+                        allControllersConnected(); 
+                        changePage('home')
+                    }}
+                >
+                    Done
+                </button>
             </div>
 
         </div>
