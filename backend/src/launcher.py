@@ -3,9 +3,12 @@ import game
 import os
 import uuid
 
-database_directory = "../data/games.json"
-games_directory = "/home/pi/ConsoleGames"
-cover_image_directory = "../data/cover_images"
+#database_directory = "../data/games.json"
+database_directory = r"C:\Users\BuriskMe\COMS_Console\COMS-Console\frontend\src\data\games.json" #WINDOWS
+#games_directory = "/home/pi/ConsoleGames"
+games_directory = r"C:\Users\BuriskMe\Documents\test" #WINDOWS
+#cover_image_directory = "../data/cover_images"
+cover_image_directory = r"C:\Users\awbus\OneDrive\Desktop\cover_images" #WINDOWS
 
 # adds new games in the games directory to the game_data json file
 def scan():

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import GameThumbnail from "./GameThumbnail";
 import { BsArrowLeft } from "react-icons/bs";
 import '../styles/GameGallery.css';
@@ -11,76 +11,27 @@ import * as Search from '../helpers/SearchGames';
 import { FilterContext } from '../context/FilterContext';
 import { SearchContext } from '../context/SearchContext';
 
-export default function GameGallery() {
+function GameGallery() {
 
-	// TODO: Make API call to get games
-	// let games = [
-	// 	{
-	// 		"id": "duck-duck-go",
-	// 		"title": "duck duck go",
-	// 		"image": "./assets/placeholder.jpg"
-	// 	},
-	// 	{
-	// 		"id": "go-duck",
-	// 		"title": "go duck",
-	// 		"image": "./assets/placeholder.jpg"
-	// 	},
-	// 	{
-	// 		"id": "snake-but-ducks",
-	// 		"title": "Snake! but ducks",
-	// 		"image": "./assets/placeholder.jpg"
-	// 	},
-	// 	{
-	// 		"id": "duck-duck-go6",
-	// 		"title": "duck duck go",
-	// 		"image": "./assets/placeholder.jpg"
-	// 	},
-	// 	{
-	// 		"id": "go-duck4",
-	// 		"title": "go duck",
-	// 		"image": "./assets/placeholder.jpg"
-	// 	},
-	// 	{
-	// 		"id": "snake-but-ducks9",
-	// 		"title": "Snake! but ducks",
-	// 		"image": "./assets/placeholder.jpg"
-	// 	},
-	// 	{
-	// 		"id": "duck-duck-go1",
-	// 		"title": "duck duck go",
-	// 		"image": "./assets/placeholder.jpg"
-	// 	},
-	// 	{
-	// 		"id": "go-duck2",
-	// 		"title": "go duck",
-	// 		"image": "./assets/placeholder.jpg"
-	// 	},
-	// 	{
-	// 		"id": "snake-but-ducks3",
-	// 		"title": "Snake! but ducks",
-	// 		"image": "./assets/placeholder.jpg"
-	// 	},
-	// 	{
-	// 		"id": "duck-duck-go11",
-	// 		"title": "duck duck go",
-	// 		"image": "./assets/placeholder.jpg"
-	// 	},
-	// 	{
-	// 		"id": "go-duck21",
-	// 		"title": "go duck",
-	// 		"image": "./assets/placeholder.jpg"
-	// 	},
-	// 	{
-	// 		"id": "snake-but-ducks31",
-	// 		"title": "Snake! but ducks",
-	// 		"image": "./assets/placeholder.jpg"
-	// 	}
-	// ]
-  
 	const [showFullGallery, setShowFullGallery] = useState(false);
 	const {sort} = useContext(SortContext)
 	const {filter, hasFilter} = useContext(FilterContext)
 	const {search, hasSearch} = useContext(SearchContext)
+	const [games, setGames] = useState([]);
+	
+	useEffect(() => {
+		async function fetchGameInfo() {
+		  try {
+			const response = await fetch('http://127.0.0.1:8000/games');
+			const data = await response.json();
+			setGames(data);
+		  } catch (error) {
+			console.error('Error fetching game info:', error);
+		  }
+		}
+		fetchGameInfo();
+	  }, []);
+	  console.log(games);
 
     const handleSeeAllClick = () => {
         setShowFullGallery(!showFullGallery);
@@ -218,3 +169,5 @@ export default function GameGallery() {
 		</div>
     );
 }
+
+export default GameGallery;
