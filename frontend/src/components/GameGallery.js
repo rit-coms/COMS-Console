@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import GameThumbnail from "./GameThumbnail";
 import { BsArrowLeft } from "react-icons/bs";
 import '../styles/GameGallery.css';
-import games from '../games.json'
+import games from '../data/games.json'
 import { useContext } from 'react';
 import { SortContext } from '../context/SortContext';
 import * as Sort from '../helpers/SortGames';
@@ -11,12 +11,28 @@ import * as Search from '../helpers/SearchGames';
 import { FilterContext } from '../context/FilterContext';
 import { SearchContext } from '../context/SearchContext';
 
-export default function GameGallery() {
+
+function GameGallery() {
   
 	const [showFullGallery, setShowFullGallery] = useState(false);
 	const {sort} = useContext(SortContext)
 	const {filter, hasFilter} = useContext(FilterContext)
 	const {search, hasSearch} = useContext(SearchContext)
+	const [games, setGames] = useState([]);
+	
+	useEffect(() => {
+		async function fetchGameInfo() {
+		  try {
+			const response = await fetch('http://127.0.0.1:8000/games');
+			const data = await response.json();
+			setGames(data);
+		  } catch (error) {
+			console.error('Error fetching game info:', error);
+		  }
+		}
+		fetchGameInfo();
+	  }, []);
+	  console.log(games);
 
     const handleSeeAllClick = () => {
         setShowFullGallery(!showFullGallery);
@@ -154,3 +170,5 @@ export default function GameGallery() {
 		</div>
     );
 }
+
+export default GameGallery;
