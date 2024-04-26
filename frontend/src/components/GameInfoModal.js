@@ -1,12 +1,15 @@
 import Modal from 'react-modal';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import "../styles/GameInfoModal.css"
 import { BsXLg } from "react-icons/bs";
+import { PageContext } from '../context/PageContext';
 
 const GameInfoModal = ({ isOpen, toggleModal, game }) => {
 
 	// to suppress warning error
 	Modal.setAppElement('#root')
+
+	const {changePage} = useContext(PageContext);
 
 	const playGame = () => {
 		console.log("PLAY: ", game.title)
@@ -22,7 +25,10 @@ const GameInfoModal = ({ isOpen, toggleModal, game }) => {
 			<div className='game-info-modal-container'>
 
 				{/* Close Button */}
-				<button className={'game-info-modal-close ' + isOpen} onClick={toggleModal} >
+				<button className={'game-info-modal-close ' + isOpen} onClick={() => {
+					toggleModal()
+					changePage('home')
+				}} >
 					<BsXLg />
 				</button>
 				
@@ -86,6 +92,7 @@ const GameInfoModal = ({ isOpen, toggleModal, game }) => {
 						onClick={() => {
 							toggleModal()
 							playGame()
+							changePage('home')
 						}}
 					>
 						<div className='game-info-modal-play-text'>

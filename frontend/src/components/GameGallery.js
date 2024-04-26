@@ -84,14 +84,14 @@ export default function GameGallery() {
 		<div className='game-gallery'>
 			
 			{/* See All || null */}
-			{!showFullGallery ?
+			{/* {!showFullGallery ?
 				<div className="see-all-container" >
 					<button className='game-gallery-card see-all-button' onClick={handleSeeAllClick}>
 						See All
 					</button>	
 				</div>
 				: null
-			}
+			} */}
 
 			{/* Game Gallery View */}
 			<div className='game-gallery-container'>
