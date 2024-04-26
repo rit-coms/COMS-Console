@@ -16,7 +16,20 @@ const GameInfoModal = ({ isOpen, toggleModal, game, gameInfo}) => {
 	Modal.setAppElement('#root')
 
 	const playGame = () => {
-		console.log("PLAY: ", game.title)
+		
+		fetch('http://127.0.0.1:8000/launch?id=' + game.id)
+		.then(response => {
+			if(response.ok)
+			{
+				console.log("PLAY: ", game.title)
+			} else {
+				console.log("Error triggering script:", response.statusText)
+			}
+			
+		})
+		.catch(error => {
+			console.error("Error:" + error)
+		})
 	}
 	
 	return (

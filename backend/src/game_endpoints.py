@@ -5,8 +5,8 @@ import launcher
 import json
 
 app = FastAPI()
-#file_path = r"..\data\games.json"
-file_path = r"C:\Users\BuriskMe\COMS_Console\COMS-Console\frontend\src\data\games.json"  #WINDOWS
+file_path = r"..\data\games.json"
+# file_path = r"C:\Users\awbus\OneDrive\Desktop\games.json"  #WINDOWS
 
 origins = [
     "http://localhost:3",
