@@ -9,10 +9,10 @@ export const SortProvider = ({children}) => {
         "None",
         "Name - Alphabetical",
         "Name - Reverse Alphabetical",
-        "Year - Newest to Oldest",
-        "Year - Oldest to Newest",
-        "Most Played",
-        "Least Played",
+        // "Year - Newest to Oldest",
+        // "Year - Oldest to Newest",
+        // "Most Played",
+        // "Least Played",
     ]
 
     const [sort, setSort] = useState(sortValues[0])
