@@ -52,14 +52,14 @@
 
             .game-info-modal-image {
                 background-color: var(--grey);
-                width: 300px;
+                width: 360px;
                 margin-left: -50px;
                 display: flex;
                 border-radius: 9px;
 
                 .game-image {
                     border-radius: 9px;
-                    width: 300px;
+                    width: 360px;
                     justify-content: center;
                     background-image: url('../assets/placeholder.jpg');
                     background-size: cover;
@@ -69,7 +69,7 @@
 
             .game-info-modal-game-details {
                 float: right;
-                width: 500px;
+                width: 450px;
                 padding: 20px;
 
                 .game-info-modal-header {

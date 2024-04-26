@@ -90,9 +90,9 @@
                             display: flex;
                             justify-content: center;
                             align-items: center;
-                            width: 60px;
+                            width: 90px;
                             height: 50px;
-                            font-size: 24px;
+                            font-size: 26px;
                             border-radius: 6px;
                             margin-right: 10px;
                             border: none;
@@ -133,6 +133,7 @@
                 justify-content: center;
                 border-radius: 6px;
                 margin-left: 25px;
+                font-size: 20px;
             }
 
             .search-modal-button.cancel {

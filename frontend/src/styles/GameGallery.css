@@ -8,9 +8,9 @@
         background-color: var(--grey);
         display: inline-flex;
         justify-content: center;
-        height: 350px;
-        min-width: 275px;
-        max-width: 275px;
+        height: 425px;
+        min-width: 300px;
+        max-width: 300px;
         margin-left: 25px;
         border-radius: 6px;
 
