@@ -11,8 +11,9 @@ import * as Search from '../helpers/SearchGames';
 import { FilterContext } from '../context/FilterContext';
 import { SearchContext } from '../context/SearchContext';
 
-function GameGallery() {
 
+function GameGallery() {
+  
 	const [showFullGallery, setShowFullGallery] = useState(false);
 	const {sort} = useContext(SortContext)
 	const {filter, hasFilter} = useContext(FilterContext)
@@ -89,7 +90,7 @@ function GameGallery() {
 
 	const searchResults = (games) => {
 
-		if (search=="")
+		if (!hasSearch || search=="")
 			return games
 		return Search.searchBy(games, search)
 
@@ -99,14 +100,14 @@ function GameGallery() {
 		<div className='game-gallery'>
 			
 			{/* See All || null */}
-			{!showFullGallery ?
+			{/* {!showFullGallery ?
 				<div className="see-all-container" >
-					<div className='game-gallery-card see-all-button' onClick={handleSeeAllClick}>
+					<button className='game-gallery-card see-all-button' onClick={handleSeeAllClick}>
 						See All
-					</div>	
+					</button>	
 				</div>
 				: null
-			}
+			} */}
 
 			{/* Game Gallery View */}
 			<div className='game-gallery-container'>
@@ -114,10 +115,10 @@ function GameGallery() {
 				{/* Back Button || null */}
 				{showFullGallery ?
 					<div className='game-gallery-back-container' onClick={handleSeeAllClick}>
-						<span className='back-button-title'>
+						<button className='back-button-title'>
 							<BsArrowLeft className='back-button-icon'/>
 							&nbsp; Back
-						</span>
+						</button>
 					</div>
 					: null
 				}
@@ -153,14 +154,14 @@ function GameGallery() {
 				<div className={showFullGallery ? 'game-carousel full-gallery' : 'game-carousel'}>
 					{showFullGallery
 						? searchResults(filterGames(sortGames(games))).map((game) =>
-							<div key={game.id} className="game-gallery-card">
-								<GameThumbnail key={game.id} game={game}></GameThumbnail>
-							</div>
+							<GameThumbnail key={game.id} game={game} 
+								className='game-gallery-card'
+							/>
 						)
 						: searchResults(filterGames(sortGames(games))).slice(0, 6).map((game) =>
-							<div key={game.id} className="game-gallery-card">
-								<GameThumbnail key={game.id} game={game}></GameThumbnail>
-							</div>
+							<GameThumbnail key={game.id} game={game}
+								className="game-gallery-card" 
+							/>
 						)
 					}
 				</div>

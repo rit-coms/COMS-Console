@@ -28,3 +28,21 @@ body {
     background-position: left 2em top 3rem;    
 
 }
+
+.player2 {
+  border: 3px solid #f95369 !important;
+  box-shadow: 3px 3px 3px rgba(249, 83, 105, 0.5);
+}
+
+.player1 {
+  border: 3px solid #249bdb !important;
+  box-shadow: 3px 3px 3px rgba(36, 155, 219, 0.5);
+}
+
+.player1.player2 {
+  border-left: 3px solid #249bdb !important;
+  border-bottom: 3px solid #249bdb !important;
+  border-right: 3px solid #f95369 !important;
+  border-top: 3px solid #f95369 !important;
+  box-shadow: 3px 3px 3px rgba(196, 196, 196, 0.5);
+}

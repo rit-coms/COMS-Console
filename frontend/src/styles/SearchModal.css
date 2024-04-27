@@ -32,6 +32,8 @@
         height: 100%;
 
         .search-modal-close {
+            background-color: transparent;
+            border: none;
             display: flex;
             float: right;
             font-size: 24px;
@@ -84,14 +86,16 @@
 
                         .keyboard-key {
                             background-color: var(--off-white);
+                            color: var(--cyan);
                             display: flex;
                             justify-content: center;
                             align-items: center;
-                            width: 60px;
+                            width: 90px;
                             height: 50px;
-                            font-size: 24px;
+                            font-size: 26px;
                             border-radius: 6px;
                             margin-right: 10px;
+                            border: none;
                         }
 
                         .keyboard-key:last-child {
@@ -104,7 +108,7 @@
                         }
                     }
 
-                    .keyboard-row:first-child .keyboard-key:last-child {
+                    .keyboard-row:nth-child(3) .keyboard-key:first-child {
                         width: 120px;
                     }
 
@@ -121,6 +125,7 @@
 
             .search-modal-button {
                 background-color: var(--cyan);
+                border: none;
                 width: 120px;
                 height: 40px;
                 display: flex;
@@ -128,10 +133,12 @@
                 justify-content: center;
                 border-radius: 6px;
                 margin-left: 25px;
+                font-size: 20px;
             }
 
             .search-modal-button.cancel {
                 background-color: var(--off-white);
+                color: var(--cyan);
             }
 
             .search-modal-button.submit {

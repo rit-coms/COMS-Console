@@ -2,12 +2,14 @@
 import Modal from 'react-modal';
 import { BsArrowLeft } from "react-icons/bs";
 import '../styles/FilterModal.css'
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import { FilterContext } from '../context/FilterContext';
+import { PageContext } from '../context/PageContext';
 
 function FilterModal({showModal, toggleModal}) {
 
-    const {filter, updateFilter, clearFilter, submitFilter} = useContext(FilterContext)    
+    const { filter, updateFilter, clearFilter, submitFilter } = useContext(FilterContext)    
+    const { changePage } = useContext(PageContext)
 
     const accordionData = [
         {
@@ -35,10 +37,12 @@ function FilterModal({showModal, toggleModal}) {
 
                 {/* Back Button */}
                 <div className='filter-modal-back-container'>
-                    <span className='back-button-title' onClick={toggleModal}>
-                        <span onClick={clearFilter}>
-                            <BsArrowLeft className='back-button-icon' />
-                            &nbsp; Back
+                    <span onClick={toggleModal}>
+                        <span onClick={() => changePage('home')}>
+                            <button className='back-button-title filter-modal-back' onClick={clearFilter}>
+                                <BsArrowLeft className='back-button-icon' />
+                                &nbsp; Back
+                            </button>
                         </span>
                     </span>
                 </div>
@@ -59,13 +63,13 @@ function FilterModal({showModal, toggleModal}) {
                                         {
                                             (accordion.options.map((option) => {
                                                 return (
-                                                    <div key={option} className={Object.values(filter).includes(option) ? 'accordion-item selected' : 'accordion-item'} 
+                                                    <button key={option} className={Object.values(filter).includes(option) ? 'accordion-item selected filter-option-' + (option.replace(/\ /g, "-").toLowerCase()) : 'accordion-item filter-option-' + (option.replace(/\ /g, "-").toLowerCase())} 
                                                         onClick={() => updateFilter(accordion.title, option)}
                                                     >
-                                                        <label>
+                                                        <label className='title'>
                                                             {option}
                                                         </label>
-                                                    </div>
+                                                    </button>
                                                 )
                                             }))
                                         }
@@ -81,17 +85,21 @@ function FilterModal({showModal, toggleModal}) {
                     
                     {/* Cancel */}
                     <span onClick={clearFilter}>
-                        <div className='filter-modal-button cancel'>
-                            Clear Filters
-                        </div>
+                        <span onClick={() => changePage('home')}>
+                            <button className='filter-modal-button cancel'>
+                                Clear Filters
+                            </button>
+                        </span>
                     </span>
 
                     {/* Submit */}
                     <span onClick={toggleModal}>
-                        <div className='filter-modal-button submit'
-                            onClick={submitFilter}>
-                            Submit
-                        </div>
+                        <span onClick={() => changePage('home')}>
+                            <button className='filter-modal-button submit'
+                                onClick={submitFilter}>
+                                Submit
+                            </button>
+                        </span>
                     </span>
 
                 </div>

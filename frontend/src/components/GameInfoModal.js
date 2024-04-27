@@ -1,7 +1,8 @@
 import Modal from 'react-modal';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import "../styles/GameInfoModal.css"
 import { BsXLg } from "react-icons/bs";
+import { PageContext } from '../context/PageContext';
 
 const GameInfoModal = ({ isOpen, toggleModal, game, gameInfo}) => {
 
@@ -14,6 +15,8 @@ const GameInfoModal = ({ isOpen, toggleModal, game, gameInfo}) => {
 
 	// to suppress warning error
 	Modal.setAppElement('#root')
+
+	const {changePage} = useContext(PageContext);
 
 	const playGame = () => {
 		
@@ -42,7 +45,12 @@ const GameInfoModal = ({ isOpen, toggleModal, game, gameInfo}) => {
 			<div className='game-info-modal-container'>
 
 				{/* Close Button */}
-				<BsXLg className='game-info-modal-close' onClick={toggleModal} />
+				<button className={'game-info-modal-close ' + isOpen} onClick={() => {
+					toggleModal()
+					changePage('home')
+				}} >
+					<BsXLg />
+				</button>
 				
 				{/* Modal Body */}
 				<div className='game-info-modal-body'>
@@ -102,11 +110,17 @@ const GameInfoModal = ({ isOpen, toggleModal, game, gameInfo}) => {
 
 				{/* Footer */}
 				<div className='game-info-modal-footer'>
-					<div className='game-info-modal-play-button' onClick={toggleModal}>
-						<div className='game-info-modal-play-text' onClick={playGame}>
+					<button className={'game-info-modal-play-button ' + isOpen} 
+						onClick={() => {
+							toggleModal()
+							playGame()
+							changePage('home')
+						}}
+					>
+						<div className='game-info-modal-play-text'>
 							Play
 						</div>
-					</div>
+					</button>
 				</div>
 
 			</div>

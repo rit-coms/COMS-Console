@@ -7,13 +7,15 @@ import { useContext } from "react";
 import { SortContext } from "../context/SortContext";
 import FilterModal from "./FilterModal";
 import { SearchContext } from "../context/SearchContext";
+import { PageContext } from "../context/PageContext";
 
 export default function Navigation() {
 
     const [showSearchModal, setShowSearchModal] = useState(false)
     const [showFilterModal, setShowFilterModal] = useState(false)
-    const {updateSort} = useContext(SortContext)
-    let {search, clear} = useContext(SearchContext)
+    const { updateSort } = useContext(SortContext)
+    let { search, clear } = useContext(SearchContext)
+    const { changePage } = useContext(PageContext)
 
     return (
         <div>
@@ -31,26 +33,41 @@ export default function Navigation() {
                 <div className="navigation-container">
 
                     {/* Search Bar */}
-                    <div className="search-bar" onClick={clear}>
-                        <div className="search-title" onClick={() => setShowSearchModal(!showSearchModal)}>
+                    <button className="search-bar" 
+                        onClick={() => {
+                            changePage('search modal')
+                            setShowSearchModal(!showSearchModal);
+                            clear()
+                        }}
+                    >
+                        <div className="search-title">
                             {
                                 search != "" ?
                                 search : <span>Search</span>
                             }
                         </div>
-
+                            
                         {
                             search != ""
                                 ? <BsXLg className="search-icon" onClick={clear}/>
                                 : <BsTriangle className="search-icon no-fill-triangle" />
                         }
                         
-                    </div>
+                    </button>
 
                     {/* Filter and Sort Buttons */}
                     <div className="search-query-buttons">
-                        <BsSliders2 className="search-filter-button" onClick={()=> setShowFilterModal(!showFilterModal)} />
-                        <BsSortDown className="search-sort-button" onClick={updateSort} />
+                        <button className="search-button search-filter-button"
+                            onClick={() => {
+                                changePage('filter modal')
+                                setShowFilterModal(!showFilterModal)
+                            }}
+                        >
+                            <BsSliders2 />
+                        </button>
+                        <button className="search-button search-sort-button" onClick={updateSort}>
+                            <BsSortDown />
+                        </button>
                     </div>
                 </div>
             </nav>

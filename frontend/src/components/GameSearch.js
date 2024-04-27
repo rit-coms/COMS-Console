@@ -8,26 +8,26 @@ function GameSearch() {
     let { keyboardClick } = useContext(SearchContext)
 
     const keyboard = [
-        ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'del'],
+        ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
         ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
-        ['z', 'x', 'c', 'v', 'b', 'n', 'm'],
+        ['del', 'z', 'x', 'c', 'v', 'b', 'n', 'm'],
         ['space']
     ]
 
     return (
         <div className='keyboard-container'>
             {
-                keyboard.map((row) => {
+                keyboard.map((row, index) => {
                     return (
                         <div key={row} className='keyboard-row'>
                             {
                                 row.map((key) => {
                                     return (
-                                        <div key={key} className='keyboard-key'
+                                        <button key={key} className={'keyboard-key row-' + index}
                                             onClick={() => keyboardClick(key)}
                                         >
                                             {key}
-                                        </div>
+                                        </button>
                                     )
                                 })
                             }
