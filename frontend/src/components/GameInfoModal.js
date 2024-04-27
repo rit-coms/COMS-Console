@@ -59,7 +59,7 @@ const GameInfoModal = ({ isOpen, toggleModal, game, gameInfo}) => {
 					<div className='game-info-modal-image'>
 						{
 							(game.cover_image.indexOf('placeholder') < 0 && game.cover_image.indexOf('.jpg') > 0) ?
-								<img className='game-image' src={game.cover_image} />
+								<img className='game-image' src={"https://raw.githubusercontent.com/rit-coms/COMS-Console/imagine-demo-branch" + game.cover_image.slice(54)} />
 							: 
 								// default is placeholder image
 								<img className='game-image' />
@@ -84,7 +84,12 @@ const GameInfoModal = ({ isOpen, toggleModal, game, gameInfo}) => {
 								<div className='game-info-modal-pill'>multiplayer</div>
 								: <div className='game-info-modal-pill'>single player</div>
 							}
-							<div className='game-info-modal-pill'>genre</div>
+							{
+								game.genres.map(genre => {
+									return (<div className='game-info-modal-pill'>{genre}</div>)
+								})
+							}
+							
 						</div>
 
 						{/* Summary */}
