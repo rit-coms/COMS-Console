@@ -40,8 +40,8 @@ export default function GameThumbnail(props) {
 		<div className={props.className} onClick={() => setShowDetails(!showDetails)}>
 			<GameInfoModal isOpen={showDetails} toggleModal={() => setShowDetails(false)} game={game} gameInfo={gameInfo} />
 			{
-				(game.cover_image.indexOf('placeholder') < 0 && game.cover_image.indexOf('.jpg') > 0) ?
-					<div className='game-thumbnail' style={{ backgroundImage: `url(${game.cover_image})` }}
+				(game.cover_image.indexOf('placeholder') < 0 ) ?
+					<div className='game-thumbnail' style={{ backgroundImage: `url(${"https://raw.githubusercontent.com/rit-coms/COMS-Console/imagine-demo-branch" + game.cover_image.slice(54)})`}}
 						onClick={() => setShowDetails(!showDetails)}
 					>
 						<h3>{game.title}</h3>
