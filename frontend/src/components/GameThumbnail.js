@@ -9,6 +9,7 @@ export default function GameThumbnail(props) {
 	
 	const [showDetails, setShowDetails] = useState(false)
 	const { changePage } = useContext(PageContext)
+	let game = props.game
 
 	useEffect(() => {
 		if (showDetails) {
