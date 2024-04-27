@@ -1,7 +1,23 @@
 [
     {
-        "title": "Ducky",
-        "id": "a682fc50-0d6d-45c8-931b-fee5009b673f",
+        "title": "Imprint",
+        "id": "6053141c-2346-4ede-9b90-da76b4a5de82",
+        "file_path": "/Users/zoebingham/School/Spring-2024/COMS/COMS-Console/data/games.json",
+        "author": "Christopher West",
+        "summary": "\"Imprint\" is a delightful variation of the classic Snake game, featuring a devoted momma duck leading her adorable ducklings through a picturesque park in search of delicious bread crumbs. In this heartwarming adventure, players take on the role of the caring momma duck as she guides her ducklings through the lush park landscape.",
+        "release_date": "03/25/2024",
+        "is_multiplayer": false,
+        "genres": [
+            "adventure",
+            "strategy"
+        ],
+        "cover_image": "/Users/zoebingham/School/Spring-2024/COMS/COMS-Console/data/games/Imprint/Imprint.jpg",
+        "times_played": 1,
+        "last_played": "04/25/2024"
+    },
+    {
+        "title": "games.json",
+        "id": "1c637e79-45f7-42d7-9631-be6dc6dfd8eb",
         "file_path": "/Users/zoebingham/School/Spring-2024/COMS/COMS-Console/data/games.json",
         "author": "",
         "summary": "",
@@ -14,7 +30,7 @@
     },
     {
         "title": "cover_images",
-        "id": "d3501b8a-9d34-487c-816a-b63e78eadd78",
+        "id": "e7dfea6c-924b-42e1-92b5-de0ddbffae7e",
         "file_path": "/Users/zoebingham/School/Spring-2024/COMS/COMS-Console/data/cover_images",
         "author": "",
         "summary": "",

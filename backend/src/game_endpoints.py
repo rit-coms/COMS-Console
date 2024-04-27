@@ -29,7 +29,7 @@ app.add_middleware(
 # get an individual game by ID
 @app.get("/game")
 def get_game(id: str):
-    launcher.scan()
+    #launcher.scan()
     with open(file_path, "r") as file:
         games_data = json.load(file)
     for g in games_data:
@@ -39,7 +39,7 @@ def get_game(id: str):
 # get all of the games stored on the system
 @app.get("/games")
 def get_games():
-    launcher.scan()
+    #launcher.scan()
     with open(file_path, "r") as file:
         games_data = json.load(file)
     return games_data
