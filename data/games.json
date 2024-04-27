@@ -16,15 +16,15 @@
         "last_played": "04/25/2024"
     },
     {
-        "title": "games.json",
+        "title": "Pond Invaders",
         "id": "1c637e79-45f7-42d7-9631-be6dc6dfd8eb",
         "file_path": "/Users/zoebingham/School/Spring-2024/COMS/COMS-Console/data/games.json",
-        "author": "",
-        "summary": "",
+        "author": "Jaaron Williams Gunpot",
+        "summary": "Dive into a quackingly fun adventure with 'Pond Invaders,' a delightful twist on the classic arcade game 'Space Invaders' that's drenched in duck-themed charm! In this whimsical adaptation, players find themselves defending a tranquil pond from an invasion of mischievous ducks descending from the skies above.",
         "release_date": 0,
         "is_multiplayer": false,
         "genres": [],
-        "cover_image": "",
+        "cover_image": "/Users/zoebingham/School/Spring-2024/COMS/COMS-Console/data/games/PondInvaders/Pond_Invaders.jpg",
         "times_played": 0,
         "last_played": ""
     },
