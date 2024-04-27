@@ -1,0 +1,28 @@
+[
+    {
+        "title": "Ducky",
+        "id": "a682fc50-0d6d-45c8-931b-fee5009b673f",
+        "file_path": "/Users/zoebingham/School/Spring-2024/COMS/COMS-Console/data/games.json",
+        "author": "",
+        "summary": "",
+        "release_date": 0,
+        "is_multiplayer": false,
+        "genres": [],
+        "cover_image": "",
+        "times_played": 0,
+        "last_played": ""
+    },
+    {
+        "title": "cover_images",
+        "id": "d3501b8a-9d34-487c-816a-b63e78eadd78",
+        "file_path": "/Users/zoebingham/School/Spring-2024/COMS/COMS-Console/data/cover_images",
+        "author": "",
+        "summary": "",
+        "release_date": 0,
+        "is_multiplayer": false,
+        "genres": [],
+        "cover_image": "",
+        "times_played": 0,
+        "last_played": ""
+    }
+]

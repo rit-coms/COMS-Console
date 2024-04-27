@@ -5,7 +5,7 @@ import launcher
 import json
 
 app = FastAPI()
-file_path = r"..\data\games.json"
+file_path = r"/Users/zoebingham/School/Spring-2024/COMS/COMS-Console/data/games.json"
 # file_path = r"C:\Users\awbus\OneDrive\Desktop\games.json"  #WINDOWS
 
 origins = [
@@ -13,7 +13,9 @@ origins = [
     "http://localhost:1000",
     "http://localhost:3000",
     "http://127.0.0.1",
-    "http://127.0.0.1:8000"
+    "http://127.0.0.1:8000",
+    "http://localhost:3000/"
+    "*"
 ]
 
 app.add_middleware(

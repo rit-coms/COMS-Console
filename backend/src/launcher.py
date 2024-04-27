@@ -3,11 +3,11 @@ import game
 import os
 import uuid
 
-database_directory = "../data/games.json"
+database_directory = r"/Users/zoebingham/School/Spring-2024/COMS/COMS-Console/data/games.json" #"../data/games.json"
 # database_directory = r"C:\Users\awbus\OneDrive\Desktop\games.json" #WINDOWS
-games_directory = "/home/pi/ConsoleGames"
+games_directory = r"/Users/zoebingham/School/Spring-2024/COMS/COMS-Console/data" #"/home/pi/ConsoleGames"
 # games_directory = r"C:\Users\awbus\OneDrive\Desktop\test" #WINDOWS
-cover_image_directory = "../data/cover_images"
+cover_image_directory = r"/Users/zoebingham/School/Spring-2024/COMS/COMS-Console/data/cover_images" # "../data/cover_images"
 # cover_image_directory = r"C:\Users\awbus\OneDrive\Desktop\cover_images" #WINDOWS
 
 # adds new games in the games directory to the game_data json file

@@ -17,6 +17,7 @@ export default function GameThumbnail(props) {
 
 	}, [showDetails])
   
+	let game = props.game;
 	const [gameInfo, setGameInfo] = useState(null)
 
 	useEffect(() => {
