@@ -18,6 +18,7 @@ const GameInfoModal = ({ isOpen, toggleModal, game, gameInfo}) => {
 
 	const {changePage} = useContext(PageContext);
 
+	// TODO: reimplement for tauri
 	const playGame = () => {
 		
 		fetch('http://127.0.0.1:8000/launch?id=' + game.id)

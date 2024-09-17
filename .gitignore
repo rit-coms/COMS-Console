@@ -1,4 +1,6 @@
-
+dist
+node_modules
 *pycache*
 .vscode/launch.json
-data/games.json
+src/data
+.DS_Store
