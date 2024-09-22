@@ -6,7 +6,7 @@ import reportWebVitals from './reportWebVitals';
 import { appWindow } from '@tauri-apps/api/window';
 
 
-await appWindow.setFullscreen(true);
+appWindow.setFullscreen(true);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
