@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import GameThumbnail from "./GameThumbnail";
 import { BsArrowLeft } from "react-icons/bs";
 import '../styles/GameGallery.css';
-import games from '../data/games.json'
+// import games from '../data/games.json'
 import { useContext } from 'react';
 import { SortContext } from '../context/SortContext';
 import * as Sort from '../helpers/SortGames';
