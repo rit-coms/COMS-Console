@@ -11,7 +11,7 @@ Hey y'all. This is the repo for the software side of the COMS Console, a raspber
     * Get all gammes from a directory
 * Have search functionality for games
 
-### Changes from original version (create-react-app + python webserver) to (vite + tauri)
+#### Changes from original version (create-react-app + python webserver) to (vite + tauri)
 
 * Changed frontend project folder from create-react-app to vite based
 * Updated and cleaned up package.json to get rid of extraneous dependencies
