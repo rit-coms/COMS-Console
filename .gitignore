@@ -4,5 +4,3 @@ node_modules
 .vscode/launch.json
 src/data
 .DS_Store
-games/
-COMS-Console.code-workspace
