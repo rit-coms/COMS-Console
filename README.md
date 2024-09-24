@@ -9,6 +9,7 @@ Hey y'all. This is the repo for the software side of the COMS Console, a raspber
 * Show controller connecting screen
 * Show game library of all custom made games
     * Get all gammes from a directory
+        * Create and manage default game library directory within user's data directory (different between os's)
 * Have search functionality for games
 
 ### Changes from original version (create-react-app + python webserver) to (vite + tauri)
@@ -43,7 +44,7 @@ Then in a terminal within the COMS-console directory:
 
     npm i
 
-    cargo run dev
+    npm run tauri dev
 ```
 
 Still wip whether or not this totally works, but try it and let someone on the project know if it doesn't work for you
@@ -52,9 +53,58 @@ Still wip whether or not this totally works, but try it and let someone on the p
 
 Todo (Gimme test subjects)
 
-### Linux
+### Linux (primed for pi debian users)
 
-Todo
+Start by installing a bunch of dependencies that are needed for building and rendering the tauri app.
+```bash
+sudo apt update
+sudo apt install libwebkit2gtk-4.0-dev \
+    build-essential \
+    curl \
+    wget \
+    file \
+    libssl-dev \
+    libgtk-3-dev \
+    libayatana-appindicator3-dev \
+    librsvg2-dev
+```
+
+Install rustup 
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+rustup-init
+```
+
+Install nodejs (recommended install using nvm)
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+
+source ~/.bashrc
+
+nvm install 'lts/*'
+
+nvm alias default 'lts/*'
+```
+
+Then in a terminal within the COMS-console directory:
+```bash
+# you might need to start a new terminal or source your environment path
+
+cargo install tauri-cli
+
+cd src/tauri
+
+cargo fetch
+
+cd ..
+
+npm i
+
+npm run tauri dev
+```
+
+As the initial code was written on a mac, you might get a weird error with an npm package called `@rollup`. If that happens, delete the `package-lock.json` file and run `npm i` again. It should start working.
 
 ## TODO
 
