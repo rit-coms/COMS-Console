@@ -17,7 +17,7 @@
       },
       "all": false,
       "window": {
-        "setFullscreen": true
+        "setFullscreen": false
       }
     },
     "bundle": {
@@ -44,7 +44,6 @@
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": ["../games/**"],
       "shortDescription": "",
       "targets": "all",
       "windows": {
@@ -61,7 +60,7 @@
     },
     "windows": [
       {
-        "fullscreen": true,
+        "fullscreen": false,
         "height": 600,
         "resizable": true,
         "title": "COMS Console",
