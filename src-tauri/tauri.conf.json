@@ -17,7 +17,7 @@
       },
       "all": false,
       "window": {
-        "setFullscreen": false
+        "setFullscreen": true
       }
     },
     "bundle": {
@@ -60,7 +60,7 @@
     },
     "windows": [
       {
-        "fullscreen": false,
+        "fullscreen": true,
         "height": 600,
         "resizable": true,
         "title": "COMS Console",
