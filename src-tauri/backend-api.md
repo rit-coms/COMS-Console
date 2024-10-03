@@ -97,7 +97,7 @@ import { convertFileSrc } from '@tauri-apps/api/tauri';
 ```
 
 ## play_game
-Invoking play_game will spawn a child process of the executable file associated with the given game. An id needs to be passed to the backend.
+Invoking play_game will spawn a child process of the executable file associated with the given game. An id needs to be passed to the backend. Currently does not return anything.
 
 ### Usage
 ```js

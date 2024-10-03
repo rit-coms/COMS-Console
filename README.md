@@ -106,6 +106,30 @@ npm run tauri dev
 
 As the initial code was written on a mac, you might get a weird error with an npm package called `@rollup`. If that happens, delete the `package-lock.json` file and run `npm i` again. It should start working.
 
+### Setup games folder
+
+Once you run the application one, the games folder should be created. If you have the games zip, unpack all the files into the games folder so the structure looks something like
+```sh
+coms-console
+    games
+        game1
+            ~gamefiles~
+            desc.json
+        game2
+            ~gamefiles~
+            desc.json
+        game3
+            ~gamefiles~
+            desc.json
+        game4
+            ~gamefiles~
+            desc.json
+```
+These are the folder locations for the following systems
+* Linux: `$XDG_DATA_HOME/coms-console` or `$HOME/.local/share/coms-console`.
+* macOS: `$HOME/Library/Application Support/coms-console`.
+* Windows: `{FOLDERID_LocalAppData}/coms-console`.
+
 ## TODO
 
 ### Minimum Viable Product (MVB)

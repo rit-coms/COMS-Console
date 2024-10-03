@@ -10,7 +10,7 @@ use std::{env, fs};
 use serde::{Deserialize, Serialize};
 use serde_json::Error;
 
-use tauri::{Manager, State};
+use tauri::{Manager, State, AppHandle};
 
 use chrono::serde::ts_seconds_option;
 use chrono::{DateTime, Utc};
@@ -45,12 +45,20 @@ struct AppState {
 // and updates it by looking through the games folder
 // and parsing through all the folders of games it finds
 #[tauri::command]
-fn get_game_info(state: State<'_, Mutex<AppState>>) -> Vec<GameInfo> {
+fn get_game_info(state: State<'_, Mutex<AppState>>, app_handle: AppHandle) -> Vec<GameInfo> {
     let mut state = state.lock().unwrap();
     let games_list = &mut state.games_list;
     games_list.clear();
 
-    if let Ok(entries) = fs::read_dir("../games") {
+    // generating app data directory and games folder if it doesn't exist
+    let app_data_dir = app_handle.path_resolver().app_data_dir().unwrap().join("games");
+    println!("{:?}", app_data_dir);
+    
+    unsafe {
+        fs::create_dir_all(app_data_dir.clone()).unwrap_unchecked();
+    }
+
+    if let Ok(entries) = fs::read_dir(app_data_dir.clone()) {
         for entry in entries {
             if let Ok(entry) = entry {
                 let mut desc_path = entry.path();
@@ -102,6 +110,7 @@ fn play_game(state: State<'_, Mutex<AppState>>, window: tauri::Window, id: Strin
         .join(game_info.file_path.as_ref().unwrap())
         .join(game_info.exec.as_ref().unwrap());
     println!("{:#?}", path);
+    window.minimize().expect("failed to minimize");
     let game_process = Command::new(path)
         .output()
         .expect("execution of child failed");
@@ -109,6 +118,7 @@ fn play_game(state: State<'_, Mutex<AppState>>, window: tauri::Window, id: Strin
     println!("{}", String::from_utf8(game_process.stdout).unwrap());
     println!("{}", String::from_utf8(game_process.stderr).unwrap());
     println!("exit code status: {}", game_process.status);
+    window.maximize().expect("failed to maximize");
     window.set_focus().expect("failed to focus");
     window.set_fullscreen(true).expect("failed to fullscreen");
 }
