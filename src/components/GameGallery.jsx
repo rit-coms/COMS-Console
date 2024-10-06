@@ -22,7 +22,7 @@ function GameGallery() {
 	const [games, setGames] = useState([]);
 
 	useEffect(() => {
-		invoke('get_game_info').then(games => setGames(games))
+		invoke('get_game_info').then(games => {console.log(games);setGames(games)})
 	}, [])
 
 

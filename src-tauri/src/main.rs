@@ -40,7 +40,7 @@ struct GameInfo {
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 struct GameInfoJS {
-    #[serde(default)]
+    #[serde(default="id_default")]
     id: String,
     title: String,
     #[serde(default)]
@@ -55,6 +55,10 @@ struct GameInfoJS {
     #[serde(with = "ts_seconds_option")]
     last_played: Option<DateTime<Utc>>,
     exec: PathBuf,
+}
+
+fn id_default() -> String {
+    "0".to_string()
 }
 
 impl From<GameInfo> for GameInfoJS {
@@ -134,12 +138,17 @@ fn get_game_info(
     println!("{:?}", app_data_dir);
 
     fs::create_dir_all(app_data_dir.clone())?;
-
+    
     let entries = fs::read_dir(app_data_dir.clone())?;
     for entry in entries {
         let entry = entry?;
         let mut desc_path = entry.path();
         desc_path.push("desc.json");
+
+        // add check to see if desc.json exists
+        if !desc_path.exists() { continue; }
+
+        // get desc_file
         let desc_file = fs::File::open(desc_path.clone())?;
         let mut desc: GameInfo = serde_json::from_reader(BufReader::new(desc_file))?;
 
@@ -153,10 +162,28 @@ fn get_game_info(
         desc.file_path.hash(&mut hasher);
         desc.id = hasher.finish();
 
-        // set cover image from desc.json
+        // convert to full uncanonoicalized file path
+        desc.cover_image = desc.cover_image.map(|cover_image| desc.file_path.join(&cover_image));
+
+        // check if file path exists and has an image extension
+        desc.cover_image = desc.cover_image.filter(|cover_image| 
+            cover_image
+                .extension()
+                .is_some_and(|ext| 
+                    ext.to_str()
+                        .is_some_and(|ext_str| 
+                            ["png","jpg","webp"].contains(&ext_str)
+                        )
+                    ) &&
+            cover_image.exists() 
+        );
+
         desc.cover_image = desc
             .cover_image
-            .map(|cover_image: PathBuf| fs::canonicalize(desc.file_path.join(cover_image))).transpose()?;
+            .map(|cover_image: PathBuf| {
+                println!("{:?}",&cover_image);
+                fs::canonicalize(&cover_image)
+            }).transpose()?;
 
         games_list.push(desc);
     }
