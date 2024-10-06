@@ -42,14 +42,14 @@ export const sortLeastPlayed = (games) => {
 }
 
 export const sortLastPlayed = (games) => {
-    return games.sort((a, b) =>
-        (getDate(a, 'last_played') > getDate(b, 'last_played'))
+    return games.sort((a, b) => {
+        (a['last_played'] < b['last_played'])
             ? -1 : 1
-    )
+    })
 }
 
-const getDate = (object, field='release_date') => {
-    // date convention: mm/dd/yyyy
-    const date = object[field].split('/')
-    return new Date(date[2], date[0], date[1])
-}
+// const getDate = (object, field='release_date') => {
+//     // date convention: mm/dd/yyyy
+//     const date = object[field].split('/')
+//     return new Date(date[2], date[0], date[1])
+// }

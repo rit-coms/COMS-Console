@@ -48,7 +48,7 @@ invoke('get_game_info').then(games => console.log(games))
         "cover_image": "/Users/user/COMS-Console/games/alleged-game/idk.webp",
         "times_played": 0,
         "last_played": 1727066638, // UTC timestamp
-        "exec": "game.sh"
+        "exec": "game.sh" // either a local file or an https:// or http:// link
     },
     {
         "id": 9010881980712660000,

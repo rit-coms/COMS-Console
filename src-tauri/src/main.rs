@@ -169,13 +169,8 @@ fn get_game_info(
         desc.cover_image = desc.cover_image.filter(|cover_image| 
             cover_image
                 .extension()
-                .is_some_and(|ext| 
-                    ext.to_str()
-                        .is_some_and(|ext_str| 
-                            ["png","jpg","webp"].contains(&ext_str)
-                        )
-                    ) &&
-            cover_image.exists() 
+                .is_some_and(|ext| ["png","jpg","webp"].map(|s| s.as_ref()).contains(&ext)) 
+            && cover_image.exists() 
         );
 
         desc.cover_image = desc
