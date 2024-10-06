@@ -14,7 +14,7 @@
     align-items: center;
     justify-content: center;
     width: 50%;
-    height: 65%;
+    height: 50%;
     position: fixed;
     top: 50%;
     left: 50%;
@@ -53,6 +53,7 @@
             .game-info-modal-image {
                 background-color: var(--grey);
                 width: 360px;
+                height: 510px;
                 margin-left: -50px;
                 display: flex;
                 border-radius: 9px;
@@ -92,6 +93,7 @@
 
                 .game-info-modal-attributes {
                     display: inline-flex;
+                    flex-wrap: wrap;
                     text-align: center;
                     font-size: 16px;
                     margin-top: 10px;
@@ -101,6 +103,7 @@
                         padding: 3px 7px;
                         border-radius: 7px;
                         margin-right: 7px;
+                        margin-top: 7px;
                         width: 110px;
                         min-width: fit-content;
                         color: var(--off-white);
