@@ -10,6 +10,7 @@ import * as Filter from '../helpers/FilterGames';
 import * as Search from '../helpers/SearchGames';
 import { FilterContext } from '../context/FilterContext';
 import { SearchContext } from '../context/SearchContext';
+import { invoke } from '@tauri-apps/api'
 
 
 function GameGallery() {
@@ -19,20 +20,25 @@ function GameGallery() {
 	const {filter, hasFilter} = useContext(FilterContext)
 	const {search, hasSearch} = useContext(SearchContext)
 	const [games, setGames] = useState([]);
-	
+
 	useEffect(() => {
-		async function fetchGameInfo() {
-		  try {
-			const response = await fetch('http://127.0.0.1:8000/games');
-			const data = await response.json();
-			setGames(data);
-		  } catch (error) {
-			console.error('Error fetching game info:', error);
-		  }
-		}
-		fetchGameInfo();
-	  }, []);
-	  console.log(games);
+		invoke('get_game_info').then(games => setGames(games))
+	}, [])
+
+
+	// useEffect(() => {
+	// 	async function fetchGameInfo() {
+	// 	  try {
+	// 		const response = await fetch('http://127.0.0.1:8000/games');
+	// 		const data = await response.json();
+	// 		setGames(data);
+	// 	  } catch (error) {
+	// 		console.error('Error fetching game info:', error);
+	// 	  }
+	// 	}
+	// 	fetchGameInfo();
+	//   }, []);
+	//   console.log(games);
 
     const handleSeeAllClick = () => {
         setShowFullGallery(!showFullGallery);
@@ -152,13 +158,26 @@ function GameGallery() {
 
 				{/* Full Vertical Gallery || Select Horizontal Gallery */}
 				<div className={showFullGallery ? 'game-carousel full-gallery' : 'game-carousel'}>
-					{showFullGallery
+					{/* {showFullGallery
 						? searchResults(filterGames(sortGames(games))).map((game) =>
 							<GameThumbnail key={game.id} game={game} 
 								className='game-gallery-card'
 							/>
 						)
 						: searchResults(filterGames(sortGames(games))).slice(0, 6).map((game) =>
+							<GameThumbnail key={game.id} game={game}
+								className="game-gallery-card" 
+							/>
+						)
+					} */}
+
+					{showFullGallery
+						? searchResults(games).map((game) =>
+							<GameThumbnail key={game.id} game={game} 
+								className='game-gallery-card'
+							/>
+						)
+						: searchResults(games).slice(0, 6).map((game) =>
 							<GameThumbnail key={game.id} game={game}
 								className="game-gallery-card" 
 							/>

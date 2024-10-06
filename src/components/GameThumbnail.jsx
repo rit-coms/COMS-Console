@@ -17,30 +17,12 @@ export default function GameThumbnail(props) {
 		}
 
 	}, [showDetails])
-  
-	const [gameInfo, setGameInfo] = useState(null)
-
-	useEffect(() => {
-		async function fetchGameInfo() {
-		  try {
-			const response = await fetch('http://127.0.0.1:8000/game?id=' + game.id);
-			const data = await response.json();
-			setGameInfo(data);
-		  } catch (error) {
-			console.error('Error fetching game info:', error);
-		  }
-		}
-	
-		if (showDetails && !gameInfo) {
-		  fetchGameInfo();
-		}
-	  }, [showDetails, game.id, gameInfo]);
 
 	return (
 		<div className={props.className} onClick={() => setShowDetails(!showDetails)}>
-			<GameInfoModal isOpen={showDetails} toggleModal={() => setShowDetails(false)} game={game} gameInfo={gameInfo} />
+			<GameInfoModal isOpen={showDetails} toggleModal={() => setShowDetails(false)} game={game} />
 			{
-				(game.cover_image.indexOf('placeholder') < 0 && game.cover_image.indexOf('.jpg') > 0) ?
+				game.cover_image ?
 					<div className='game-thumbnail' style={{ backgroundImage: `url(${game.cover_image})` }}
 						onClick={() => setShowDetails(!showDetails)}
 					>
@@ -48,7 +30,7 @@ export default function GameThumbnail(props) {
 					</div>
 				:
 					<div className='game-thumbnail'>
-						<h3>{props.game.title}</h3>
+						<h3>{game.title}</h3>
 					</div>
 			}
 		</div>
