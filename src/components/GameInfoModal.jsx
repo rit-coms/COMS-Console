@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import "../styles/GameInfoModal.css"
 import { BsXLg } from "react-icons/bs";
 import { PageContext } from '../context/PageContext';
+import { invoke } from '@tauri-apps/api/tauri';
 
 const GameInfoModal = ({ isOpen, toggleModal, game}) => {
 
@@ -28,6 +29,9 @@ const GameInfoModal = ({ isOpen, toggleModal, game}) => {
 	// 		console.error("Error:" + error)
 	// 	})
 	// }
+	const playGame = async id => {
+		invoke('play_game', {id: game.id})
+	}
 	
 	return (
 		<Modal

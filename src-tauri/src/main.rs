@@ -210,7 +210,7 @@ fn play_game(
     let path = path.join(&game_info.file_path).join(&game_info.exec);
     println!("{:#?}", path);
     window.minimize()?;
-    let game_process = Command::new(path).output()?;
+    let game_process = Command::new(path).current_dir(&game_info.file_path).output()?;
 
     println!("{}", String::from_utf8(game_process.stdout)?);
     println!("{}", String::from_utf8(game_process.stderr)?);
