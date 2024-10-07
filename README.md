@@ -8,7 +8,7 @@ Hey y'all. This is the repo for the software side of the COMS Console, a raspber
 * Show splash / loading page
 * Show controller connecting screen
 * Show game library of all custom made games
-    * Get all gammes from a directory
+    * Get all games from a directory
         * Create and manage default game library directory within user's data directory (different between os's)
 * Have search functionality for games
 
@@ -29,14 +29,22 @@ Hey y'all. This is the repo for the software side of the COMS Console, a raspber
 GET BREW (if you do not have it already) [brew.sh](https://brew.sh)
 
 Install rustup `brew install rustup`
+Install nvm `brew install nvm`
+Install rustup `brew install rustup`
 
 Then in a terminal within the COMS-console directory:
 ```bash
+    source ~/.bashrc
+
+    nvm install 'lts/*'
+
+    nvm alias default 'lts/*'
+
     rustup-init
 
     cargo install tauri-cli
 
-    cd src/tauri
+    cd src-tauri
 
     cargo fetch
 
@@ -93,7 +101,7 @@ Then in a terminal within the COMS-console directory:
 
 cargo install tauri-cli
 
-cd src/tauri
+cd src-tauri
 
 cargo fetch
 
@@ -104,7 +112,7 @@ npm i
 npm run tauri dev
 ```
 
-As the initial code was written on a mac, you might get a weird error with an npm package called `@rollup`. If that happens, delete the `package-lock.json` file and run `npm i` again. It should start working.
+~~As the initial code was written on a mac, you might get a weird error with an npm package called `@rollup`. If that happens, delete the `package-lock.json` file and run `npm i` again. It should start working.~~
 
 ### Setup games folder
 
@@ -135,19 +143,18 @@ These are the folder locations for the following systems
 ### Minimum Viable Product (MVB)
 
 * ~~Write readme for how to install and run the project~~
-    * Run-it-back for windows & linux
-* Reimplement backend based off of old backend
-    * Implement change from reading data.json to automatically reading a directory full of folders where each folder is a game that has information within that folder (eg. desc.txt, cover.*, exec.sh?)
+    * Run-it-back for windows & ~~linux~~
+* ~~Reimplement backend based off of old backend~~
+    * ~~Implement change from reading data.json to automatically reading a directory full of folders where each folder is a game that has information within that folder (eg. desc.txt, cover.*, exec.sh?)~~
 
 ### Future TODO
 
-* Write Github actions for automatic builds
-* Come up with list of functionalities for backend and frontend
-    * Write list of functions that frontend and backend need for communication
+* ~~Write Github actions for automatic builds~~
+* ~~Come up with list of functionalities for backend and frontend~~
+    * ~~Write list of functions that frontend and backend need for communication~~
 * Auto refocus launcher after game closed
 * Rewrite frontend in typescript
 * Add dark mode
 * Add more controller support
-* Create systemd script for project
-* Compile to .deb for easy systemd script installs
+* Use tauri startup plugin
     * Make it possible to run on any pi easily

@@ -21,6 +21,7 @@ tauri = { version = "1.8.0", features = [ "window-set-fullscreen", "protocol-ass
 chrono = { version = "0.4.31", features = ["serde"] }
 anyhow = "1.0.89"
 url = "2.5.2"
+tauri-plugin-autostart = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem and the built-in dev server is disabled.

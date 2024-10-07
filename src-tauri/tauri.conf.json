@@ -45,7 +45,7 @@
         "signingIdentity": null
       },
       "shortDescription": "",
-      "targets": "all",
+      "targets": ["deb", "nsis", "msi", "app", "dmg", "updater"],
       "windows": {
         "certificateThumbprint": null,
         "digestAlgorithm": "sha256",

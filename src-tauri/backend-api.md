@@ -4,18 +4,18 @@
 This call to the tauri backend returns an array of js objects. The strict rust type definitions for each field are shown below:
 ```rs
 struct GameInfo {
-    id: Option<u64>, // this is an option rust-side due to the id's being generated outside of the description json
+    id: u64,
     title: String,
-    file_path: Option<PathBuf>,
+    file_path: PathBuf,
     author: String,
     summary: String,
     release_date: String,
     multiplayer: bool,
     genres: Vec<String>,
-    cover_image: Option<PathBuf>,
+    cover_image: Option<PathBuf>, // optional whether cover_image exists
     times_played: u128,
-    last_played: Option<DateTime<Utc>>, // this is a utc timestamp eg. 1727149399
-    exec: Option<PathBuf>,
+    last_played: Option<DateTime<Utc>>, // this is a utc timestamp eg. 1727149399 and also optional whether it exists
+    exec: String, // either a url or a path
 }
 ```
 Fields where the type is wrapped in an `Option<T>` means that the value is either passed as null or the type `T` within.
@@ -48,7 +48,7 @@ invoke('get_game_info').then(games => console.log(games))
         "cover_image": "/Users/user/COMS-Console/games/alleged-game/idk.webp",
         "times_played": 0,
         "last_played": 1727066638, // UTC timestamp
-        "exec": "game.sh" // either a local file or an https:// or http:// link
+        "exec": "https://games.crazygames.com/en_US/ragdoll-archers/index.html?v=1.304" // either a local file or an https:// or http:// link
     },
     {
         "id": 9010881980712660000,
@@ -67,7 +67,7 @@ invoke('get_game_info').then(games => console.log(games))
         "cover_image": "/Users/user/COMS-Console/games/snake-game/assets/bread_3.png",
         "times_played": 0,
         "last_played": 1727066638,
-        "exec": "main.py"
+        "exec": "main.py" // file relative to directory of desc.json
     }
 ]
 ```

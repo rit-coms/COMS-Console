@@ -1,6 +1,8 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
+
 // use std::collections::HashMap;
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::io::BufReader;
@@ -18,7 +20,7 @@ use chrono::{DateTime, Utc};
 use std::process::Command;
 use std::sync::Mutex;
 
-use url::{Url};
+use url::Url;
 
 use anyhow::Error;
 
@@ -37,7 +39,7 @@ struct GameInfo {
     cover_image: Option<PathBuf>,
     times_played: u128,
     last_played: Option<DateTime<Utc>>,
-    exec: PathBuf,
+    exec: String,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -56,7 +58,7 @@ struct GameInfoJS {
     times_played: u128,
     #[serde(with = "ts_seconds_option")]
     last_played: Option<DateTime<Utc>>,
-    exec: PathBuf,
+    exec: String,
 }
 
 fn id_default() -> String {
@@ -213,17 +215,12 @@ fn play_game(
 
     window.minimize()?;
 
-    let exec_url = game_info
-        .exec
-        .as_os_str()
-        .to_str()
-        .map(|url| Url::parse(url))
-        .transpose();
+    let exec_url = Url::parse(&game_info.exec);
 
     println!("{:#?}", exec_url);
 
     // check if exec_url is using http or https protocols and is valid
-    match exec_url.ok().flatten().filter(|url| ["http","https"].contains(&url.scheme())) {
+    match exec_url.ok().filter(|url| ["http","https"].contains(&url.scheme())) {
         // create new game window
         Some(exec_url) => {
                 let game_window = tauri::WindowBuilder::new(
@@ -261,8 +258,10 @@ fn play_game(
 
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec![""])))
         .setup(|app| {
             app.manage(Mutex::new(AppState::default()));
+            app.autolaunch().enable()?;
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![get_game_info, play_game])
