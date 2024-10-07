@@ -18,6 +18,8 @@ use chrono::{DateTime, Utc};
 use std::process::Command;
 use std::sync::Mutex;
 
+use url::{Url};
+
 use anyhow::Error;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -40,7 +42,7 @@ struct GameInfo {
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 struct GameInfoJS {
-    #[serde(default="id_default")]
+    #[serde(default = "id_default")]
     id: String,
     title: String,
     #[serde(default)]
@@ -138,7 +140,7 @@ fn get_game_info(
     println!("{:?}", app_data_dir);
 
     fs::create_dir_all(app_data_dir.clone())?;
-    
+
     let entries = fs::read_dir(app_data_dir.clone())?;
     for entry in entries {
         let entry = entry?;
@@ -146,7 +148,9 @@ fn get_game_info(
         desc_path.push("desc.json");
 
         // add check to see if desc.json exists
-        if !desc_path.exists() { continue; }
+        if !desc_path.exists() {
+            continue;
+        }
 
         // get desc_file
         let desc_file = fs::File::open(desc_path.clone())?;
@@ -163,22 +167,25 @@ fn get_game_info(
         desc.id = hasher.finish();
 
         // convert to full uncanonoicalized file path
-        desc.cover_image = desc.cover_image.map(|cover_image| desc.file_path.join(&cover_image));
+        desc.cover_image = desc
+            .cover_image
+            .map(|cover_image| desc.file_path.join(&cover_image));
 
         // check if file path exists and has an image extension
-        desc.cover_image = desc.cover_image.filter(|cover_image| 
+        desc.cover_image = desc.cover_image.filter(|cover_image| {
             cover_image
                 .extension()
-                .is_some_and(|ext| ["png","jpg","webp"].map(|s| s.as_ref()).contains(&ext)) 
-            && cover_image.exists() 
-        );
+                .is_some_and(|ext| ["png", "jpg", "webp"].map(|s| s.as_ref()).contains(&ext))
+                && cover_image.exists()
+        });
 
         desc.cover_image = desc
             .cover_image
             .map(|cover_image: PathBuf| {
-                println!("{:?}",&cover_image);
+                println!("{:?}", &cover_image);
                 fs::canonicalize(&cover_image)
-            }).transpose()?;
+            })
+            .transpose()?;
 
         games_list.push(desc);
     }
@@ -193,6 +200,7 @@ fn get_game_info(
 fn play_game(
     state: State<'_, Mutex<AppState>>,
     window: tauri::Window,
+    app_handle: AppHandle,
     id: String,
 ) -> Result<(), ErrorType> {
     let games_list = &state.lock()?.games_list;
@@ -202,14 +210,49 @@ fn play_game(
         .iter()
         .find(|g| g.id == id)
         .ok_or("Game ID not found")?;
-    let path = path.join(&game_info.file_path).join(&game_info.exec);
-    println!("{:#?}", path);
-    window.minimize()?;
-    let game_process = Command::new(path).current_dir(&game_info.file_path).output()?;
 
-    println!("{}", String::from_utf8(game_process.stdout)?);
-    println!("{}", String::from_utf8(game_process.stderr)?);
-    println!("exit code status: {}", game_process.status);
+    window.minimize()?;
+
+    let exec_url = game_info
+        .exec
+        .as_os_str()
+        .to_str()
+        .map(|url| Url::parse(url))
+        .transpose();
+
+    println!("{:#?}", exec_url);
+
+    // check if exec_url is using http or https protocols and is valid
+    match exec_url.ok().flatten().filter(|url| ["http","https"].contains(&url.scheme())) {
+        // create new game window
+        Some(exec_url) => {
+                let game_window = tauri::WindowBuilder::new(
+                &app_handle,
+                "external",
+                tauri::WindowUrl::External(exec_url)
+            ).build()?;
+
+            game_window.maximize()?;
+            game_window.set_focus()?;
+            game_window.set_fullscreen(true)?;
+        },
+        None => {
+            let path = path.join(&game_info.file_path).join(&game_info.exec);
+
+            // check if exec path exists
+            if path.try_exists()? == false { return Err("Exec path does not exist")?; }
+            println!("{:#?}", path);
+
+            let game_process = Command::new(path)
+                .current_dir(&game_info.file_path)
+                .output()?;
+
+            println!("{}", String::from_utf8(game_process.stdout)?);
+            println!("{}", String::from_utf8(game_process.stderr)?);
+            println!("exit code status: {}", game_process.status);
+        },
+    }
+
     window.maximize()?;
     window.set_focus()?;
     window.set_fullscreen(true)?;
