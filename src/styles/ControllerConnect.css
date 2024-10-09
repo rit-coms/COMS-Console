@@ -7,16 +7,18 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 100%;
-    height: 75%;
+    width: 80%;
+    height: 80%;
     color: var(--cyan);
     padding: 25px;
     border: 3px solid var(--cyan);
+    border-radius: 8px;
 
     .controller-connect-header {
         display: flex;
         justify-content: center;
-        font-size: 24px;
+        font-size: 32px;
+        margin-top: 70px;
     }
 
     .controller-connect-players-container {
@@ -30,10 +32,10 @@
 
             .player-card {
                 background-color: var(--off-white);
-                height: 300px;
-                width: 300px;
+                height: 400px;
+                width: 400px;
                 border: 3px solid var(--cyan);
-                border-radius: 9px;
+                border-radius: 8px;
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -41,8 +43,8 @@
                 .mascot {
                     background-image: url('../assets/yellow_duck.png');
                     background-size: cover;
-                    width: 200px;
-                    height: 200px;
+                    width: 300px;
+                    height: 300px;
                 }
             }
 
@@ -56,7 +58,8 @@
 
             .player-description {
                 background-color: var(--off-white);
-                font-size: 20px;
+                height: 50px;
+                font-size: 24px;
                 text-align: center;
                 border: 3px solid var(--cyan);
                 margin-top: 15px;
@@ -101,9 +104,9 @@
         .controller-submit {
             color: var(--off-white);
             background-color: var(--cyan);
-            padding: 5px 10px;
-            font-size: 20px;
-            border-radius: 9px;
+            padding: 5px 20px;
+            font-size: 24px;
+            border-radius: 8px;
             border: 3px solid var(--cyan);
         }
 
