@@ -266,6 +266,9 @@ fn main() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![get_game_info, play_game])
+        .on_page_load(|window, _| {
+            window.show().expect("Failed to show window");
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
