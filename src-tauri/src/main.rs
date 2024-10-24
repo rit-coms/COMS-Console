@@ -149,7 +149,7 @@ fn get_game_info(
         let mut desc_path = entry.path();
         desc_path.push("desc.json");
 
-        // add check to see if desc.json exists
+        // checks to see if desc.json exists
         if !desc_path.exists() {
             continue;
         }
@@ -181,6 +181,7 @@ fn get_game_info(
                 && cover_image.exists()
         });
 
+        // set cover image to the canonicalized path if it exists
         desc.cover_image = desc
             .cover_image
             .map(|cover_image: PathBuf| {
