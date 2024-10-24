@@ -3,15 +3,9 @@ import React, { useContext, useEffect, useState } from 'react';
 import "../styles/GameInfoModal.css"
 import { BsXLg } from "react-icons/bs";
 import { PageContext } from '../context/PageContext';
+import { invoke } from '@tauri-apps/api/tauri';
 
-const GameInfoModal = ({ isOpen, toggleModal, game, gameInfo}) => {
-
-	let nullString = "{\"title\":\"placeholder\",\"id\":\"97b3efec-c3b5-4bbc-a4c9-d5aa4ad34d67\",\"file_path\":\"test\",\"author\":\"test\",\"summary\":\"testtestsetsetsetsetsetsetsetsetsetsetsetsetsertsetsetsetse\",\"release_date\":0,\"is_multiplayer\":true,\"genres\":[],\"cover_image\":\"test\",\"times_played\":0,\"last_played\":\"\"}";
-	const nullObj = JSON.parse(nullString);
-	if(!gameInfo)
-	{
-		gameInfo = nullObj;
-	}
+const GameInfoModal = ({ isOpen, toggleModal, game}) => {
 
 	// to suppress warning error
 	Modal.setAppElement('#root')
@@ -19,21 +13,24 @@ const GameInfoModal = ({ isOpen, toggleModal, game, gameInfo}) => {
 	const {changePage} = useContext(PageContext);
 
 	// TODO: reimplement for tauri
-	const playGame = () => {
+	// const playGame = () => {
 		
-		fetch('http://127.0.0.1:8000/launch?id=' + game.id)
-		.then(response => {
-			if(response.ok)
-			{
-				console.log("PLAY: ", game.title)
-			} else {
-				console.log("Error triggering script:", response.statusText)
-			}
+	// 	fetch('http://127.0.0.1:8000/launch?id=' + game.id)
+	// 	.then(response => {
+	// 		if(response.ok)
+	// 		{
+	// 			console.log("PLAY: ", game.title)
+	// 		} else {
+	// 			console.log("Error triggering script:", response.statusText)
+	// 		}
 			
-		})
-		.catch(error => {
-			console.error("Error:" + error)
-		})
+	// 	})
+	// 	.catch(error => {
+	// 		console.error("Error:" + error)
+	// 	})
+	// }
+	const playGame = async id => {
+		invoke('play_game', {id: game.id})
 	}
 	
 	return (
@@ -59,7 +56,7 @@ const GameInfoModal = ({ isOpen, toggleModal, game, gameInfo}) => {
 					{/* Game Image */}
 					<div className='game-info-modal-image'>
 						{
-							(game.cover_image.indexOf('placeholder') < 0 && game.cover_image.indexOf('.jpg') > 0) ?
+							true ?
 								<img className='game-image' src={game.cover_image} />
 							: 
 								// default is placeholder image
@@ -72,26 +69,32 @@ const GameInfoModal = ({ isOpen, toggleModal, game, gameInfo}) => {
 
 						{/* Header */}
 						<div className='game-info-modal-header'>
-							<h3 className='game-title'>{
-							gameInfo['title']
-							}</h3>
-							<span className='game-author'><i>{gameInfo['author']}</i></span> <br />
-							<span className='game-release-date'>{gameInfo['release_date'].toString()}</span>
+							<h3 className='game-title'>
+								{game.title}
+							</h3>
+							<span className='game-author'><i>{game.author}</i></span> <br />
+							<span className='game-release-date'>{game.release_date}</span>
 						</div>
 
 						{/* Attributes */}
 						<div className='game-info-modal-attributes'>
-							{Boolean(gameInfo['is_multiplayer']).valueOf() ?
-								<div className='game-info-modal-pill'>multiplayer</div>
-								: <div className='game-info-modal-pill'>single player</div>
+							{
+								game.multiplayer ?
+									<div className='game-info-modal-pill'>multiplayer</div>
+									: <div className='game-info-modal-pill'>single player</div>
 							}
-							<div className='game-info-modal-pill'>genre</div>
+							{
+								game.genres.map((genre) => {
+									return <div className='game-info-modal-pill'>{genre}</div>
+								})
+							}
+							
 						</div>
 
 						{/* Summary */}
 						<div className='game-info-modal-summary'>
 							{
-								gameInfo['summary'] == "" ?
+								game.summary == "" ?
 									// default is lorem ipsum
 									<p>
 										Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
@@ -103,7 +106,7 @@ const GameInfoModal = ({ isOpen, toggleModal, game, gameInfo}) => {
 										pharetra elit ut venenatis.
 									</p>
 								: 
-									<p>{gameInfo['summary']}</p>
+									<p>{game.summary}</p>
 							}
 						</div>
 					</div>
