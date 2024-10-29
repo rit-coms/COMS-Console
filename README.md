@@ -136,7 +136,7 @@ coms-console
 These are the folder locations for the following systems
 * Linux: `$XDG_DATA_HOME/coms-console` or `$HOME/.local/share/coms-console`.
 * macOS: `$HOME/Library/Application Support/coms-console`.
-* Windows: `{FOLDERID_LocalAppData}/coms-console`.
+* Windows: `$HOME\AppData\Roaming\coms-console`
 
 ## TODO
 

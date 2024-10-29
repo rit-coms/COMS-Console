@@ -11,6 +11,7 @@ import * as Search from '../helpers/SearchGames';
 import { FilterContext } from '../context/FilterContext';
 import { SearchContext } from '../context/SearchContext';
 import { invoke } from '@tauri-apps/api'
+import { convertFileSrc } from '@tauri-apps/api/tauri';
 
 
 function GameGallery() {
@@ -22,7 +23,14 @@ function GameGallery() {
 	const [games, setGames] = useState([]);
 
 	useEffect(() => {
-		invoke('get_game_info').then(games => {console.log(games);setGames(games)})
+		invoke('get_game_info').then(games => {
+			games = games.map(async gameInfo => {
+				gameInfo.cover_image = await convertFileSrc(gameInfo.cover_image)
+				return gameInfo
+			})
+			console.log(games)
+			Promise.all(games).then(games => setGames(games))
+		})
 	}, [])
 
 
