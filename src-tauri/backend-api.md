@@ -67,7 +67,7 @@ invoke('get_game_info').then(games => console.log(games))
         "cover_image": "/Users/user/COMS-Console/games/snake-game/assets/bread_3.png",
         "times_played": 0,
         "last_played": 1727066638,
-        "exec": "main.py" // file relative to directory of desc.json
+        "exec": "main.py" // file relative to directory of game-metadata.json
     }
 ]
 ```

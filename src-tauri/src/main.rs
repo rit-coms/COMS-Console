@@ -146,35 +146,35 @@ fn get_game_info(
     let entries = fs::read_dir(app_data_dir.clone())?;
     for entry in entries {
         let entry = entry?;
-        let mut desc_path = entry.path();
-        desc_path.push("desc.json");
+        let mut game_metadata_path = entry.path();
+        game_metadata_path.push("game-metadata.json");
 
-        // checks to see if desc.json exists
-        if !desc_path.exists() {
+        // checks to see if game_metadata.json exists
+        if !game_metadata_path.exists() {
             continue;
         }
 
-        // get desc_file
-        let desc_file = fs::File::open(desc_path.clone())?;
-        let mut desc: GameInfo = serde_json::from_reader(BufReader::new(desc_file))?;
+        // get game_metadata_file
+        let game_metadata_file = fs::File::open(game_metadata_path.clone())?;
+        let mut game_metadata: GameInfo = serde_json::from_reader(BufReader::new(game_metadata_file))?;
 
         // initialize file path
-        let mut folder_path = desc_path.clone();
+        let mut folder_path = game_metadata_path.clone();
         folder_path.pop();
-        desc.file_path = folder_path;
+        game_metadata.file_path = folder_path;
 
         // create and set hash id
         let mut hasher = DefaultHasher::new();
-        desc.file_path.hash(&mut hasher);
-        desc.id = hasher.finish();
+        game_metadata.file_path.hash(&mut hasher);
+        game_metadata.id = hasher.finish();
 
-        // convert to full uncanonoicalized file path
-        desc.cover_image = desc
+        // convert to full uncanonicalized file path
+        game_metadata.cover_image = game_metadata
             .cover_image
-            .map(|cover_image| desc.file_path.join(&cover_image));
+            .map(|cover_image| game_metadata.file_path.join(&cover_image));
 
         // check if file path exists and has an image extension
-        desc.cover_image = desc.cover_image.filter(|cover_image| {
+        game_metadata.cover_image = game_metadata.cover_image.filter(|cover_image| {
             cover_image
                 .extension()
                 .is_some_and(|ext| ["png", "jpg", "webp"].map(|s| s.as_ref()).contains(&ext))
@@ -182,7 +182,7 @@ fn get_game_info(
         });
 
         // set cover image to the canonicalized path if it exists
-        desc.cover_image = desc
+        game_metadata.cover_image = game_metadata
             .cover_image
             .map(|cover_image: PathBuf| {
                 println!("{:?}", &cover_image);
@@ -190,7 +190,7 @@ fn get_game_info(
             })
             .transpose()?;
 
-        games_list.push(desc);
+        games_list.push(game_metadata);
     }
 
     println!("{}", serde_json::to_string_pretty(games_list).unwrap());

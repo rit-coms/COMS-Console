@@ -6,10 +6,17 @@ This repository hosts the software for the COMS Console, a Raspberry Pi-based pr
 
 ## Features
 
-- Auto fullscreen on Raspberry Pi startup
+- Window management on Raspberry Pi startup
+  - Automatic startup fullscreen
+  - Refocus on launcher after game closes
 - Displays a library of all custom-made games
   - Retrieves and manages all games from a game library directory (varies by OS)
+  - Supports multiple game-making platforms
+    - Pygame
+    - Godot
+    - Web Games
 - Cross platform
+- Automated builds for the Raspberry Pi, Mac, Windows, and Debian Linux
 
 
 ## Tech Stack
@@ -25,7 +32,8 @@ This repository hosts the software for the COMS Console, a Raspberry Pi-based pr
 
 
 ## Installation
-
+> [!NOTE]
+> It's not necessary to install Homebrew or nvm, but it's highly recommended to install this way if it's your first time using these tools. These package managers will help differentiate dependency versions in between other projects.
 ### macOS
 
 1. Install [Homebrew](https://brew.sh/)
@@ -139,22 +147,22 @@ coms-console
 └── games
     ├── game1
     │   ├── <game source files>
-    │   └── desc.json
+    │   └── game-metadata.json
     ├── game2
     │   ├── <game source files>
-    │   └── desc.json
+    │   └── game-metadata.json
     ├── game3
     │   ├── <game source files>
-    │   └── desc.json
+    │   └── game-metadata.json
     └── game4
         ├── <game source files>
-        └── desc.json
+        └── game-metadata.json
 ```
 
 Each game should reside in its own folder with the following components:
 
 - `<game source files>`: All essential files for the game
-- `desc.json`: Metadata file containing information about the game
+- `game-metadata.json`: Metadata file containing information about the game
 
 ### Default `games` Folder Locations
 The games folder is located within the user’s application data directory, which varies by operating system:
@@ -166,38 +174,50 @@ The games folder is located within the user’s application data directory, whic
 - Windows: `$HOME\AppData\Roaming\coms-console`
 
 > Note: Make sure to extract the games directly into the games folder to ensure the application can locate and display them properly.
-## Deployment
 
-To deploy this project run
+## Development & Building
+
+To startup this project's development server run
 
 ```bash
+# In top level of repository
 npm run tauri dev
 ```
 
+To build this project for your current platform
+
+```bash
+# In top level of repository
+npm run tauri build
+```
 
 ## Optimizations
 
 - Migrated frontend from [Create React App](https://create-react-app.dev/) to [Vite](https://vite.dev/) for improved performance and faster build times
 - Cleaned up `package.json` by removing unnecessary dependencies
-- Initialized a Tauri project to replace the previous Python backend, enhancing cross-platform compatibility
+- Initialized a Tauri project to replace the previous Python backend, incurring less overhead during IPC and giving more control over window management
 - Configured Vite to work seamlessly with Tauri
 - Set Tauri to launch in fullscreen mode on startup for a better user experience
+- Introduced error handling for file system access that propogates to the front end
 
 
 ## Future Project Roadmap
 
 ### Hardware
 
-- **Simplified Raspberry Pi Deployment:** Streamline the deployment process on Raspberri Pi to make it more user-friendly
+- **Simplified Raspberry Pi Deployment:** Streamline the deployment process on the Raspberry Pi to make it more user-friendly
 
 ### Backend
-- **Automate Builds:** Implement GitHub Actions for automated builds
 
-- **Frontend and Backend Communication:** Outline and document functions for communication between the frontend and backend
+- **Pause Menu Screen:** Implement a general overlay that communicates to the game to pause and give the options to quit out of a game
+
+- **Global Controller Key Listening:** Listen for certain inputs from the controller that should be used to draw inputs or navigate
+
+- **Tauri v2 Migration:** Transition the backend tauri api from v1 &rarr; v2 for easier IPC, further package compartmentalization, and more testing functionality
+
+- **Unit Testing:** Create unit and integration tests to establish continous integration workflow
 
 ### Frontend
-
-- **Auto-refocus Launcher:** Enable the application to automatically refocus the launcher after closing a game
 
 - **TypeScript Migration:** Transition the frontend codebase from JavaScript to TypeScript to improve type safety
 
@@ -205,9 +225,8 @@ npm run tauri dev
 
 - **Expanded Controller Support:** Increase support for various game controllers to enhance accessibility and user engagement
 
-- **Tauri Startup Plugin:** Integrate the Tauri startup plugin for better application startup management
+- **QuackBox Design System:** Implement a QuackBox-specific design system, to improve user interface and experience
 
-- **QuackBox Design System:** Implement a QuackBox-specific design syste, to improve user interface and experience
 ## Feedback
 
 If you have any feedback, feature requests, or comments, please reach out to us at [coms@rit.edu](mailto:coms@rit.edu).
