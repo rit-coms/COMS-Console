@@ -6,17 +6,17 @@ This repository hosts the software for the COMS Console, a Raspberry Pi-based pr
 
 ## Features
 
-- Window management on Raspberry Pi startup
-  - Automatic startup fullscreen
-  - Refocus on launcher after game closes
+- Window management of game launcher
+  - Automatic fullscreen and focus capture
+  - Manages game and launcher screen real estate
 - Displays a library of all custom-made games
   - Retrieves and manages all games from a game library directory (varies by OS)
-  - Supports multiple game-making platforms
+  - Supports multiple game-making platforms (and in the process of adding more!)
     - Pygame
     - Godot
     - Web Games
-- Cross platform
-- Automated builds for the Raspberry Pi, Mac, Windows, and Debian Linux
+- Cross platform support
+- Automated CD builds for the Raspberry Pi, Mac, Windows, and Debian Linux
 
 
 ## Tech Stack
@@ -198,20 +198,22 @@ npm run tauri build
 - Initialized a Tauri project to replace the previous Python backend, incurring less overhead during IPC and giving more control over window management
 - Configured Vite to work seamlessly with Tauri
 - Set Tauri to launch in fullscreen mode on startup for a better user experience
-- Introduced error handling for file system access that propogates to the front end
+- Introduced error handling for file system access that propagates to the front end
 
 
 ## Future Project Roadmap
 
-### Hardware
+### System Runtime
 
 - **Simplified Raspberry Pi Deployment:** Streamline the deployment process on the Raspberry Pi to make it more user-friendly
+
+- **Kiosk Mode:** Run with less overhead using a custom kiosk window manager like [cage](https://github.com/cage-kiosk/cage) (for pi only)
 
 ### Backend
 
 - **Pause Menu Screen:** Implement a general overlay that communicates to the game to pause and give the options to quit out of a game
 
-- **Global Controller Key Listening:** Listen for certain inputs from the controller that should be used to draw inputs or navigate
+- **Global Controller Key Listening:** Listen for certain inputs from the controller globally to manage game runtimes
 
 - **Tauri v2 Migration:** Transition the backend tauri api from v1 &rarr; v2 for easier IPC, further package compartmentalization, and more testing functionality
 
@@ -230,3 +232,7 @@ npm run tauri build
 ## Feedback
 
 If you have any feedback, feature requests, or comments, please reach out to us at [coms@rit.edu](mailto:coms@rit.edu).
+
+### License
+
+This software is licensed under the [MIT License](LICENSE).
