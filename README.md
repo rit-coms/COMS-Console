@@ -173,7 +173,8 @@ The games folder is located within the user’s application data directory, whic
 
 - Windows: `$HOME\AppData\Roaming\coms-console`
 
-> Note: Make sure to extract the games directly into the games folder to ensure the application can locate and display them properly.
+> [!NOTE]
+> Make sure to extract the games directly into the games folder to ensure the application can locate and display them properly.
 
 ## Development & Building
 
