@@ -87,6 +87,7 @@
                     }
                     
                     .accordion-item {
+                        all: unset;
                         padding: 10px;
                         display: flex;
                         font-size: 22px;
@@ -114,6 +115,7 @@
         .filter-modal-footer {
             display: flex;
             justify-content: space-around;
+            margin-bottom: 50px;
 
             .filter-modal-button {
                 background-color: var(--cyan);

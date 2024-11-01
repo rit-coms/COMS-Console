@@ -61,6 +61,7 @@
                 .game-image {
                     border-radius: 9px;
                     width: 360px;
+                    height: 510px;
                     justify-content: center;
                     background-image: url('../assets/placeholder.jpg');
                     background-size: cover;
