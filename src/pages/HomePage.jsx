@@ -57,7 +57,7 @@ export default function HomePage() {
 
 	return (
 		<> {
-			isConnected ?
+			// isConnected ?
 				<SearchProvider>
 					<SortProvider>
 						<FilterProvider>
@@ -67,7 +67,7 @@ export default function HomePage() {
 						</FilterProvider>
 					</SortProvider>
 				</SearchProvider>
-				: <ControllerConnectPage />
+				// : <ControllerConnectPage />
 		}
 		</>
 	)
