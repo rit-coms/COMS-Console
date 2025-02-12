@@ -156,7 +156,25 @@ fn get_game_info(
 
         // get game_metadata_file
         let game_metadata_file = fs::File::open(game_metadata_path.clone())?;
-        let mut game_metadata: GameInfo = serde_json::from_reader(BufReader::new(game_metadata_file))?;
+        let game_metadata: Result<GameInfo, serde_json::Error> =
+            serde_json::from_reader(BufReader::new(game_metadata_file));
+
+        if let Err(err) = game_metadata {
+            println!("Failed at {:#?}", game_metadata_path);
+            match err.classify() {
+                serde_json::error::Category::Io => println!("Failed to read json"),
+                serde_json::error::Category::Syntax => println!("JSON is not syntactically valid"),
+                serde_json::error::Category::Data => {
+                    println!("JSON data is not semantically correct")
+                }
+                serde_json::error::Category::Eof => {
+                    println!("Prematurely reached end of JSON file")
+                }
+            }
+            continue;
+        }
+
+        let mut game_metadata = game_metadata?;
 
         // initialize file path
         let mut folder_path = game_metadata_path.clone();
@@ -221,24 +239,30 @@ fn play_game(
     println!("{:#?}", exec_url);
 
     // check if exec_url is using http or https protocols and is valid
-    match exec_url.ok().filter(|url| ["http","https"].contains(&url.scheme())) {
+    match exec_url
+        .ok()
+        .filter(|url| ["http", "https"].contains(&url.scheme()))
+    {
         // create new game window
         Some(exec_url) => {
-                let game_window = tauri::WindowBuilder::new(
+            let game_window = tauri::WindowBuilder::new(
                 &app_handle,
                 "external",
-                tauri::WindowUrl::External(exec_url)
-            ).build()?;
+                tauri::WindowUrl::External(exec_url),
+            )
+            .build()?;
 
             game_window.maximize()?;
             game_window.set_focus()?;
             game_window.set_fullscreen(true)?;
-        },
+        }
         None => {
             let path = path.join(&game_info.file_path).join(&game_info.exec);
 
             // check if exec path exists
-            if path.try_exists()? == false { return Err("Exec path does not exist")?; }
+            if path.try_exists()? == false {
+                return Err("Exec path does not exist")?;
+            }
             println!("{:#?}", path);
 
             let game_process = Command::new(path)
@@ -248,7 +272,7 @@ fn play_game(
             println!("{}", String::from_utf8(game_process.stdout)?);
             println!("{}", String::from_utf8(game_process.stderr)?);
             println!("exit code status: {}", game_process.status);
-        },
+        }
     }
 
     window.maximize()?;
@@ -259,7 +283,10 @@ fn play_game(
 
 fn main() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec![""])))
+        .plugin(tauri_plugin_autostart::init(
+            MacosLauncher::LaunchAgent,
+            Some(vec![""]),
+        ))
         .setup(|app| {
             app.manage(Mutex::new(AppState::default()));
             app.autolaunch().enable()?;
