@@ -11,7 +11,10 @@ mod frontend_api;
 
 fn main() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec![""])))
+        .plugin(tauri_plugin_autostart::init(
+            MacosLauncher::LaunchAgent,
+            Some(vec![""]),
+        ))
         .setup(|app| {
             app.manage(Mutex::new(AppState::default()));
             app.autolaunch().enable()?;

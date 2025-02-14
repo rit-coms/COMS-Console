@@ -3,6 +3,27 @@
 
 This repository hosts the software for the COMS Console, a Raspberry Pi-based project with a unique, duck-inspired design owned by the [Computing Organization for Multicultural Students](https://www.rit.edu/computing/coms/).
 
+## WIP backend refactor structure
+- main.rs (cross-platform)
+    - runs the actual tauri instance
+    - requires and sets up all the handlers and plugins
+- frontend-api
+  - games.rs
+    - Get game info
+    - Startup games
+  - More in the future?
+- quackl (pi-specific)
+    - pipe.rs
+        - This will be our communication layer with Quackl. I need to look more into linux / unix ipc, but I'm leaning towards either sockets or named pipes
+            - named pipes are nice for their simplicity
+            - sockets are nice because of their throughput
+- db (cross-platform)
+    - local.rs
+        - this is the public facing api for game developers that allows them to store data. 
+    - public.rs
+        - This if for actually making all the backend api calls to the unified db
+    - testing.rs
+        - This is for if a game dev downloaded the software wanting to test out their game's api calls. We'll have to manage a db that is locally stored to the users computer and can simulate the requests that they want to make
 
 ## Features
 
