@@ -57,7 +57,7 @@ export default function HomePage() {
 
 	return (
 		<> {
-			isConnected ?
+			isConnected || (import.meta.env.DEV) ? // disables controller connect when running in dev mode
 				<SearchProvider>
 					<SortProvider>
 						<FilterProvider>

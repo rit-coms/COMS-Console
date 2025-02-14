@@ -108,10 +108,50 @@ impl<T: ToString> From<T> for ErrorType {
     }
 }
 
-// TODO: reimplement to handle errors and be smarter later
-// currently takes in the games_list from Tauri's store
-// and updates it by looking through the games folder
-// and parsing through all the folders of games it finds
+/// Retrieves the game information from the games folder and updates the application's state.
+///
+/// This command scans the games folder in the app data directory, reads the `game-metadata.json`
+/// files for each game, and updates the `games_list` in the application's state.
+///
+/// # Arguments
+///
+/// * `state` - A reference to the application's state containing the list of games.
+/// * `app_handle` - A handle to the Tauri application.
+///
+/// # Returns
+///
+/// * `Result<Vec<GameInfo>, ErrorType>` - A list of `GameInfo` structs representing the games,
+///   or an `ErrorType` if an error occurs.
+///
+/// # Errors
+///
+/// This function will return an error if:
+/// * The app data directory cannot be found.
+/// * The games folder cannot be created.
+/// * The `game-metadata.json` file cannot be read or parsed.
+/// * The cover image path cannot be canonicalized.
+///
+/// # Example (Frontend)
+///
+/// ```javascript
+/// import { invoke } from '@tauri-apps/api/tauri';
+/// import { convertFileSrc } from '@tauri-apps/api/tauri';
+///
+/// async function fetchGameInfo() {
+///   try {
+///     let games = await invoke('get_game_info');
+///     games = await Promise.all(games.map(async (gameInfo) => {
+///       gameInfo.cover_image = await convertFileSrc(gameInfo.cover_image);
+///       return gameInfo;
+///     }));
+///     console.log('Games:', games);
+///   } catch (error) {
+///     console.error('Error fetching game info:', error);
+///   }
+/// }
+///
+/// fetchGameInfo();
+/// ```
 #[tauri::command]
 pub fn get_game_info(
     state: State<'_, Mutex<AppState>>,
@@ -205,7 +245,46 @@ pub fn get_game_info(
     Ok(state.games_list.clone())
 }
 
-// run a game
+/// Runs a game based on its ID.
+///
+/// This command finds the game with the specified ID in the `games_list`, minimizes the current window,
+/// and either opens a new window with the game's URL or runs the game's executable file.
+///
+/// # Arguments
+///
+/// * `state` - A reference to the application's state containing the list of games.
+/// * `window` - A reference to the current Tauri window.
+/// * `app_handle` - A handle to the Tauri application.
+/// * `id` - The ID of the game to be played.
+///
+/// # Returns
+///
+/// * `Result<(), ErrorType>` - An empty result indicating success, or an `ErrorType` if an error occurs.
+///
+/// # Errors
+///
+/// This function will return an error if:
+/// * The game ID is not found in the `games_list`.
+/// * The current directory cannot be accessed.
+/// * The game executable path does not exist.
+/// * The game process cannot be started.
+///
+/// # Example (Frontend)
+///
+/// ```javascript
+/// import { invoke } from '@tauri-apps/api/tauri';
+///
+/// async function startGame(gameId) {
+///   try {
+///     await invoke('play_game', { id: gameId });
+///     console.log('Game started successfully');
+///   } catch (error) {
+///     console.error('Error starting game:', error);
+///   }
+/// }
+///
+/// startGame('12345');
+/// ```
 #[tauri::command]
 pub fn play_game(
     state: State<'_, Mutex<AppState>>,
