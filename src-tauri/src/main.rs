@@ -18,16 +18,14 @@ fn running_on_rasp_pi() -> bool {
 }
 
 fn main() {
-    let mut app = tauri::Builder::default();
-
-    app = app.plugin(tauri_plugin_autostart::init(
+    tauri::Builder::default()
+    .plugin(tauri_plugin_autostart::init(
         MacosLauncher::LaunchAgent,
         Some(vec![""]),
-    ));
-
-    app.setup(|app| {
+    ))
+    .setup(|app| {
         app.manage(Mutex::new(AppState::default()));
-        if running_on_rasp_pi() {
+        if running_on_rasp_pi() { // Only enable on raspberry pi
             app.autolaunch().enable()?;
         }
         Ok(())
