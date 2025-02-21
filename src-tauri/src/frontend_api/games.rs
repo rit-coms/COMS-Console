@@ -167,7 +167,7 @@ pub fn get_game_info(
         .app_data_dir()
         .ok_or("Could not find app data directory")?
         .join("games");
-    println!("{:?}", app_data_dir);
+    // println!("{:?}", app_data_dir);
 
     fs::create_dir_all(app_data_dir.clone())?;
 
@@ -240,7 +240,7 @@ pub fn get_game_info(
         games_list.push(game_metadata);
     }
 
-    println!("{}", serde_json::to_string_pretty(games_list).unwrap());
+    // println!("{}", serde_json::to_string_pretty(games_list).unwrap());
 
     Ok(state.games_list.clone())
 }
