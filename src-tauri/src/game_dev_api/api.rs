@@ -9,7 +9,14 @@ async fn hello_world_handler() -> impl IntoResponse {
     Json(json_response)
 }
 
-async fn set_leaderboard() {}
+async fn set_leaderboard(Json(payload): Json<LeaderboardEntry>) {
+    // Get game_id and user_id
+    let game_id = 42;
+    let user_id = 0;
+
+    // Save entry to database
+    println!("Saved to database: {{user_id:{user_id:?}, gameid:{game_id:?}, tag:{0:?}, value:{1:?}}}", payload.tag, payload.value)
+}
 
 async fn get_leaderboard() -> impl IntoResponse {}
 
