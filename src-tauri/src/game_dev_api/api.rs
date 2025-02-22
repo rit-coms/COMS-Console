@@ -1,4 +1,11 @@
-use axum::{response::IntoResponse, routing::get, Json, Router};
+use axum::{response::IntoResponse, routing::{get, post}, Json, Router};
+use serde::Deserialize;
+
+#[derive(Deserialize)]
+struct LeaderboardEntry {
+    tag: String,
+    value: u32,
+}
 
 /// Example get request handler
 async fn hello_world_handler() -> impl IntoResponse {
@@ -27,7 +34,9 @@ async fn get_save_data() -> impl IntoResponse {}
 async fn get_all_save_paths() -> impl IntoResponse {}
 
 pub async fn setup_game_dev_api() {
-    let app = Router::new().route("/api/healthchecker", get(hello_world_handler));
+    let app = Router::new()
+    .route("/api/healthchecker", get(hello_world_handler))
+    .route("/api/set-leaderboard", post(set_leaderboard));
 
     println!("Server started successfully!!!");
     let listener = tokio::net::TcpListener::bind("127.0.0.1:8000")
