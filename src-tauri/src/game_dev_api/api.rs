@@ -121,7 +121,7 @@ pub async fn setup_game_dev_api() {
             post(set_leaderboard).get(get_leaderboard),
         )
         .route(
-            &format!("{}/save-data", route_prefixt ),
+            &format!("{}/save-data", route_prefix),
             post(set_save_data).get(get_save_data),
         );
 
