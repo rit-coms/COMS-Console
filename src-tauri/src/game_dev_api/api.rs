@@ -100,7 +100,7 @@ async fn set_save_data(Json(payload): Json<SaveDataEntry>) {
 
 async fn get_save_data() -> impl IntoResponse {
     // TODO: parse BSON from database bask into json
-    let data: String = r#"{"money":32, "level":3}"#.to_string();
+    let data: String = String::from(r#"{"money":32, "level":3}"#);
     let json_response = serde_json::json!([
         {
             "file_name":"2_24_2025",
