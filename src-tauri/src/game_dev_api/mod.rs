@@ -130,5 +130,5 @@ pub async fn setup_game_dev_api() {
         .await
         .unwrap(); // TODO make the port configurable
     axum::serve(listener, app).await.unwrap();
-    println!("API routes accessible at {:?}", route_prefix)
+    
 }

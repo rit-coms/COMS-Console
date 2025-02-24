@@ -2,7 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use frontend_api::games::{get_game_info, play_game, AppState};
-use game_dev_api::api;
+use game_dev_api::setup_game_dev_api;
 use tauri::Manager;
 use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 
@@ -20,7 +20,7 @@ fn main() {
         .setup(|app| {
             app.manage(Mutex::new(AppState::default()));
             app.autolaunch().enable()?;
-            tauri::async_runtime::spawn(api::setup_game_dev_api());
+            tauri::async_runtime::spawn(setup_game_dev_api());
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![get_game_info, play_game])
