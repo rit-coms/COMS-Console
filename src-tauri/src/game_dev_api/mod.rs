@@ -113,9 +113,9 @@ async fn get_save_data() -> impl IntoResponse {
 
 async fn get_all_save_paths() -> impl IntoResponse {}
 
-pub async fn setup_game_dev_api() {
+fn app() -> Router {
     let route_prefix: String = format!("/api/v{}", VERSION.to_string());
-    let app = Router::new()
+    Router::new()
         .route(
             &format!("{}/leaderboard", route_prefix),
             post(set_leaderboard).get(get_leaderboard),
@@ -123,12 +123,18 @@ pub async fn setup_game_dev_api() {
         .route(
             &format!("{}/save-data", route_prefix),
             post(set_save_data).get(get_save_data),
-        );
+        )
+}
+
+pub async fn setup_game_dev_api() {
+    let app = app();
 
     println!("Server started successfully!!!");
     let listener = tokio::net::TcpListener::bind("127.0.0.1:8000")
         .await
         .unwrap(); // TODO make the port configurable
     axum::serve(listener, app).await.unwrap();
-    
 }
+
+#[cfg(test)]
+mod tests {}
