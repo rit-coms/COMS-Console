@@ -143,9 +143,22 @@ mod tests {
 
     use super::*;
     use axum::http::Request;
+    use axum::response::Response;
     use axum::{body::Body, http::StatusCode};
     use http_body_util::BodyExt;
     use tower::{Service, ServiceExt};
+
+    async fn response_to_body_text(response: Response<Body>) -> String {
+        String::from_utf8(
+            response
+                .into_body()
+                .collect()
+                .await
+                .unwrap()
+                .to_bytes()
+                .to_ascii_lowercase(),
+        ).unwrap()
+    }
 
     #[tokio::test]
     async fn get_save_data() {
@@ -163,14 +176,7 @@ mod tests {
 
         assert_eq!(response.status(), StatusCode::OK);
 
-        let body_bytes = response
-            .into_body()
-            .collect()
-            .await
-            .unwrap()
-            .to_bytes()
-            .to_ascii_lowercase();
-        let body_text: String = String::from_utf8(body_bytes).unwrap();
+        let body_text: String = response_to_body_text(response).await;
 
         let response_fields: Vec<String> = vec![String::from("file_name"), String::from("data")];
 
