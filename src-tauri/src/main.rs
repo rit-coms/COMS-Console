@@ -10,6 +10,7 @@ use std::sync::Mutex;
 
 mod frontend_api;
 mod game_dev_api;
+mod db;
 
 fn main() {
     tauri::Builder::default()
@@ -19,6 +20,7 @@ fn main() {
         ))
         .setup(|app| {
             app.manage(Mutex::new(AppState::default()));
+            // tauri::async_runtime::spawn(db::test_db());
             app.autolaunch().enable()?;
             tauri::async_runtime::spawn(setup_game_dev_api());
             Ok(())
