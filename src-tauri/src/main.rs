@@ -9,11 +9,6 @@ use std::sync::Mutex;
 
 mod frontend_api;
 
-/// Returns true if the code is using the 'autostart' feature
-fn running_on_rasp_pi() -> bool {
-    cfg!(feature = "autostart")
-}
-
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_autostart::init(
@@ -22,7 +17,7 @@ fn main() {
         ))
         .setup(|app| {
             app.manage(Mutex::new(AppState::default()));
-            if running_on_rasp_pi() {
+            if cfg!(feature = "autostart") {
                 // Only enable on raspberry pi
                 app.autolaunch().enable()?;
             }
