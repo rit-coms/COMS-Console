@@ -9,12 +9,9 @@ use std::sync::Mutex;
 
 mod frontend_api;
 
-/// Returns true if the code is running on a raspberry pi
+/// Returns true if the code is using the 'autostart' feature
 fn running_on_rasp_pi() -> bool {
-    cfg!(all(
-        target_arch = "aarch64",
-        not(any(target_os = "macos", target_os = "linux"))
-    ))
+    cfg!(feature = "autostart")
 }
 
 fn main() {
