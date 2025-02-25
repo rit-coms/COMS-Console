@@ -27,6 +27,7 @@ tokio = "1.29.1"
 bson = "2.13.0"
 tower = { version = "0.4.13", features = ["util"]}
 http-body-util = "0.1.2"
+serde_with = "3.0.0"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem and the built-in dev server is disabled.
