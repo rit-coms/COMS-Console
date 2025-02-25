@@ -5,6 +5,7 @@ use axum::{
     Json, Router,
 };
 use serde::Deserialize;
+use serde_with::{serde_as, NoneAsEmptyString};
 
 const VERSION: u8 = 1;
 
@@ -98,20 +99,45 @@ async fn set_save_data(Json(payload): Json<SaveDataEntry>) {
     )
 }
 
-async fn get_save_data() -> impl IntoResponse {
-    // TODO: provide query params so we can return a specific save file or a list of all for one user, etc.
-    // TODO: parse BSON from database bask into json
-    let json_response = serde_json::json!([
-        {
-            "file_name":"2_24_2025",
+#[serde_as]
+#[derive(Deserialize)]
+struct SaveDataGetParams {
+    user_id: String,
+    #[serde_as(as = "NoneAsEmptyString")]
+    file_name: Option<String>,
+}
+
+/// Can either get a list of save files for current user or
+/// get a specific file by user and name
+async fn get_save_data(params: Query<SaveDataGetParams>) -> impl IntoResponse {
+    if let Some(file_name) = &params.file_name {
+        let json_response = serde_json::json!({
             "data": {
                 "money":32,
-                "level":3,
+                "level":3
             }
-        }
-    ]);
-
-    Json(json_response)
+        });
+        return Json(json_response)
+    } else {
+        let json_response = serde_json::json!([
+            {
+                "file_name":"2_24_2025",
+                "data": {
+                    "money":32,
+                    "level":3,
+                }
+            },
+            {
+                "file_name":"2_25_2025",
+                "data": {
+                    "money":3,
+                    "level":5
+                }
+            }
+        ]);
+        return Json(json_response);
+    }
+    // TODO: parse BSON from database bask into json
 }
 
 fn app() -> Router {
@@ -157,7 +183,8 @@ mod tests {
                 .unwrap()
                 .to_bytes()
                 .to_ascii_lowercase(),
-        ).unwrap()
+        )
+        .unwrap()
     }
 
     #[tokio::test]
