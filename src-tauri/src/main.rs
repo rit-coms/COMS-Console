@@ -8,6 +8,7 @@ use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 use std::sync::Mutex;
 
 mod frontend_api;
+mod db;
 
 fn main() {
     tauri::Builder::default()
@@ -17,6 +18,7 @@ fn main() {
         ))
         .setup(|app| {
             app.manage(Mutex::new(AppState::default()));
+            // tauri::async_runtime::spawn(db::test_db());
             app.autolaunch().enable()?;
             Ok(())
         })
