@@ -99,6 +99,7 @@ async fn set_save_data(Json(payload): Json<SaveDataEntry>) {
 }
 
 async fn get_save_data() -> impl IntoResponse {
+    // TODO: provide query params so we can return a specific save file or a list of all for one user, etc.
     // TODO: parse BSON from database bask into json
     let json_response = serde_json::json!([
         {
@@ -112,9 +113,6 @@ async fn get_save_data() -> impl IntoResponse {
 
     Json(json_response)
 }
-
-/// Get all names of save files
-async fn get_all_save_paths() -> impl IntoResponse {}
 
 fn app() -> Router {
     let route_prefix: String = format!("/api/v{}", VERSION.to_string());
