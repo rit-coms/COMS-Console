@@ -213,6 +213,12 @@ To build this project for your current platform
 npm run tauri build
 ```
 
+To build this project for the QuackBox
+```bash
+# In top level of repository
+npm run tauri build -- --features quackbox-raspi
+```
+
 ## Optimizations
 
 - Migrated frontend from [Create React App](https://create-react-app.dev/) to [Vite](https://vite.dev/) for improved performance and faster build times
