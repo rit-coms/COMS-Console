@@ -27,7 +27,7 @@ enum LeaderboardScope {
     Global,
 }
 
-async fn set_leaderboard(Json(payload): Json<LeaderboardEntry>) {
+async fn set_leaderboard(Json(payload): Json<LeaderboardEntry>) -> impl IntoResponse {
     // Get game_id and user_id
     let game_id = 42;
     let user_id = 0;
@@ -36,7 +36,12 @@ async fn set_leaderboard(Json(payload): Json<LeaderboardEntry>) {
     println!(
         "Saved to database: {{user_id:{user_id:?}, game_id:{game_id:?}, tag:{0:?}, value:{1:?}}}",
         payload.tag, payload.value
-    )
+    );
+
+    Json(serde_json::json!({
+        "tag":payload.tag,
+        "value":payload.value,
+    }))
 }
 
 #[derive(Deserialize)]
@@ -48,7 +53,6 @@ async fn get_leaderboard(params: Query<LeaderboardGetParams>) -> impl IntoRespon
     let json_response: serde_json::Value;
     match params.scope {
         // TODO: query databse
-        // TODO: should we exclude game and user id from response since we are handling that instead of the game developer?
         LeaderboardScope::User => {
             // Example data with two leaderboard entries
             json_response = serde_json::json!([
@@ -87,16 +91,20 @@ async fn get_leaderboard(params: Query<LeaderboardGetParams>) -> impl IntoRespon
     }
 }
 
-async fn set_save_data(Json(payload): Json<SaveDataEntry>) {
+async fn set_save_data(Json(payload): Json<SaveDataEntry>) -> impl IntoResponse {
     let game_id = 32;
     let user_id = 53;
-    let bson_data = bson::to_bson(&payload.data);
 
     // Save entry to database;
     println!(
-        "Saved to database: {{user_id:{user_id:?}, game_id:{game_id:?}, file_id{:?}}} with also some BSON data",
+        "Saved to database: {{user_id:{user_id:?}, game_id:{game_id:?}, file_name{:?}}} with also some BSON data",
         payload.file_name
-    )
+    );
+
+    Json(serde_json::json!({
+        "file_name": payload.file_name,
+        "data": payload.data
+    }))
 }
 
 #[serde_as]
@@ -187,13 +195,13 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn get_save_data() {
+    async fn get_save_file() {
         let app = app();
 
         let response = app
             .oneshot(
                 Request::builder()
-                    .uri(format!("/api/v{}/save-data", VERSION))
+                    .uri(format!("/api/v{}/save-data?file_name=test", VERSION))
                     .body(Body::empty())
                     .unwrap(),
             )
