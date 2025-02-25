@@ -113,6 +113,7 @@ async fn get_save_data() -> impl IntoResponse {
     Json(json_response)
 }
 
+/// Get all names of save files
 async fn get_all_save_paths() -> impl IntoResponse {}
 
 fn app() -> Router {
