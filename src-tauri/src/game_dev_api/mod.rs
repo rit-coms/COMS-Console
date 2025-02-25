@@ -27,11 +27,6 @@ enum LeaderboardScope {
     Global,
 }
 
-#[derive(Deserialize)]
-struct LeaderboardGetParams {
-    scope: LeaderboardScope,
-}
-
 async fn set_leaderboard(Json(payload): Json<LeaderboardEntry>) {
     // Get game_id and user_id
     let game_id = 42;
@@ -42,6 +37,11 @@ async fn set_leaderboard(Json(payload): Json<LeaderboardEntry>) {
         "Saved to database: {{user_id:{user_id:?}, game_id:{game_id:?}, tag:{0:?}, value:{1:?}}}",
         payload.tag, payload.value
     )
+}
+
+#[derive(Deserialize)]
+struct LeaderboardGetParams {
+    scope: LeaderboardScope,
 }
 
 async fn get_leaderboard(params: Query<LeaderboardGetParams>) -> impl IntoResponse {
@@ -102,7 +102,6 @@ async fn set_save_data(Json(payload): Json<SaveDataEntry>) {
 #[serde_as]
 #[derive(Deserialize)]
 struct SaveDataGetParams {
-    user_id: String,
     #[serde_as(as = "NoneAsEmptyString")]
     file_name: Option<String>,
 }
@@ -117,7 +116,7 @@ async fn get_save_data(params: Query<SaveDataGetParams>) -> impl IntoResponse {
                 "level":3
             }
         });
-        return Json(json_response)
+        Json(json_response)
     } else {
         let json_response = serde_json::json!([
             {
@@ -135,7 +134,7 @@ async fn get_save_data(params: Query<SaveDataGetParams>) -> impl IntoResponse {
                 }
             }
         ]);
-        return Json(json_response);
+        Json(json_response)
     }
     // TODO: parse BSON from database bask into json
 }
