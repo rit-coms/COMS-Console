@@ -100,11 +100,13 @@ async fn set_save_data(Json(payload): Json<SaveDataEntry>) {
 
 async fn get_save_data() -> impl IntoResponse {
     // TODO: parse BSON from database bask into json
-    let data: String = String::from(r#"{"money":32, "level":3}"#);
     let json_response = serde_json::json!([
         {
             "file_name":"2_24_2025",
-            "data": data
+            "data": {
+                "money":32,
+                "level":3,
+            }
         }
     ]);
 
@@ -137,4 +139,44 @@ pub async fn setup_game_dev_api() {
 }
 
 #[cfg(test)]
-mod tests {}
+mod tests {
+    use std::str;
+
+    use super::*;
+    use axum::http::Request;
+    use axum::{body::Body, http::StatusCode};
+    use http_body_util::BodyExt;
+    use tower::{Service, ServiceExt};
+
+    #[tokio::test]
+    async fn get_save_data() {
+        let app = app();
+
+        let response = app
+            .oneshot(
+                Request::builder()
+                    .uri(format!("/api/v{}/save-data", VERSION))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::OK);
+
+        let body_bytes = response
+            .into_body()
+            .collect()
+            .await
+            .unwrap()
+            .to_bytes()
+            .to_ascii_lowercase();
+        let body_text: String = String::from_utf8(body_bytes).unwrap();
+
+        let response_fields: Vec<String> = vec![String::from("file_name"), String::from("data")];
+
+        for field in response_fields {
+            assert!(body_text.contains(&field));
+        }
+    }
+}
