@@ -181,7 +181,7 @@ mod tests {
     use http_body_util::BodyExt;
     use tower::{Service, ServiceExt};
 
-    async fn response_to_body_text(response: Response<Body>) -> String {
+    async fn response_to_body_text(response: Response) -> String {
         String::from_utf8(
             response
                 .into_body()
