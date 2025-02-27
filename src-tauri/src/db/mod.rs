@@ -3,6 +3,8 @@ use dotenvy::dotenv;
 use models::*;
 use schema::{leaderboard::user_id, saves};
 use std::env;
+use serde::de::Unexpected::Option;
+use crate::db::schema::leaderboard::dsl::leaderboard;
 
 pub mod models;
 pub mod schema;
@@ -82,6 +84,34 @@ pub async fn get_top_n_leaderboard_entries(
     result
 }
 
+pub async fn get_top_n_user_leaderboard_entries(
+    game_id_s: &str,
+    value_name_s: &str,
+    num_entries: i64,
+    min_is_best: bool,
+    user_id_s: &str,
+) -> Vec<LeaderboardEntry> {
+    use self::schema::leaderboard::dsl::*;
+    let connection = &mut establish_connection();
+
+    let order: Box<dyn BoxableExpression<_, _, SqlType = _>> = if min_is_best {
+        Box::new(value_num.asc())
+    } else {
+        Box::new(value_num.desc())
+    };
+
+    let result = leaderboard
+        .select(LeaderboardEntry::as_select())
+        .filter(game_id.eq(game_id_s))
+        .filter(value_name.eq(value_name_s))
+        .filter(user_id.eq(user_id_s))
+        .order_by(order)
+        .limit(num_entries)
+        .get_results(connection)
+        .expect("Error loading leaderboard");
+    result
+}
+
 pub async fn get_all_user_leaderboard_entries(
     user_id_s: &str
 ) -> Vec<LeaderboardEntry> {
@@ -109,6 +139,45 @@ pub async fn get_leaderboard_entry(
         .filter(value_name.eq(value_name_s))
         .first(connection)
         .expect("Error loading leaderboard")
+}
+
+pub async fn get_leaderboard(
+    game_id_s: Option<&str>,
+    user_id_s: Option<&str>,
+    num_entries: Option<i64>,
+    ascending: Option<bool>,
+    value_name_s: Option<&str>,
+) -> Vec<LeaderboardEntry>{
+    use self::schema::leaderboard::dsl::*;
+    let connection = &mut establish_connection();
+
+    let mut query = leaderboard.into_boxed(); // Selects all by default
+
+    if let Some(game_id_s) = game_id_s {
+        query = query.filter(game_id.eq(game_id_s));
+    }
+    if let Some(user_id_s) = user_id_s {
+        query = query.filter(user_id.eq(user_id_s));
+    }
+    if let Some(num_entries) = num_entries {
+        query = query.limit(num_entries);
+    }
+    if let Some(value_name_s) = value_name_s {
+        query = query.filter(value_name.eq(value_name_s))
+    }
+    if let Some(ascending) = ascending {
+        if ascending {
+            query = query.order_by(value_num.asc());
+        } else {
+            query = query.order_by(value_num.desc());
+        }
+    } else {
+        query = query.order_by(value_num.desc()); // Set leaderboard descending by default
+    }
+    let results = query
+        .get_results(connection)
+        .expect("Error loading leaderboard");
+    results
 }
 
 pub async fn create_user(

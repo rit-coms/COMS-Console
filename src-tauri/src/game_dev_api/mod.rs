@@ -6,6 +6,7 @@ use axum::{
 };
 use serde::Deserialize;
 use serde_with::{serde_as, NoneAsEmptyString};
+use crate::db;
 
 const VERSION: u8 = 1;
 
@@ -44,32 +45,22 @@ async fn set_leaderboard(Json(payload): Json<LeaderboardEntry>) -> impl IntoResp
     }))
 }
 
+#[serde_as]
 #[derive(Deserialize)]
 struct LeaderboardGetParams {
     scope: LeaderboardScope,
+    #[serde_as(as = "NoneAsEmptyString")]
+    count: Option<i64>
 }
 
 async fn get_leaderboard(params: Query<LeaderboardGetParams>) -> impl IntoResponse {
+    let game_id = 14314314; // Example for now
     let json_response: serde_json::Value;
     match params.scope {
-        // TODO: query databse
         LeaderboardScope::User => {
-            // Example data with two leaderboard entries
-            json_response = serde_json::json!([
-                {
-                    "user_id":3,
-                    "game_id":6,
-                    "name":"points",
-                    "value":312
-                },
-                {
-                    "user_id":3,
-                    "game_id":6,
-                    "name":"points",
-                    "value":365
-                }
-            ]);
-            Json(json_response)
+            if let Some(count) = params.count {
+                db::get_top_n_user_leaderboard_entries(game_id,)
+            }
         }
         LeaderboardScope::Global => {
             json_response = serde_json::json!([
