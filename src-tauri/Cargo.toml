@@ -22,7 +22,7 @@ chrono = { version = "0.4.31", features = ["serde"] }
 anyhow = "1.0.89"
 url = "2.5.2"
 tauri-plugin-autostart = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
-diesel = { version = "2.2.0", features = ["sqlite", "returning_clauses_for_sqlite_3_35"] }
+diesel = { version = "2.2.0", features = ["sqlite", "returning_clauses_for_sqlite_3_35", "chrono"] }
 # build libsqlite3 as part of the build process
 # uncomment this line if you run into setup issues
 libsqlite3-sys = { version = "0.30", features = ["bundled"] }

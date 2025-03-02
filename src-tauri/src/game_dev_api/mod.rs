@@ -81,7 +81,7 @@ async fn get_leaderboard(params: Query<LeaderboardGetParams>) -> impl IntoRespon
         None => None, // If no scope query param given, default to global
     };
 
-    let json_response = db::get_leaderboard(
+    let leaderboard_entries = db::get_leaderboard(
         Some(game_id),
         user_id_s,
         count,
@@ -90,6 +90,16 @@ async fn get_leaderboard(params: Query<LeaderboardGetParams>) -> impl IntoRespon
         params.offset,
     )
     .await;
+
+    let json_response: Vec<serde_json::Value> = Vec::new();
+
+    // TODO: add time_stamp
+    for entry in leaderboard_entries {
+        json_response.append(serde_json::json!({
+            "value_name": entry.value_name,
+            "value_num": entry.value_num,
+        }));
+    }
 
     Json(json_response)
 }
