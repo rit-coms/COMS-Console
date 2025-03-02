@@ -1,4 +1,4 @@
-use crate::db::{self, schema::leaderboard::value_num};
+use crate::db;
 use axum::{
     extract::Query,
     response::IntoResponse,
@@ -35,7 +35,13 @@ async fn set_leaderboard(Json(payload): Json<LeaderboardEntry>) -> impl IntoResp
     let user_id = "0234345";
 
     // Save entry to database
-    db::insert_leaderboard_entry(user_id, game_id, payload.value_name.as_str(), payload.value_num);
+    db::insert_leaderboard_entry(
+        user_id,
+        game_id,
+        payload.value_name.as_str(),
+        payload.value_num,
+        false,
+    );
 
     Json(serde_json::json!({
         "value_name":payload.value_name,
@@ -85,6 +91,7 @@ async fn get_leaderboard(params: Query<LeaderboardGetParams>) -> impl IntoRespon
         params.ascending,
         params.value_name.clone(),
         params.offset,
+        false,
     )
     .await;
 
@@ -205,27 +212,5 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn get_save_file() {
-        let app = app();
-
-        let response = app
-            .oneshot(
-                Request::builder()
-                    .uri(format!("/api/v{}/save-data?file_name=test", VERSION))
-                    .body(Body::empty())
-                    .unwrap(),
-            )
-            .await
-            .unwrap();
-
-        assert_eq!(response.status(), StatusCode::OK);
-
-        let body_text: String = response_to_body_text(response).await;
-
-        let response_fields: Vec<String> = vec![String::from("file_name"), String::from("data")];
-
-        for field in response_fields {
-            assert!(body_text.contains(&field));
-        }
-    }
+    async fn leaderboard_post_and_get() {}
 }

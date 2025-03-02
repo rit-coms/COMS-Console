@@ -10,25 +10,30 @@ use std::option::Option;
 pub mod models;
 pub mod schema;
 
-pub fn establish_connection() -> SqliteConnection {
+pub fn establish_connection(test: bool) -> SqliteConnection {
     dotenv().ok();
 
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let database_url = if test {
+         env::var("DATABASE_URL").expect("DATABASE_URL must be set")
+    } else {
+        env::var("TEST_DATABASE_URL").expect("TEST_DATABASE_URL must be set")
+    };
+
     SqliteConnection::establish(&database_url)
         .unwrap_or_else(|_| panic!("Error connecting to {}", database_url)) // TODO handle database connection error
 }
 
-pub async fn insert_game(id_s: &str, name_s: &str) -> QueryResult<usize> {
+pub async fn insert_game(id_s: &str, name_s: &str, test: bool) -> QueryResult<usize> {
     use self::schema::games::dsl::*;
-    let connection = &mut establish_connection();
+    let connection = &mut establish_connection(test);
     insert_into(games)
         .values((id.eq(id_s), name.eq(name_s)))
         .execute(connection)
 }
 
-pub async fn get_all_games() -> Vec<Game> {
+pub async fn get_all_games(test: bool) -> Vec<Game> {
     use self::schema::games::dsl::*;
-    let connection = &mut establish_connection();
+    let connection = &mut establish_connection(test);
     games
         .select(Game::as_select())
         .get_results(connection)
@@ -40,9 +45,10 @@ pub async fn insert_leaderboard_entry(
     game_id_s: &str,
     value_name_s: &str,
     value_num_i: i64,
+    test: bool,
 ) -> QueryResult<usize> {
     use self::schema::leaderboard::dsl::*;
-    let connection = &mut establish_connection();
+    let connection = &mut establish_connection(test);
     insert_into(leaderboard)
         .values((
             user_id.eq(user_id_s),
@@ -63,9 +69,10 @@ pub async fn get_leaderboard(
     ascending: Option<bool>,
     value_name_s: Option<String>,
     offset: Option<i64>,
+    test: bool
 ) -> Vec<LeaderboardEntry> {
     use self::schema::leaderboard::dsl::*;
-    let connection = &mut establish_connection();
+    let connection = &mut establish_connection(test);
 
     let mut query = leaderboard.into_boxed(); // Selects all by default
 
@@ -99,18 +106,18 @@ pub async fn get_leaderboard(
     results
 }
 
-pub async fn create_user(id_s: &str, name_s: &str) -> User {
+pub async fn create_user(id_s: &str, name_s: &str, test: bool) -> User {
     use self::schema::users::dsl::*;
-    let connection = &mut establish_connection();
+    let connection = &mut establish_connection(test);
     insert_into(users)
         .values((id.eq(id_s), name.eq(name_s)))
         .get_result::<User>(connection)
         .expect("Could not create User")
 }
 
-pub async fn get_all_saves(user_id_s: &str, game_id_s: &str) -> Vec<Save> {
+pub async fn get_all_saves(user_id_s: &str, game_id_s: &str, test: bool) -> Vec<Save> {
     use self::schema::saves::dsl::*;
-    let connection = &mut establish_connection();
+    let connection = &mut establish_connection(test);
     saves
         .select(Save::as_select())
         .filter(user_id.eq(user_id_s))
@@ -120,10 +127,11 @@ pub async fn get_all_saves(user_id_s: &str, game_id_s: &str) -> Vec<Save> {
 }
 
 pub async fn get_all_user_leaderboard_entries(
-    user_id_s: &str
+    user_id_s: &str,
+    test: bool
 ) -> Vec<LeaderboardEntry> {
     use self::schema::leaderboard::dsl::*;
-    let connection = &mut establish_connection();
+    let connection = &mut establish_connection(test);
     let result = leaderboard
         .select(LeaderboardEntry::as_select())
         .filter(user_id.eq(user_id_s))
@@ -137,9 +145,10 @@ pub async fn set_save(
     game_id_s: &str,
     file_name_s: &str,
     data_b: &Vec<u8>,
+    test: bool
 ) -> Save {
     use self::schema::saves::dsl::*;
-    let connection = &mut establish_connection();
+    let connection = &mut establish_connection(test);
     insert_into(saves)
         .values((
             user_id.eq(user_id_s),
@@ -159,9 +168,9 @@ pub async fn set_save(
         .expect("Could not set save")
 }
 
-pub async fn get_save(user_id_s: &str, game_id_s: &str, file_name_s: &str) -> Save {
+pub async fn get_save(user_id_s: &str, game_id_s: &str, file_name_s: &str, test: bool) -> Save {
     use self::schema::saves::dsl::*;
-    let connection = &mut establish_connection();
+    let connection = &mut establish_connection(test);
     saves
         .select(Save::as_select())
         .filter(user_id.eq(user_id_s))
@@ -185,21 +194,21 @@ mod tests {
         let name_s = "A random user";
 
         let mut buffer = Uuid::encode_buffer();
-        let user = create_user(user_id_s, name_s).await;
+        let user = create_user(user_id_s, name_s, true).await;
         let game_id_s = Uuid::new_v4().as_simple().encode_lower(&mut buffer);
         let example_game_name = "Example Game";
 
-        insert_game(game_id_s, example_game_name).await;
+        insert_game(game_id_s, example_game_name, true).await;
 
-        insert_leaderboard_entry(user_id_s, game_id_s, "spaghetti", 10).await;
+        insert_leaderboard_entry(user_id_s, game_id_s, "spaghetti", 10, true).await;
 
         let file_name_s = "testpath";
         let data_b = "random_data".as_bytes().to_owned();
 
-        set_save(user_id_s, game_id_s, file_name_s, &data_b).await;
+        set_save(user_id_s, game_id_s, file_name_s, &data_b, true).await;
 
-        println!("{:#?}", get_all_games().await);
-        println!("{:#?}", get_all_user_leaderboard_entries(user_id_s).await);
-        println!("{:#?}", get_all_saves(user_id_s, game_id_s).await);
+        println!("{:#?}", get_all_games(true).await);
+        println!("{:#?}", get_all_user_leaderboard_entries(user_id_s, true).await);
+        println!("{:#?}", get_all_saves(user_id_s, game_id_s, true).await);
     }
 }
