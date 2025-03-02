@@ -13,7 +13,7 @@ const VERSION: u8 = 1;
 
 #[derive(Deserialize)]
 struct LeaderboardEntry {
-    value_name: &str,
+    value_name: String,
     value_num: i64,
 }
 
@@ -35,7 +35,7 @@ async fn set_leaderboard(Json(payload): Json<LeaderboardEntry>) -> impl IntoResp
     let user_id = "0234345";
 
     // Save entry to database
-    db::insert_leaderboard_entry(user_id_s, game_id_s, payload.value_name, payload.value_num);
+    db::insert_leaderboard_entry(user_id, game_id, payload.value_name.as_str(), payload.value_num);
 
     Json(serde_json::json!({
         "value_name":payload.value_name,
@@ -88,11 +88,11 @@ async fn get_leaderboard(params: Query<LeaderboardGetParams>) -> impl IntoRespon
     )
     .await;
 
-    let json_response: Vec<serde_json::Value> = Vec::new();
+    let mut json_response: Vec<serde_json::Value> = Vec::new();
 
     // TODO: add time_stamp
     for entry in leaderboard_entries {
-        json_response.append(serde_json::json!({
+        json_response.push(serde_json::json!({
             "value_name": entry.value_name,
             "value_num": entry.value_num,
         }));

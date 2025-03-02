@@ -119,6 +119,19 @@ pub async fn get_all_saves(user_id_s: &str, game_id_s: &str) -> Vec<Save> {
         .expect("Could not get save")
 }
 
+pub async fn get_all_user_leaderboard_entries(
+    user_id_s: &str
+) -> Vec<LeaderboardEntry> {
+    use self::schema::leaderboard::dsl::*;
+    let connection = &mut establish_connection();
+    let result = leaderboard
+        .select(LeaderboardEntry::as_select())
+        .filter(user_id.eq(user_id_s))
+        .get_results(connection)
+        .expect("Error loading leaderboard");
+    result
+}
+
 pub async fn set_save(
     user_id_s: &str,
     game_id_s: &str,
