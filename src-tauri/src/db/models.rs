@@ -9,7 +9,8 @@ pub struct LeaderboardEntry {
     pub user_id: String,
     pub game_id: String,
     pub value_name: String,
-    pub value_num: i64
+    pub value_num: i64,
+    pub time_stamp: String // add time stamp
 }
 
 #[derive(Queryable, Selectable, Debug)]
@@ -37,5 +38,6 @@ pub struct Save {
     pub user_id: String,
     pub game_id: String,
     pub file_name: String,
-    pub data: Vec<u8>
+    pub data: Vec<u8>,
+    pub time_stamp: String
 }

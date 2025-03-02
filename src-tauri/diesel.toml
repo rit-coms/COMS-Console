@@ -6,4 +6,4 @@ file = "src/db/schema.rs"
 custom_type_derives = ["diesel::query_builder::QueryId", "Clone"]
 
 [migrations_directory]
-dir = "/Users/mc/Documents/github/COMS-Console/src-tauri/migrations"
+dir = "C:\\Users\\05raa\\duckComsBackend\\COMS-Console\\src-tauri\\migrations"

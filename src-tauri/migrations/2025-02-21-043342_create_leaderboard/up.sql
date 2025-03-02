@@ -5,5 +5,6 @@ CREATE TABLE leaderboard (
   game_id CHAR(32) NOT NULL REFERENCES games(id),
   value_name TEXT NOT NULL,
   value_num UNSIGNED BIG INT NOT NULL DEFAULT 0,
+  time_stamp TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL, -- time stamp 
   UNIQUE(user_id, game_id, value_name)
 );
