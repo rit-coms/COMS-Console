@@ -7,3 +7,4 @@ src/data
 games
 .idea/
 pnpm-lock.yaml
+.env
