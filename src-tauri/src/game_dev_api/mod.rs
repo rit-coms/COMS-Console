@@ -1,3 +1,4 @@
+use crate::db;
 use axum::{
     extract::Query,
     response::IntoResponse,
@@ -6,7 +7,7 @@ use axum::{
 };
 use serde::Deserialize;
 use serde_with::{serde_as, NoneAsEmptyString};
-use crate::db;
+use std::option::Option;
 
 const VERSION: u8 = 1;
 
@@ -45,41 +46,52 @@ async fn set_leaderboard(Json(payload): Json<LeaderboardEntry>) -> impl IntoResp
     }))
 }
 
-#[serde_as]
 #[derive(Deserialize)]
 struct LeaderboardGetParams {
-    scope: LeaderboardScope,
-    #[serde_as(as = "NoneAsEmptyString")]
-    count: Option<i64>
+    scope: Option<LeaderboardScope>,
+    count: Option<i64>,
+    ascending: Option<bool>,
+    value_name: Option<String>,
+    offset: Option<i64>,
 }
 
 async fn get_leaderboard(params: Query<LeaderboardGetParams>) -> impl IntoResponse {
-    let game_id = 14314314; // Example for now
-    let json_response: serde_json::Value;
-    match params.scope {
-        LeaderboardScope::User => {
-            if let Some(count) = params.count {
-                db::get_top_n_user_leaderboard_entries(game_id,)
-            }
+    let game_id: String = String::from("123124"); // Example for now
+    let user_id: String = String::from("3451435");
+    let count: Option<i64>;
+
+    // TODO: add error http response to handle when count > 100
+    if let Some(entry_count) = params.count {
+        if entry_count > 100 {
+            count = Some(100);
+        } else {
+            count = Some(entry_count);
         }
-        LeaderboardScope::Global => {
-            json_response = serde_json::json!([
-                {
-                    "user_id":5,
-                    "game_id":6,
-                    "name":"points",
-                    "value":312
-                },
-                {
-                    "user_id":7,
-                    "game_id":6,
-                    "name":"points",
-                    "value":365
-                }
-            ]);
-            Json(json_response)
-        }
+    } else {
+        count = Some(100);
     }
+
+    // Set the user_id according to the given leaderboard scope
+    // TODO: get actual user_id
+    let user_id_s: Option<String> = match &params.scope {
+        Some(scope) => match scope {
+            LeaderboardScope::User => Some(user_id),
+            LeaderboardScope::Global => None,
+        },
+        None => None, // If no scope query param given, default to global
+    };
+
+    let json_response = db::get_leaderboard(
+        Some(game_id),
+        user_id_s,
+        count,
+        params.ascending,
+        params.value_name.clone(),
+        params.offset,
+    )
+    .await;
+
+    Json(json_response)
 }
 
 async fn set_save_data(Json(payload): Json<SaveDataEntry>) -> impl IntoResponse {
