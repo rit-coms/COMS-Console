@@ -1,4 +1,4 @@
-use crate::db;
+use crate::db::{self, schema::leaderboard::value_num};
 use axum::{
     extract::Query,
     response::IntoResponse,
@@ -13,8 +13,8 @@ const VERSION: u8 = 1;
 
 #[derive(Deserialize)]
 struct LeaderboardEntry {
-    tag: String,
-    value: u32,
+    value_name: &str,
+    value_num: i64,
 }
 
 #[derive(Deserialize)]
@@ -31,18 +31,15 @@ enum LeaderboardScope {
 
 async fn set_leaderboard(Json(payload): Json<LeaderboardEntry>) -> impl IntoResponse {
     // Get game_id and user_id
-    let game_id = 42;
-    let user_id = 0;
+    let game_id = "4234345";
+    let user_id = "0234345";
 
     // Save entry to database
-    println!(
-        "Saved to database: {{user_id:{user_id:?}, game_id:{game_id:?}, tag:{0:?}, value:{1:?}}}",
-        payload.tag, payload.value
-    );
+    db::insert_leaderboard_entry(user_id_s, game_id_s, payload.value_name, payload.value_num);
 
     Json(serde_json::json!({
-        "tag":payload.tag,
-        "value":payload.value,
+        "value_name":payload.value_name,
+        "value_num":payload.value_num,
     }))
 }
 
