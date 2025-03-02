@@ -6,3 +6,4 @@ src/data
 .DS_Store
 games
 .idea/
+pnpm-lock.yaml
