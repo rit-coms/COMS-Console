@@ -117,44 +117,17 @@ async fn set_save_data(Json(payload): Json<SaveDataEntry>) -> impl IntoResponse 
     }))
 }
 
-#[serde_as]
 #[derive(Deserialize)]
 struct SaveDataGetParams {
-    #[serde_as(as = "NoneAsEmptyString")]
     file_name: Option<String>,
+    count: Option<i64>,
+    offset: Option<i64>
 }
 
 /// Can either get a list of save files for current user or
 /// get a specific file by user and name
 async fn get_save_data(params: Query<SaveDataGetParams>) -> impl IntoResponse {
-    if let Some(file_name) = &params.file_name {
-        let json_response = serde_json::json!({
-            "data": {
-                "money":32,
-                "level":3
-            }
-        });
-        Json(json_response)
-    } else {
-        let json_response = serde_json::json!([
-            {
-                "file_name":"2_24_2025",
-                "data": {
-                    "money":32,
-                    "level":3,
-                }
-            },
-            {
-                "file_name":"2_25_2025",
-                "data": {
-                    "money":3,
-                    "level":5
-                }
-            }
-        ]);
-        Json(json_response)
-    }
-    // TODO: parse BSON from database bask into json
+    
 }
 
 fn app() -> Router {

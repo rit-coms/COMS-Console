@@ -1,5 +1,6 @@
 use crate::db::schema::leaderboard::dsl::leaderboard;
 use chrono::offset;
+use core::num;
 use diesel::{insert_into, prelude::*, query_builder::AsQuery, select, update, upsert::excluded};
 use dotenvy::dotenv;
 use models::*;
@@ -72,15 +73,19 @@ pub async fn get_leaderboard(
     if let Some(game_id_s) = game_id_s {
         query = query.filter(game_id.eq(game_id_s));
     }
+
     if let Some(user_id_s) = user_id_s {
         query = query.filter(user_id.eq(user_id_s));
     }
+
     if let Some(num_entries) = num_entries {
         query = query.limit(num_entries);
     }
+
     if let Some(value_name_s) = value_name_s {
         query = query.filter(value_name.eq(value_name_s))
     }
+
     if let Some(ascending) = ascending {
         if ascending {
             query = query.order_by(value_num.asc());
@@ -90,12 +95,61 @@ pub async fn get_leaderboard(
     } else {
         query = query.order_by(value_num.desc()); // Set leaderboard descending by default
     }
+
     if let Some(offset) = offset {
         query = query.offset(offset)
     }
+
     let results = query
         .get_results(connection)
         .expect("Error loading leaderboard");
+
+    results
+}
+
+pub async fn get_save_data(
+    game_id_s: Option<String>,
+    user_id_s: Option<String>,
+    num_entries: Option<i64>,
+    offset: Option<i64>,
+    ascending: Option<bool>, // By time_stamp
+) -> Vec<Save> {
+    use self::schema::saves::dsl::*;
+    let connection = &mut establish_connection();
+
+    let mut query = saves.into_boxed();
+
+    if let Some(game_id_s) = game_id_s {
+        query = query.filter(game_id.eq(game_id_s));
+    }
+
+    if let Some(user_id_s) = user_id_s {
+        query = query.filter(user_id.eq(user_id_s));
+    }
+
+    if let Some(num_entries) = num_entries {
+        query = query.limit(num_entries)
+    }
+
+    if let Some(offset) = offset {
+        query = query.offset(offset)
+    }
+
+    // TODO: uncomment when time_stamps implemented
+    // if let Some(ascending) = ascending {
+    //     if ascending {
+    //         query = query.order(time_stamp.asc());
+    //     } else {
+    //         query = query.order(time_stamp.desc());
+    //     }
+    // } else {
+    //     query = query.order(time_stamp.desc());
+    // }
+
+    let results = query
+        .get_results(connection)
+        .expect("Error loading save data");
+
     results
 }
 
@@ -119,9 +173,7 @@ pub async fn get_all_saves(user_id_s: &str, game_id_s: &str) -> Vec<Save> {
         .expect("Could not get save")
 }
 
-pub async fn get_all_user_leaderboard_entries(
-    user_id_s: &str
-) -> Vec<LeaderboardEntry> {
+pub async fn get_all_user_leaderboard_entries(user_id_s: &str) -> Vec<LeaderboardEntry> {
     use self::schema::leaderboard::dsl::*;
     let connection = &mut establish_connection();
     let result = leaderboard
