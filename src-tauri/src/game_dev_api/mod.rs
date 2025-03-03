@@ -1,10 +1,15 @@
-use crate::db::{self, schema::leaderboard::value_num};
+use crate::db::{
+    self,
+    schema::{leaderboard::value_num, saves::file_name},
+};
 use axum::{
     extract::Query,
+    http::StatusCode,
     response::IntoResponse,
     routing::{get, post},
     Json, Router,
 };
+use diesel::dsl::count;
 use serde::Deserialize;
 use serde_with::{serde_as, NoneAsEmptyString};
 use std::option::Option;
@@ -35,7 +40,12 @@ async fn set_leaderboard(Json(payload): Json<LeaderboardEntry>) -> impl IntoResp
     let user_id = "0234345";
 
     // Save entry to database
-    db::insert_leaderboard_entry(user_id, game_id, payload.value_name.as_str(), payload.value_num);
+    db::insert_leaderboard_entry(
+        user_id,
+        game_id,
+        payload.value_name.as_str(),
+        payload.value_num,
+    );
 
     Json(serde_json::json!({
         "value_name":payload.value_name,
@@ -121,13 +131,61 @@ async fn set_save_data(Json(payload): Json<SaveDataEntry>) -> impl IntoResponse 
 struct SaveDataGetParams {
     file_name: Option<String>,
     count: Option<i64>,
-    offset: Option<i64>
+    offset: Option<i64>,
+    ascending: Option<bool>,
 }
 
 /// Can either get a list of save files for current user or
 /// get a specific file by user and name
 async fn get_save_data(params: Query<SaveDataGetParams>) -> impl IntoResponse {
-    
+    let game_id: String = String::from("123124"); // Example for now
+    let user_id: String = String::from("3451435");
+
+    // File names should be unique per game, so if both file_name and count are
+    // provided, the developer should know that they can't do that. One and only
+    // one of these parameters should be provided.
+    let file_name_s: Option<String>;
+    let entry_count: Option<i64>;
+    match (params.file_name.clone(), params.count) {
+        (Some(_), Some(_)) => (return StatusCode::BAD_REQUEST.into_response()),
+        (Some(filename), None) => {
+            file_name_s = Some(filename);
+            entry_count = None;
+        }
+        (None, Some(num_entries)) => {
+            if num_entries > 50 {
+                (return StatusCode::PAYLOAD_TOO_LARGE.into_response())
+            }
+            file_name_s = None;
+            entry_count = Some(num_entries);
+        }
+        (None, None) => {
+            file_name_s = None;
+            entry_count = Some(10)
+        }
+    }
+
+    let save_data_entries = db::get_save_data(
+        Some(game_id),
+        Some(user_id),
+        entry_count,
+        params.offset,
+        params.ascending,
+    )
+    .await;
+
+    let mut json_response = Vec::new();
+
+    // TODO: add time_stamp
+    // TODO: parse binary data into json
+    for entry in save_data_entries {
+        json_response.push(serde_json::json!({
+            "data":entry.data,
+            "file_name": entry.file_name
+        }));
+    }
+
+    Json(json_response).into_response()
 }
 
 fn app() -> Router {
