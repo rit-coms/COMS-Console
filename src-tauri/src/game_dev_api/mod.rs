@@ -45,7 +45,8 @@ async fn set_leaderboard(Json(payload): Json<LeaderboardEntry>) -> impl IntoResp
         game_id,
         payload.value_name.as_str(),
         payload.value_num,
-    );
+    )
+    .await;
 
     Json(serde_json::json!({
         "value_name":payload.value_name,
@@ -112,14 +113,17 @@ async fn get_leaderboard(params: Query<LeaderboardGetParams>) -> impl IntoRespon
 }
 
 async fn set_save_data(Json(payload): Json<SaveDataEntry>) -> impl IntoResponse {
-    let game_id = 32;
-    let user_id = 53;
+    let game_id = "32";
+    let user_id = "53";
 
     // Save entry to database;
-    println!(
-        "Saved to database: {{user_id:{user_id:?}, game_id:{game_id:?}, file_name{:?}}} with also some BSON data",
-        payload.file_name
-    );
+    // TODO: more elegant error handling for converting json data to vec of bytes
+    db::set_save(
+        user_id,
+        game_id,
+        payload.file_name.as_str(),
+        &serde_json::to_vec(&payload.data).unwrap(),
+    ).await;
 
     Json(serde_json::json!({
         "file_name": payload.file_name,
@@ -138,6 +142,7 @@ struct SaveDataGetParams {
 /// Can either get a list of save files for current user or
 /// get a specific file by user and name
 async fn get_save_data(params: Query<SaveDataGetParams>) -> impl IntoResponse {
+    println!("Getting save data!");
     let game_id: String = String::from("123124"); // Example for now
     let user_id: String = String::from("3451435");
 
@@ -184,6 +189,8 @@ async fn get_save_data(params: Query<SaveDataGetParams>) -> impl IntoResponse {
             "file_name": entry.file_name
         }));
     }
+
+    println!("{}", serde_json::to_string_pretty(&json_response).unwrap());
 
     Json(json_response).into_response()
 }
