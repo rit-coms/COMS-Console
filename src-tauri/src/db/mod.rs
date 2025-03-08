@@ -7,6 +7,7 @@ use models::*;
 use schema::{leaderboard::user_id, saves};
 use std::env;
 use std::option::Option;
+use std::path::Path;
 
 pub mod models;
 pub mod schema;
@@ -17,6 +18,16 @@ pub fn establish_connection() -> SqliteConnection {
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     SqliteConnection::establish(&database_url)
         .unwrap_or_else(|_| panic!("Error connecting to {}", database_url)) // TODO handle database connection error
+}
+
+pub fn establish_test_connection(db_name: String) -> SqliteConnection {
+    dotenv().ok();
+
+    let test_db_url =
+        Path::new(&env::var("ROOT_PATH").expect("ROOT_PATH must be set")).join(db_name);
+
+    SqliteConnection::establish(test_db_url.to_str().unwrap())
+        .unwrap_or_else(|_| panic!("Error connecting to {}", test_db_url.display())) // TODO handle database connection error
 }
 
 pub async fn insert_game(id_s: &str, name_s: &str) -> QueryResult<usize> {
