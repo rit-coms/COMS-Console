@@ -27,15 +27,6 @@ pub async fn insert_game(id_s: &str, name_s: &str) -> QueryResult<usize> {
         .execute(connection)
 }
 
-pub async fn get_all_games() -> Vec<Game> {
-    use self::schema::games::dsl::*;
-    let connection = &mut establish_connection();
-    games
-        .select(Game::as_select())
-        .get_results(connection)
-        .expect("Error loading leaderboard")
-}
-
 pub async fn insert_leaderboard_entry(
     user_id_s: &str,
     game_id_s: &str,
