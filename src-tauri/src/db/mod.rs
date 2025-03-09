@@ -16,7 +16,11 @@ pub mod schema;
 pub fn establish_connection(db_name: &str) -> SqliteConnection {
     dotenv().ok();
 
-    let test_db_url = Path::new(&env::var("ROOT_PATH").expect("ROOT_PATH must be set"))
+    // Here, just DATABASE_URL isn't used because we want to be able to specify different names for test databases.
+    // If you want to use the real database, make sure db_name matches the name of the .db file in your .env file.
+    let test_db_url = Path::new(&env::var("DATABASE_URL").expect("DATABASE_URL must be set"))
+        .parent()
+        .unwrap()
         .join(db_name)
         .with_extension("db");
 
@@ -191,12 +195,7 @@ pub async fn set_save(
         .expect("Could not set save")
 }
 
-pub async fn get_save(
-    user_id_s: &str,
-    game_id_s: &str,
-    file_name_s: &str,
-    db_name: &str,
-) -> Save {
+pub async fn get_save(user_id_s: &str, game_id_s: &str, file_name_s: &str, db_name: &str) -> Save {
     use self::schema::saves::dsl::*;
     let mut connection = &mut establish_connection(db_name);
     saves
