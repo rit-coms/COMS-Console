@@ -20,12 +20,6 @@ impl TestContext {
         dotenv().expect("Make sure you have a .env in the project root directory");
         let mut connection = establish_connection(db_name);
 
-        // let query = diesel::sql_query(format!("CREATE DATABASE {}", db_name).as_str());
-
-        // query
-        //     .execute(&mut connection)
-        //     .expect(format!("Could not create database {}", db_name).as_str());
-
         connection
             .run_pending_migrations(MIGRATIONS)
             .expect("Failed to run migrations");
