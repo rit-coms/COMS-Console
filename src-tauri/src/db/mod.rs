@@ -13,19 +13,32 @@ use std::path::Path;
 pub mod models;
 pub mod schema;
 
+/// Finds the filepath of a database using a given name.
+///
+/// This function will use the DATABASE_URL environment variable, but truncates the .db file and attaches the given db_name
+/// to the path. If you want this path to math the DATABASE_URL variable, db_name should just be the name of the db file.
+///
+/// Ex: if DATABASE_URL="C:/Users/username/AppData/Roaming/coms-console/local.db", then db_name should be "local".
+pub fn get_db_path(db_name: &str) -> String {
+    Path::new(&env::var("DATABASE_URL").expect("DATABASE_URL must be set"))
+        .parent()
+        .unwrap()
+        .join(db_name)
+        .with_extension("db")
+        .into_os_string()
+        .into_string()
+        .unwrap()
+}
+
 pub fn establish_connection(db_name: &str) -> SqliteConnection {
     dotenv().ok();
 
     // Here, just DATABASE_URL isn't used because we want to be able to specify different names for test databases.
     // If you want to use the real database, make sure db_name matches the name of the .db file in your .env file.
-    let test_db_url = Path::new(&env::var("DATABASE_URL").expect("DATABASE_URL must be set"))
-        .parent()
-        .unwrap()
-        .join(db_name)
-        .with_extension("db");
+    let test_db_url = get_db_path(db_name);
 
-    SqliteConnection::establish(test_db_url.to_str().unwrap())
-        .unwrap_or_else(|_| panic!("Error connecting to {}", test_db_url.display()))
+    SqliteConnection::establish(test_db_url.as_str())
+        .unwrap_or_else(|_| panic!("Error connecting to {}", test_db_url))
     // TODO handle database connection error
 }
 
@@ -165,6 +178,18 @@ pub async fn create_user(id_s: &str, name_s: &str, db_name: &str) -> User {
         .values((id.eq(id_s), name.eq(name_s)))
         .get_result::<User>(connection)
         .expect("Could not create User")
+}
+
+pub async fn get_user(name_s: &str, user_id_s: &str, db_name: &str) -> User {
+    use self::schema::users::dsl::*;
+    let mut connection = &mut establish_connection(db_name);
+
+    users
+        .select(User::as_select())
+        .filter(name.eq(name_s))
+        .filter(id.eq(user_id_s))
+        .first(connection)
+        .expect("Error loading user data")
 }
 
 pub async fn set_save(
