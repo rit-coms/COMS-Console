@@ -10,19 +10,19 @@ use axum::{
     Json, Router,
 };
 use diesel::dsl::count;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_with::{serde_as, NoneAsEmptyString};
 use std::option::Option;
 
 #[derive(Clone)]
 pub struct ApiState {
-    pub db_url: String,
+    pub db_name: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct LeaderboardEntry {
-    value_name: String,
-    value_num: i64,
+    pub value_name: String,
+    pub value_num: i64,
 }
 
 #[derive(Deserialize)]
@@ -41,9 +41,9 @@ pub async fn set_leaderboard(
     State(state): State<ApiState>,
     Json(payload): Json<LeaderboardEntry>,
 ) -> impl IntoResponse {
-    // Get game_id and user_id
-    let game_id = "4234345";
-    let user_id = "0234345";
+    // TODO: Get game_id and user_id
+    let game_id = "0";
+    let user_id = "0";
 
     // Save entry to database
     // TODO: Can I return the query response from this function?
@@ -52,7 +52,7 @@ pub async fn set_leaderboard(
         game_id,
         payload.value_name.as_str(),
         payload.value_num,
-        &state.db_url,
+        &state.db_name,
     )
     .await;
 
@@ -75,8 +75,8 @@ pub async fn get_leaderboard(
     State(state): State<ApiState>,
     params: Query<LeaderboardGetParams>,
 ) -> impl IntoResponse {
-    let game_id: String = String::from("123124"); // Example for now
-    let user_id: String = String::from("3451435");
+    let game_id: String = String::from("0"); // Example for now
+    let user_id: String = String::from("0");
     let count: Option<i64>;
 
     // TODO: add error http response to handle when count > 100
@@ -107,7 +107,7 @@ pub async fn get_leaderboard(
         params.ascending,
         params.value_name.clone(),
         params.offset,
-        &state.db_url,
+        &state.db_name,
     )
     .await;
 
@@ -128,8 +128,8 @@ pub async fn set_save_data(
     State(state): State<ApiState>,
     Json(payload): Json<SaveDataEntry>,
 ) -> impl IntoResponse {
-    let game_id = "32";
-    let user_id = "53";
+    let game_id = "0";
+    let user_id = "0";
 
     // Save entry to database;
     // TODO: more elegant error handling for converting json data to vec of bytes
@@ -138,7 +138,7 @@ pub async fn set_save_data(
         game_id,
         payload.file_name.as_str(),
         &serde_json::to_vec(&payload.data).unwrap(),
-        &state.db_url,
+        &state.db_name,
     )
     .await;
 
@@ -163,8 +163,8 @@ pub async fn get_save_data(
     params: Query<SaveDataGetParams>,
 ) -> impl IntoResponse {
     println!("Getting save data!");
-    let game_id: String = String::from("123124"); // Example for now
-    let user_id: String = String::from("3451435");
+    let game_id: String = String::from("0"); // Example for now
+    let user_id: String = String::from("0");
 
     // File names should be unique per game, so if both file_name and count are
     // provided, the developer should know that they can't do that. One and only
@@ -196,7 +196,7 @@ pub async fn get_save_data(
         entry_count,
         params.offset,
         params.ascending,
-        &state.db_url,
+        &state.db_name,
     )
     .await;
 

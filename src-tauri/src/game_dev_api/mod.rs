@@ -7,12 +7,12 @@ use serde::Deserialize;
 
 const VERSION: u8 = 1;
 
-mod handlers;
+pub mod handlers;
 
-fn create_router(db_url: &str) -> Router {
+pub fn create_router(db_name: &str) -> Router {
     let route_prefix: String = format!("/api/v{}", VERSION.to_string());
     let api_state = ApiState {
-        db_url: db_url.to_owned(),
+        db_name: db_name.to_owned(),
     };
 
     Router::new()
