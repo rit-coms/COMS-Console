@@ -6,7 +6,7 @@ export default {
     title: "Components/Search",
     component: Search,
     parameters: {
-        controls: {exclude: ["id", "className", "onChange", "onClick"]},
+        controls: {exclude: ["id", "className", "onChange", "onClick"]}
     }
 } as Meta<typeof Search>
 

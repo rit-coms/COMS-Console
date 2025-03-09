@@ -1,9 +1,10 @@
 
+import { ReactNode } from "react"
 import { BaseProps, FontSizes } from "../../types"
 import { Header } from "../Typography/Header/Header"
 import styles from "./Game.module.css"
 
-interface GameProps extends BaseProps {
+export interface GameProps extends BaseProps {
 
     // Content Props
     title: string
@@ -30,7 +31,7 @@ export const Game = ({
     id,
     ...props
 
-}: GameProps) => {
+}: GameProps): ReactNode => {
 
     const classNames: string = [
         styles.game,

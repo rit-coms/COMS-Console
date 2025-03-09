@@ -7,7 +7,7 @@ import { CloseButton } from "../Close Button/CloseButton"
 import { Header } from "../Typography/Header/Header"
 import styles from "./Modal.module.css"
 
-interface ModalProps extends BaseProps {
+export interface ModalProps extends BaseProps {
     
     // Content Props
     children: ReactNode
@@ -44,7 +44,7 @@ export const Modal = ({
     id,
     ...props
 
-}: ModalProps) => {
+}: ModalProps): ReactNode => {
 
     const classNames: string = [
         styles.modal,
@@ -59,17 +59,9 @@ export const Modal = ({
 
     const Actions = () => {
 
-        if (confirmLabel != undefined && cancelLabel != undefined) {
+        if (confirmLabel !== undefined && cancelLabel !== undefined) {
 
             switch (variant) {
-
-                default:
-                    return (
-                        <ButtonGroup bLFirst bRLast>
-                            <ActionButton variant={"danger"} onClick={onCancellation}>{cancelLabel}</ActionButton>
-                            <ActionButton variant={"success"} onClick={onConfirmation}>{confirmLabel}</ActionButton>
-                        </ButtonGroup>
-                    )
                 
                 case "gameInfo":
                     return null
@@ -90,17 +82,18 @@ export const Modal = ({
                         </ButtonGroup>
                     )
 
-            }
-
-        } else if (confirmLabel != undefined) {
-
-            switch (variant) {
                 default:
                     return (
-                        <ButtonGroup bL bR>
+                        <ButtonGroup bLFirst bRLast>
+                            <ActionButton variant={"danger"} onClick={onCancellation}>{cancelLabel}</ActionButton>
                             <ActionButton variant={"success"} onClick={onConfirmation}>{confirmLabel}</ActionButton>
                         </ButtonGroup>
                     )
+            }
+
+        } else if (confirmLabel !== undefined) {
+
+            switch (variant) {
 
                 case "gameInfo":
                     return (
@@ -129,16 +122,17 @@ export const Modal = ({
                             <ActionButton variant={"success"} onClick={onConfirmation}>{confirmLabel}</ActionButton>
                         </ButtonGroup>
                     )
-            }
 
-        } else if (cancelLabel != undefined) {
-            switch (variant) {
                 default:
                     return (
-                        <ButtonGroup bR bL>
-                            <ActionButton variant={"danger"} onClick={onCancellation}>{cancelLabel}</ActionButton>
+                        <ButtonGroup bL bR>
+                            <ActionButton variant={"success"} onClick={onConfirmation}>{confirmLabel}</ActionButton>
                         </ButtonGroup>
                     )
+            }
+
+        } else if (cancelLabel !== undefined) {
+            switch (variant) {
 
                 case "gameInfo":
                     return null
@@ -156,10 +150,18 @@ export const Modal = ({
                             <ActionButton variant={"danger"} onClick={onCancellation}>{cancelLabel}</ActionButton>
                         </ButtonGroup>
                     )
+
+                default:
+                    return (
+                        <ButtonGroup bR bL>
+                            <ActionButton variant={"danger"} onClick={onCancellation}>{cancelLabel}</ActionButton>
+                        </ButtonGroup>
+                    )
             }
+        } else {
+            return null
         }
     }
-    
 
     return (
         <div className={styles.modalOverlay}>

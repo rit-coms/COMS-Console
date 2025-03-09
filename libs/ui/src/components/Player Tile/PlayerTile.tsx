@@ -1,10 +1,11 @@
 
+import { ReactNode } from "react"
 import { BaseProps } from "../../types"
 import { Button } from "../Button/Button"
 import { Text } from "../Typography/Text/Text"
 import styles from "./PlayerTile.module.css"
 
-interface PlayerTileProps extends BaseProps {
+export interface PlayerTileProps extends BaseProps {
 
     // Content Props
     playerNumber: number
@@ -29,7 +30,7 @@ export const PlayerTile = ({
     id,
     ...props
 
-}: PlayerTileProps) => {
+}: PlayerTileProps): ReactNode => {
 
     const classNames: string = [
         styles.playerTile,

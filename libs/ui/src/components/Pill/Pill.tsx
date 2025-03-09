@@ -3,7 +3,7 @@ import { ReactNode } from "react"
 import { BaseProps, ColorVariants, Sizes } from "../../types"
 import styles from "./Pill.module.css"
 
-interface PillProps extends BaseProps {
+export interface PillProps extends BaseProps {
 
     // Content Props
     children: ReactNode
@@ -24,7 +24,7 @@ export const Pill = ({
     id,
     ...props
 
-}: PillProps) => {
+}: PillProps): ReactNode => {
 
     const classNames: string = [
         styles.pill, 

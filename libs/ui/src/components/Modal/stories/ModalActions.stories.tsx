@@ -1,9 +1,8 @@
 
-import React from "react"
+import React, { useState } from "react"
 import { Meta, StoryObj } from "@storybook/react"
-import { useState } from "react"
-import { Modal } from "../Modal"
 import { Button } from "../../Button/Button"
+import { Modal } from "../Modal"
 
 export default {
     title: "Components/Modal/Actions",

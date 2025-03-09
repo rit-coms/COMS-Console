@@ -1,15 +1,14 @@
 
-import React from "react"
+import React, { useState } from "react"
 import { Meta, StoryFn } from "@storybook/react"
 import { PlayerContainer } from "../PlayerContainer"
 import { PlayerTile } from "../../Player Tile/PlayerTile"
-import { useState } from "react"
 
 export default {
     title: "Components/Player Container",
     component: PlayerContainer,
     parameters: {
-        controls: {exclude: ["id", "className", "children"]},
+        controls: {exclude: ["id", "className", "children"]}
     },
     argTypes: {}
 } as Meta<typeof PlayerContainer>

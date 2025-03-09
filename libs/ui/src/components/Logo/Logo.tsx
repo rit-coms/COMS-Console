@@ -1,8 +1,9 @@
 
+import { ReactNode } from "react"
 import { BaseProps } from "../../types"
 import styles from "./Logo.module.css"
 
-interface LogoProps extends BaseProps {
+export interface LogoProps extends BaseProps {
 
     // Styling Props
     src: string
@@ -19,7 +20,7 @@ export const Logo = ({
     id,
     ...props
 
-}: LogoProps) => {
+}: LogoProps): ReactNode => {
 
     const classNames: string = [
         styles.logo,
@@ -33,10 +34,10 @@ export const Logo = ({
             className={classNames}
             {...props}
         >
-            {variant != "text" &&
+            {variant !== "text" &&
                 <img src={src} className={styles.logoImage}/>
             }
-            {variant != "logo" &&
+            {variant !== "logo" &&
                 <span className={styles.logoText}>QuackBox</span>
             }
         </div>

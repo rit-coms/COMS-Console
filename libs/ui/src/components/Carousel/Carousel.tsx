@@ -4,7 +4,7 @@ import { BaseProps } from "../../types"
 import { Caret } from "../Caret/Caret"
 import styles from "./Carousel.module.css"
 
-interface CarouselProps extends BaseProps {
+export interface CarouselProps extends BaseProps {
    
     // Content Props
     children: ReactNode
@@ -25,7 +25,7 @@ export const Carousel = ({
     id,
     ...props
 
-}: CarouselProps) => {
+}: CarouselProps): ReactNode => {
 
     const classNames: string = [
         styles.carousel,

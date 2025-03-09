@@ -1,16 +1,16 @@
 
-import { useState } from "react"
+import { ReactNode, useState } from "react"
 import { BaseProps } from "../../types"
 import styles from "./CheckboxGroup.module.css"
 
-interface CheckboxOption {
+export interface CheckboxOption {
 
     // Content Props
     label: string
 
 }
 
-interface CheckboxGroupProps extends BaseProps {
+export interface CheckboxGroupProps extends BaseProps {
     // Content Props
     options: CheckboxOption[]
 
@@ -34,14 +34,14 @@ export const CheckboxGroup = ({
     id,
     ...props
 
-}: CheckboxGroupProps) => {
+}: CheckboxGroupProps): ReactNode => {
 
     const [internalValues, setInternalValues] = useState<string[]>(selectedValues)
 
     const handleChange = (newSelectedValue: string) => {
         let updatedValues
         if (internalValues?.includes(newSelectedValue)) 
-            updatedValues = internalValues.filter(value => value != newSelectedValue)
+            updatedValues = internalValues.filter(value => value !== newSelectedValue)
         else
             updatedValues = [...internalValues, newSelectedValue]
 

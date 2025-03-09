@@ -8,7 +8,7 @@ export default {
     title: "Components/Button Group",
     component: ButtonGroup,
     parameters: {
-        controls: {include: ["direction", "disabled", "gap"]},
+        controls: {include: ["direction", "disabled", "gap"]}
     },
     argTypes: {
         direction: {control: {type: "inline-radio"}},

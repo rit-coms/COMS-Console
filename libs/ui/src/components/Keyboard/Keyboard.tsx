@@ -1,10 +1,11 @@
 
+import { ReactNode } from "react"
 import { BaseProps } from "../../types"
 import { Button } from "../Button/Button"
 import { Icon } from "../Icon/Icon"
 import styles from "./Keyboard.module.css"
 
-interface KeyboardProps extends BaseProps {
+export interface KeyboardProps extends BaseProps {
 
     // Content Props
     layout?: "qwerty" | "alpha"
@@ -23,7 +24,7 @@ export const Keyboard = ({
     id,
     ...props
 
-}: KeyboardProps) => {
+}: KeyboardProps): ReactNode => {
 
     const getKeys = () => {
         switch (layout) {
@@ -74,8 +75,8 @@ export const Keyboard = ({
 
                             let classNames: string = styles.keyboardKey
 
-                            if (key == "space") classNames += " " + styles.span3
-                            if (key == "clear") classNames += " " + styles.span2
+                            if (key === "space") classNames = `${className} ${styles.span3}`
+                            if (key === "clear") classNames = `${className} ${styles.span2}`
                             
                             return (
                                 <Button
@@ -84,7 +85,7 @@ export const Keyboard = ({
                                     onClick={() => onKeyPress(key)}
                                 >
                                     {
-                                        key != "delete" 
+                                        key !== "delete" 
                                         ? key : 
                                         <Icon 
                                             className={styles.icon}

@@ -1,9 +1,10 @@
 
+import { ReactNode } from "react"
 import { AlertVariants } from "../../types"
 import { Button, ButtonProps } from "../Button/Button"
 import styles from "./ActionButton.module.css"
 
-interface ActionButtonProps extends Omit<ButtonProps, "variant"> {
+export interface ActionButtonProps extends Omit<ButtonProps, "variant"> {
 
     // Styling Props
     variant?: AlertVariants
@@ -23,7 +24,7 @@ export const ActionButton = ({
     id,
     ...props
 
-}: ActionButtonProps) => {
+}: ActionButtonProps): ReactNode => {
 
     const classNames: string = [
         styles.button,

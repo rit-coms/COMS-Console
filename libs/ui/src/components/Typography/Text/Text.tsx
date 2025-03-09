@@ -3,7 +3,7 @@ import { ElementType, ReactNode } from "react"
 import { BaseProps, FontSizes, Weights } from "../../../types"
 import styles from "../Typography.module.css"
 
-interface TextProps extends BaseProps {
+export interface TextProps extends BaseProps {
 
     // Content Props
     children: ReactNode
@@ -18,7 +18,7 @@ interface TextProps extends BaseProps {
 export const Text = ({
     children,
     as: Tag = "p",
-    fontSize = "default",
+    fontSize = "auto",
     weight = "normal",
     
     // Base Props
@@ -26,7 +26,7 @@ export const Text = ({
     id,
     ...props
 
-}: TextProps) => {
+}: TextProps): ReactNode => {
 
     const classNames = [
         styles.text,

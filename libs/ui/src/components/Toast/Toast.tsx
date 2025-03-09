@@ -1,10 +1,10 @@
 
-import { useEffect, useState } from "react"
+import { ReactNode, useEffect, useState } from "react"
 import { AlertVariants, BaseProps, Positions } from "../../types"
 import { Logo } from "../Logo/Logo"
 import styles from "./Toast.module.css"
 
-interface ToastProps extends BaseProps {
+export interface ToastProps extends BaseProps {
 
     // Content Props
     message: string
@@ -31,7 +31,7 @@ export const Toast = ({
     id,
     ...props
 
-}: ToastProps) => {
+}: ToastProps): ReactNode => {
 
     const [isVisible, setIsVisible] = useState<boolean>(true)
 

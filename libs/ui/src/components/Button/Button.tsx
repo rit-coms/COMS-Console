@@ -32,7 +32,7 @@ export const Button = ({
     id,
     ...props
 
-}: ButtonProps) => {
+}: ButtonProps): ReactNode => {
 
     const classNames: string = [
         styles.button,

@@ -1,8 +1,7 @@
 
-import React from "react"
+import React, { useState } from "react"
 import { Meta, StoryObj } from "@storybook/react"
 import { CheckboxGroup } from "../CheckboxGroup"
-import { useState } from "react"
 
 export default {
     title: "Components/Checkbox Group/States",

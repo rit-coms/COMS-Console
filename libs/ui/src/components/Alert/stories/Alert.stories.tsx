@@ -20,6 +20,6 @@ export const Alert_Default: Story = {
     args: {
         message: "Default Info Alert",
         duration: 30000000,
-        variant: "info",
+        variant: "info"
     }
 }

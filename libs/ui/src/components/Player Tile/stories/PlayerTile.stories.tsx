@@ -6,7 +6,7 @@ export default {
     title: "Components/Player Tile",
     component: PlayerTile,
     parameters: {
-        controls: {exclude: ["id", "className", "onToggle"]},
+        controls: {exclude: ["id", "className", "onToggle"]}
     },
     argTypes: {}
 } as Meta<typeof PlayerTile>

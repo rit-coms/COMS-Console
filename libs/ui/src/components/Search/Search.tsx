@@ -1,8 +1,9 @@
 
+import { ReactNode } from "react"
 import { BaseProps } from "../../types"
 import styles from "./Search.module.css"
 
-interface SearchProps extends BaseProps {
+export interface SearchProps extends BaseProps {
 
     // Action Props
     onChange: () => void
@@ -29,7 +30,7 @@ export const Search = ({
     id,
     ...props
 
-}: SearchProps) => {
+}: SearchProps): ReactNode => {
 
     const classNames: string = [
         styles.search,

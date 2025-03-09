@@ -1,8 +1,9 @@
 
+import { ReactNode } from "react"
 import { BaseProps } from "../../types"
 import styles from "./Caret.module.css"
 
-interface CaretProps extends BaseProps {
+export interface CaretProps extends BaseProps {
 
     // Action Props
     onClick?: () => void
@@ -27,7 +28,7 @@ export const Caret = ({
     id,
     ...props
 
-}: CaretProps) => {
+}: CaretProps): ReactNode => {
 
     const classNames: string = [
         styles.caret,
@@ -36,8 +37,8 @@ export const Caret = ({
         id
     ].filter(Boolean).join(" ")
 
-    const x1: number = direction == "left" ? 35 : 65
-    const x2: number = direction == "left" ? 65 : 35
+    const x1: number = direction === "left" ? 35 : 65
+    const x2: number = direction === "left" ? 65 : 35
     const y1Top: number = 50, y2Bottom: number = 50
     const y2Top: number = 10
     const y1Bottom: number = 90

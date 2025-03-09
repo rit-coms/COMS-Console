@@ -20,7 +20,7 @@ export const PlayerContainer = ({
     id,
     ...props
 
-}: PlayerContainerProps) => {
+}: PlayerContainerProps): ReactNode => {
 
     const gridMode: boolean = numPlayers > 4
 

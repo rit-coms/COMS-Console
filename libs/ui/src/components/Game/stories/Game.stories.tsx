@@ -9,7 +9,7 @@ export default {
         controls: {exclude: ["id", "className", "onClick"]}
     },
     argTypes: {
-        fontSize: {control: {type: "inline-radio"}},
+        fontSize: {control: {type: "inline-radio"}}
     }
 } as Meta<typeof Game>
 

@@ -11,7 +11,7 @@ export default {
 type Story = StoryObj<typeof ActionButton>
 
 export const ActionButton_Actions: Story = {
-    name: "Action Buttons",
+    name: "Action Button",
     render: () => (
         <div>
             <ActionButton variant={"info"}>

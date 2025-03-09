@@ -23,6 +23,6 @@ export const Toast_Default: Story = {
         position: "top-left",
         iconSrc: "/assets/duck.png",
         variant: "info",
-        duration: 30000000,
+        duration: 30000000
     }
 }

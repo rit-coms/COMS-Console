@@ -1,8 +1,9 @@
 
+import { ReactNode } from "react"
 import { BaseProps } from "../../types"
 import styles from "./Radio.module.css"
 
-interface RadioProps extends BaseProps {
+export interface RadioProps extends BaseProps {
 
     // Content Props
     children: string
@@ -28,7 +29,7 @@ export const Radio = ({
     id,
     ...props 
 
-}: RadioProps) => {
+}: RadioProps): ReactNode => {
 
     const classNames: string = [
         styles.radioContainer,

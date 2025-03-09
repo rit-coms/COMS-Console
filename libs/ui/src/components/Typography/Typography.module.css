@@ -2,7 +2,7 @@
 .text {
     font-family: var(--font-family);
 
-    &.default {
+    &.auto {
         font-size: var(--font-size);
     }
 
@@ -38,7 +38,7 @@
 .header {
     font-family: var(--font-family);
 
-    &.default {
+    &.auto {
         font-size: var(--font-size);
     }
 

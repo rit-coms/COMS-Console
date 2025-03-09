@@ -1,8 +1,9 @@
 
+import { ReactNode } from "react"
 import { BaseProps } from "../../types"
 import styles from "./Checkbox.module.css"
 
-interface CheckboxProps extends BaseProps {
+export interface CheckboxProps extends BaseProps {
 
     // Content Props
     children: string
@@ -27,7 +28,7 @@ export const Checkbox = ({
     id,
     ...props
 
-}: CheckboxProps) => {
+}: CheckboxProps): ReactNode => {
 
     const classNames: string = [
         styles.checkboxContainer,

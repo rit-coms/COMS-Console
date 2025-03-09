@@ -19,7 +19,7 @@ export default defineConfig({
   ],
   build: {
     lib: {
-      entry: "src/index.ts",
+      entry: "src/types/index.ts",
       name: "quackbox-design-system",
       fileName: (format) => `quackbox-design-system.${format}.js`,
     },

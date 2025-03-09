@@ -1,16 +1,16 @@
 
-import { useState } from "react"
+import { ReactNode, useState } from "react"
 import { BaseProps } from "../../types"
 import styles from "./RadioGroup.module.css"
 
-interface RadioOption {
+export interface RadioOption {
 
     // Content Props
     label: string
 
 }
 
-interface RadioGroupProps extends BaseProps {
+export interface RadioGroupProps extends BaseProps {
 
     // Content Props
     options: RadioOption[]
@@ -35,13 +35,14 @@ export const RadioGroup = ({
     id,
     ...props
 
-}: RadioGroupProps) => {
+}: RadioGroupProps): ReactNode => {
 
     const [internalValue, setInternalValue] = useState<string | undefined>(selectedValue)
 
     const handleChange = (newSelectedValue: string) => {
-        if (selectedValue == undefined) 
+        if (selectedValue === undefined) 
             setInternalValue(newSelectedValue)
+        
 
         if (onChange)
             onChange(newSelectedValue)
@@ -67,7 +68,7 @@ export const RadioGroup = ({
                 >
                     <input
                         className={styles.radioInput}
-                        checked={(selectedValue ?? internalValue) == option.label}
+                        checked={(selectedValue ?? internalValue) === option.label}
                         disabled={disabled} 
                         onChange={() => handleChange(option.label)}
                         type={"radio"}

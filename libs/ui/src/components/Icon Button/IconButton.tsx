@@ -3,13 +3,14 @@ import * as LuIcons from "react-icons/lu"
 import { ColorVariants } from "../../types"
 import { ButtonProps } from "../Button/Button"
 import styles from "./IconButton.module.css"
+import { ReactNode } from "react"
 
-type IconName = keyof typeof LuIcons
+export type LuIconName = keyof typeof LuIcons
 
 export interface IconButtonProps extends Omit<ButtonProps, "children"> {
 
     // Content Props
-    iconName: IconName
+    iconName: LuIconName
 
     // Styling Props
     variant?: ColorVariants
@@ -27,7 +28,7 @@ export const IconButton = ({
     id,
     ...props
 
-}: IconButtonProps) => {
+}: IconButtonProps): ReactNode => {
 
     const Icon = LuIcons[iconName]
 
