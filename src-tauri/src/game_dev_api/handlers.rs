@@ -3,7 +3,7 @@ use crate::db::{
     schema::{leaderboard::value_num, saves::file_name},
 };
 use axum::{
-    extract::Query,
+    extract::{Query, State},
     http::StatusCode,
     response::IntoResponse,
     routing::{get, post},
@@ -13,6 +13,11 @@ use diesel::dsl::count;
 use serde::Deserialize;
 use serde_with::{serde_as, NoneAsEmptyString};
 use std::option::Option;
+
+#[derive(Clone)]
+pub struct ApiState {
+    pub db_url: String,
+}
 
 #[derive(Deserialize)]
 pub struct LeaderboardEntry {
@@ -32,7 +37,7 @@ enum LeaderboardScope {
     Global,
 }
 
-pub async fn set_leaderboard(Json(payload): Json<LeaderboardEntry>) -> impl IntoResponse {
+pub async fn set_leaderboard(State(state): State<ApiState>, Json(payload): Json<LeaderboardEntry>) -> impl IntoResponse {
     // Get game_id and user_id
     let game_id = "4234345";
     let user_id = "0234345";
@@ -43,6 +48,7 @@ pub async fn set_leaderboard(Json(payload): Json<LeaderboardEntry>) -> impl Into
         game_id,
         payload.value_name.as_str(),
         payload.value_num,
+        &state.db_url,
     )
     .await;
 
@@ -61,7 +67,7 @@ pub struct LeaderboardGetParams {
     offset: Option<i64>,
 }
 
-pub async fn get_leaderboard(params: Query<LeaderboardGetParams>) -> impl IntoResponse {
+pub async fn get_leaderboard(State(state): State<ApiState>, params: Query<LeaderboardGetParams>) -> impl IntoResponse {
     let game_id: String = String::from("123124"); // Example for now
     let user_id: String = String::from("3451435");
     let count: Option<i64>;
@@ -94,6 +100,7 @@ pub async fn get_leaderboard(params: Query<LeaderboardGetParams>) -> impl IntoRe
         params.ascending,
         params.value_name.clone(),
         params.offset,
+        &state.db_url,
     )
     .await;
 
@@ -110,7 +117,7 @@ pub async fn get_leaderboard(params: Query<LeaderboardGetParams>) -> impl IntoRe
     Json(json_response)
 }
 
-pub async fn set_save_data(Json(payload): Json<SaveDataEntry>) -> impl IntoResponse {
+pub async fn set_save_data(State(state): State<ApiState>, Json(payload): Json<SaveDataEntry>) -> impl IntoResponse {
     let game_id = "32";
     let user_id = "53";
 
@@ -121,6 +128,7 @@ pub async fn set_save_data(Json(payload): Json<SaveDataEntry>) -> impl IntoRespo
         game_id,
         payload.file_name.as_str(),
         &serde_json::to_vec(&payload.data).unwrap(),
+        &state.db_url
     ).await;
 
     Json(serde_json::json!({
@@ -139,7 +147,7 @@ pub struct SaveDataGetParams {
 
 /// Can either get a list of save files for current user or
 /// get a specific file by user and name
-pub async fn get_save_data(params: Query<SaveDataGetParams>) -> impl IntoResponse {
+pub async fn get_save_data(State(state): State<ApiState>, params: Query<SaveDataGetParams>) -> impl IntoResponse {
     println!("Getting save data!");
     let game_id: String = String::from("123124"); // Example for now
     let user_id: String = String::from("3451435");
@@ -174,6 +182,7 @@ pub async fn get_save_data(params: Query<SaveDataGetParams>) -> impl IntoRespons
         entry_count,
         params.offset,
         params.ascending,
+        &state.db_url,
     )
     .await;
 

@@ -22,7 +22,7 @@ fn main() {
             app.manage(Mutex::new(AppState::default()));
             // tauri::async_runtime::spawn(db::test_db());
             app.autolaunch().enable()?;
-            tauri::async_runtime::spawn(setup_game_dev_api());
+            tauri::async_runtime::spawn(setup_game_dev_api("local"));
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![get_game_info, play_game])
