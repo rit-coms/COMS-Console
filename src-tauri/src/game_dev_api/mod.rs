@@ -1,20 +1,13 @@
-use crate::db::{
-    self, establish_connection, 
-    schema::{leaderboard::value_num, saves::file_name},
-};
 use axum::{
-    extract::Query, http::StatusCode, response::IntoResponse, routing::{get, post}, serve::Listener, Json, Router
+    routing::{get, post},
+    Router,
 };
-use diesel::{dsl::count, SqliteConnection};
 use handlers::{get_leaderboard, get_save_data, set_leaderboard, set_save_data, ApiState};
 use serde::Deserialize;
-use serde_with::{serde_as, NoneAsEmptyString};
-use std::option::Option;
 
 const VERSION: u8 = 1;
 
 mod handlers;
-
 
 fn create_router(db_url: &str) -> Router {
     let route_prefix: String = format!("/api/v{}", VERSION.to_string());
@@ -27,11 +20,12 @@ fn create_router(db_url: &str) -> Router {
             &format!("{}/leaderboard", route_prefix),
             post(set_leaderboard).get(get_leaderboard),
         )
-        .with_state(api_state.clone())// TODO: wrap the state in an ARC to avoid cloning???
+        .with_state(api_state.clone()) // TODO: wrap the state in an ARC to avoid cloning???
         .route(
             &format!("{}/save-data", route_prefix),
             post(set_save_data).get(get_save_data),
-        ).with_state(api_state)
+        )
+        .with_state(api_state)
 }
 
 pub async fn setup_game_dev_api(db_name: &str) {

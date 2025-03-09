@@ -208,7 +208,7 @@ pub async fn get_save(
         .expect("Could not get save")
 }
 
-/* mod tests {
+mod tests {
     use super::*;
     extern crate tokio;
 
@@ -216,17 +216,19 @@ pub async fn get_save(
     pub async fn test_db() {
         use uuid::Uuid;
 
+        let db_name = "local";
+
         let mut buffer = Uuid::encode_buffer();
         // create test user
         let user_id_s = Uuid::new_v4().as_simple().encode_lower(&mut buffer);
         let name_s = "A random user";
 
         let mut buffer = Uuid::encode_buffer();
-        let user = create_user(user_id_s, name_s).await;
+        let user = create_user(user_id_s, name_s, db_name).await;
         let game_id_s = Uuid::new_v4().as_simple().encode_lower(&mut buffer);
         let example_game_name = "Example Game";
 
-        insert_game(game_id_s, example_game_name).await;
+        insert_game(game_id_s, example_game_name, db_name).await;
 
         insert_leaderboard_entry(user_id_s, game_id_s, "spaghetti", 10, test_connection).await;
 
@@ -235,4 +237,4 @@ pub async fn get_save(
 
         set_save(user_id_s, game_id_s, file_name_s, &data_b, test_connection).await;
     }
-} */
+}

@@ -37,13 +37,17 @@ enum LeaderboardScope {
     Global,
 }
 
-pub async fn set_leaderboard(State(state): State<ApiState>, Json(payload): Json<LeaderboardEntry>) -> impl IntoResponse {
+pub async fn set_leaderboard(
+    State(state): State<ApiState>,
+    Json(payload): Json<LeaderboardEntry>,
+) -> impl IntoResponse {
     // Get game_id and user_id
     let game_id = "4234345";
     let user_id = "0234345";
 
     // Save entry to database
-    db::insert_leaderboard_entry(
+    // TODO: Can I return the query response from this function?
+    let _ = db::insert_leaderboard_entry(
         user_id,
         game_id,
         payload.value_name.as_str(),
@@ -67,7 +71,10 @@ pub struct LeaderboardGetParams {
     offset: Option<i64>,
 }
 
-pub async fn get_leaderboard(State(state): State<ApiState>, params: Query<LeaderboardGetParams>) -> impl IntoResponse {
+pub async fn get_leaderboard(
+    State(state): State<ApiState>,
+    params: Query<LeaderboardGetParams>,
+) -> impl IntoResponse {
     let game_id: String = String::from("123124"); // Example for now
     let user_id: String = String::from("3451435");
     let count: Option<i64>;
@@ -117,7 +124,10 @@ pub async fn get_leaderboard(State(state): State<ApiState>, params: Query<Leader
     Json(json_response)
 }
 
-pub async fn set_save_data(State(state): State<ApiState>, Json(payload): Json<SaveDataEntry>) -> impl IntoResponse {
+pub async fn set_save_data(
+    State(state): State<ApiState>,
+    Json(payload): Json<SaveDataEntry>,
+) -> impl IntoResponse {
     let game_id = "32";
     let user_id = "53";
 
@@ -128,8 +138,9 @@ pub async fn set_save_data(State(state): State<ApiState>, Json(payload): Json<Sa
         game_id,
         payload.file_name.as_str(),
         &serde_json::to_vec(&payload.data).unwrap(),
-        &state.db_url
-    ).await;
+        &state.db_url,
+    )
+    .await;
 
     Json(serde_json::json!({
         "file_name": payload.file_name,
@@ -147,7 +158,10 @@ pub struct SaveDataGetParams {
 
 /// Can either get a list of save files for current user or
 /// get a specific file by user and name
-pub async fn get_save_data(State(state): State<ApiState>, params: Query<SaveDataGetParams>) -> impl IntoResponse {
+pub async fn get_save_data(
+    State(state): State<ApiState>,
+    params: Query<SaveDataGetParams>,
+) -> impl IntoResponse {
     println!("Getting save data!");
     let game_id: String = String::from("123124"); // Example for now
     let user_id: String = String::from("3451435");
