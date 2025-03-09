@@ -18,7 +18,7 @@ pub fn establish_connection(db_name: &str) -> SqliteConnection {
 
     let test_db_url = Path::new(&env::var("ROOT_PATH").expect("ROOT_PATH must be set"))
         .join(db_name)
-        .with_extension(".db");
+        .with_extension("db");
 
     SqliteConnection::establish(test_db_url.to_str().unwrap())
         .unwrap_or_else(|_| panic!("Error connecting to {}", test_db_url.display()))
@@ -230,11 +230,11 @@ mod tests {
 
         insert_game(game_id_s, example_game_name, db_name).await;
 
-        insert_leaderboard_entry(user_id_s, game_id_s, "spaghetti", 10, test_connection).await;
+        insert_leaderboard_entry(user_id_s, game_id_s, "spaghetti", 10, db_name).await;
 
         let file_name_s = "testpath";
         let data_b = "random_data".as_bytes().to_owned();
 
-        set_save(user_id_s, game_id_s, file_name_s, &data_b, test_connection).await;
+        set_save(user_id_s, game_id_s, file_name_s, &data_b, db_name).await;
     }
 }
