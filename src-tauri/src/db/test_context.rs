@@ -28,6 +28,6 @@ impl TestContext {
 
 impl Drop for TestContext {
     fn drop(&mut self) {
-        remove_file(get_db_path(&self.db_name));
+        remove_file(get_db_path(&self.db_name)).expect("Failed to delete file");
     }
 }

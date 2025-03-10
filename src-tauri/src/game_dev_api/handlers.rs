@@ -1,6 +1,4 @@
-use crate::db::{
-    self,
-};
+use crate::db::{self};
 use axum::{
     extract::{Query, State},
     http::StatusCode,
@@ -8,6 +6,7 @@ use axum::{
     Json,
 };
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::option::Option;
 
 #[derive(Clone)]
@@ -21,10 +20,10 @@ pub struct LeaderboardEntry {
     pub value_num: i64,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct SaveDataEntry {
-    file_name: String,
-    data: serde_json::Value, // This data should be stored in the database as BSON data, is this the correct type?
+    pub file_name: String,
+    pub data: serde_json::Value, // This data should be stored in the database as BSON data, is this the correct type?
 }
 
 #[derive(Deserialize, Serialize)]
@@ -52,7 +51,6 @@ pub async fn set_leaderboard(
     )
     .await
     .expect("Falied to enter leaderboard entry");
-    
 
     Json(serde_json::json!({
         "value_name":payload.value_name,
@@ -146,12 +144,12 @@ pub async fn set_save_data(
     }))
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct SaveDataGetParams {
-    file_name: Option<String>,
-    count: Option<i64>,
-    offset: Option<i64>,
-    ascending: Option<bool>,
+    pub file_name: Option<String>,
+    pub count: Option<i64>,
+    pub offset: Option<i64>,
+    pub ascending: Option<bool>,
 }
 
 /// Can either get a list of save files for current user or
@@ -177,7 +175,7 @@ pub async fn get_save_data(
         }
         (None, Some(num_entries)) => {
             if num_entries > 50 {
-                return StatusCode::PAYLOAD_TOO_LARGE.into_response()
+                return StatusCode::PAYLOAD_TOO_LARGE.into_response();
             }
             file_name_s = None;
             entry_count = Some(num_entries);
@@ -204,7 +202,7 @@ pub async fn get_save_data(
     // TODO: parse binary data into json
     for entry in save_data_entries {
         json_response.push(serde_json::json!({
-            "data":entry.data,
+            "data":serde_json::from_slice::<Value>(&entry.data).expect("Failed to deserialize BSON data"),
             "file_name": entry.file_name
         }));
     }

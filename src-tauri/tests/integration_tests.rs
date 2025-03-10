@@ -1,4 +1,3 @@
-
 use app::{
     db::{
         create_user, get_user, insert_game,
@@ -7,7 +6,10 @@ use app::{
     },
     game_dev_api::{
         create_router,
-        handlers::{LeaderboardEntry, LeaderboardGetParams, LeaderboardScope},
+        handlers::{
+            LeaderboardEntry, LeaderboardGetParams, LeaderboardScope, SaveDataEntry,
+            SaveDataGetParams,
+        },
     },
 };
 use axum_test::TestServer;
@@ -113,4 +115,60 @@ async fn read_and_write_leaderboard_data() {
 
     assert_eq!(get_response_entry.value_name, value_name);
     assert_eq!(get_response_entry.value_num, value_num);
+}
+
+#[tokio::test]
+async fn read_and_write_save_data() {
+    let test_context = TestContext::new("read_and_write_save_data");
+    let save_data_path = "/api/v1/save-data";
+
+    setup_initial_data(&test_context.db_name).await;
+
+    let app: axum::Router = create_router(&test_context.db_name);
+
+    let server: TestServer = TestServer::new(app).expect("Failed to set up test server");
+
+    let file_name: String = String::from("test data");
+    let data: serde_json::Value = serde_json::json!({
+        "level":12,
+        "money":1515,
+        "BAC":0.31,
+        "items": [
+            {"name": "Excalibur", "damage": 43},
+            {"name": "healing potion", "damage": 0}
+        ]
+    });
+
+    let post_response: axum_test::TestResponse = server
+        .post(save_data_path)
+        .json(&SaveDataEntry {
+            file_name: file_name.clone(),
+            data: data.clone(),
+        })
+        .await;
+
+    post_response.assert_status_ok();
+    let post_response_entry: SaveDataEntry = post_response.json::<SaveDataEntry>();
+
+    assert_eq!(post_response_entry.file_name, file_name);
+    assert_eq!(post_response_entry.data, data);
+
+    let get_filename_response: axum_test::TestResponse = server
+        .get(save_data_path)
+        .add_query_params(SaveDataGetParams {
+            file_name: Some(file_name.clone()),
+            count: None,
+            offset: None,
+            ascending: None,
+        })
+        .await;
+
+    get_filename_response.assert_status_ok();
+    let get_response_entries = get_filename_response.json::<Vec<SaveDataEntry>>();
+    let get_response_entry = get_response_entries
+        .get(0)
+        .expect("No entries in leaderboard get response");
+
+    assert_eq!(get_response_entry.file_name, file_name);
+    assert_eq!(get_response_entry.data, data);
 }
