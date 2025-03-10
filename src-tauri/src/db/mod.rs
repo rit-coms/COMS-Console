@@ -12,6 +12,7 @@ use std::path::Path;
 
 pub mod models;
 pub mod schema;
+pub mod test_context;
 
 /// Finds the filepath of a database using a given name.
 ///

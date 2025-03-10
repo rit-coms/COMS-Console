@@ -5,6 +5,7 @@ use app::{
         create_user, get_user, insert_game,
         models::{Game, User},
         schema::{games, leaderboard},
+        test_context::TestContext,
     },
     game_dev_api::{
         create_router,
@@ -15,12 +16,9 @@ use app::{
 use axum::ServiceExt;
 use axum_test::TestServer;
 use serde_json::json;
-use test_context::TestContext;
 
 #[macro_use]
 extern crate diesel_migrations;
-
-mod test_context;
 
 async fn setup_initial_user_data(db_name: &str) {
     let users = vec![
@@ -114,7 +112,9 @@ async fn read_and_write_leaderboard_data() {
 
     get_response.assert_status_ok();
     let get_response_entries = get_response.json::<Vec<LeaderboardEntry>>();
-    let get_response_entry = get_response_entries.get(0).expect("No entries in leaderboard get response");
+    let get_response_entry = get_response_entries
+        .get(0)
+        .expect("No entries in leaderboard get response");
 
     assert_eq!(get_response_entry.value_name, value_name);
     assert_eq!(get_response_entry.value_num, value_num);

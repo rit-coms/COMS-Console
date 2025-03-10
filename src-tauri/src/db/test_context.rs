@@ -1,16 +1,14 @@
-extern crate app;
-
 use std::{env, fs::remove_file, path::Path};
 
-use app::db::{establish_connection, get_db_path};
-use app::game_dev_api::setup_game_dev_api;
+use crate::db::{establish_connection, get_db_path};
+use crate::game_dev_api::setup_game_dev_api;
 use diesel::RunQueryDsl;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use dotenvy::dotenv;
 
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
 
-/// This struct is to be used for setting up integration tests for axum and diesel
+/// This struct is to be used for setting up and automatically deleting database instances for testing
 pub struct TestContext {
     pub db_name: String,
 }
