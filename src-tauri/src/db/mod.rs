@@ -1,11 +1,6 @@
-use crate::db::schema::leaderboard::dsl::leaderboard;
-use chrono::offset;
-use core::num;
-use diesel::connection;
-use diesel::{insert_into, prelude::*, query_builder::AsQuery, select, update, upsert::excluded};
+use diesel::{insert_into, prelude::*, upsert::excluded};
 use dotenvy::dotenv;
 use models::*;
-use schema::{leaderboard::user_id, saves};
 use std::env;
 use std::option::Option;
 use std::path::Path;
@@ -175,7 +170,7 @@ pub async fn get_save_data(
 
 pub async fn create_user(id_s: &str, name_s: &str, db_name: &str) -> User {
     use self::schema::users::dsl::*;
-    let mut connection = &mut establish_connection(db_name);
+    let connection = &mut establish_connection(db_name);
     insert_into(users)
         .values((id.eq(id_s), name.eq(name_s)))
         .get_result::<User>(connection)
@@ -184,7 +179,7 @@ pub async fn create_user(id_s: &str, name_s: &str, db_name: &str) -> User {
 
 pub async fn get_user(name_s: &str, user_id_s: &str, db_name: &str) -> User {
     use self::schema::users::dsl::*;
-    let mut connection = &mut establish_connection(db_name);
+    let connection = &mut establish_connection(db_name);
 
     users
         .select(User::as_select())
@@ -202,7 +197,7 @@ pub async fn set_save(
     db_name: &str,
 ) -> Save {
     use self::schema::saves::dsl::*;
-    let mut connection = &mut establish_connection(db_name);
+    let connection = &mut establish_connection(db_name);
     insert_into(saves)
         .values((
             user_id.eq(user_id_s),
@@ -224,7 +219,7 @@ pub async fn set_save(
 
 pub async fn get_save(user_id_s: &str, game_id_s: &str, file_name_s: &str, db_name: &str) -> Save {
     use self::schema::saves::dsl::*;
-    let mut connection = &mut establish_connection(db_name);
+    let connection = &mut establish_connection(db_name);
     saves
         .select(Save::as_select())
         .filter(user_id.eq(user_id_s))
@@ -235,7 +230,7 @@ pub async fn get_save(user_id_s: &str, game_id_s: &str, file_name_s: &str, db_na
 }
 
 mod tests {
-    use super::*;
+    
     extern crate tokio;
 
     #[tokio::test]

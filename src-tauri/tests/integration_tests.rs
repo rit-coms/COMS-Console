@@ -1,21 +1,16 @@
-use std::net::SocketAddr;
 
 use app::{
     db::{
         create_user, get_user, insert_game,
         models::{Game, User},
-        schema::{games, leaderboard},
         test_context::TestContext,
     },
     game_dev_api::{
         create_router,
         handlers::{LeaderboardEntry, LeaderboardGetParams, LeaderboardScope},
-        setup_game_dev_api,
     },
 };
-use axum::ServiceExt;
 use axum_test::TestServer;
-use serde_json::json;
 
 #[macro_use]
 extern crate diesel_migrations;

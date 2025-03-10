@@ -1,18 +1,14 @@
 use crate::db::{
     self,
-    schema::{leaderboard::value_num, saves::file_name},
 };
 use axum::{
     extract::{Query, State},
     http::StatusCode,
     response::IntoResponse,
-    routing::{get, post},
-    Json, Router,
+    Json,
 };
-use diesel::dsl::count;
 use serde::{Deserialize, Serialize};
-use serde_with::{serde_as, NoneAsEmptyString};
-use std::{fmt::Debug, option::Option};
+use std::option::Option;
 
 #[derive(Clone)]
 pub struct ApiState {
@@ -174,14 +170,14 @@ pub async fn get_save_data(
     let file_name_s: Option<String>;
     let entry_count: Option<i64>;
     match (params.file_name.clone(), params.count) {
-        (Some(_), Some(_)) => (return StatusCode::BAD_REQUEST.into_response()),
+        (Some(_), Some(_)) => return StatusCode::BAD_REQUEST.into_response(),
         (Some(filename), None) => {
             file_name_s = Some(filename);
             entry_count = None;
         }
         (None, Some(num_entries)) => {
             if num_entries > 50 {
-                (return StatusCode::PAYLOAD_TOO_LARGE.into_response())
+                return StatusCode::PAYLOAD_TOO_LARGE.into_response()
             }
             file_name_s = None;
             entry_count = Some(num_entries);

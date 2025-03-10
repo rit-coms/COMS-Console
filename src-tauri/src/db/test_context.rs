@@ -1,8 +1,6 @@
-use std::{env, fs::remove_file, path::Path};
+use std::fs::remove_file;
 
 use crate::db::{establish_connection, get_db_path};
-use crate::game_dev_api::setup_game_dev_api;
-use diesel::RunQueryDsl;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use dotenvy::dotenv;
 

@@ -1,6 +1,5 @@
 use diesel::prelude::*;
 use serde::Serialize;
-use chrono::NaiveDateTime;
 
 
 #[derive(Queryable, Selectable, Debug, Serialize)]

@@ -1,9 +1,8 @@
 use axum::{
-    routing::{get, post},
+    routing::post,
     Router,
 };
 use handlers::{get_leaderboard, get_save_data, set_leaderboard, set_save_data, ApiState};
-use serde::Deserialize;
 
 const VERSION: u8 = 1;
 
