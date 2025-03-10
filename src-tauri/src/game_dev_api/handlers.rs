@@ -12,7 +12,7 @@ use axum::{
 use diesel::dsl::count;
 use serde::{Deserialize, Serialize};
 use serde_with::{serde_as, NoneAsEmptyString};
-use std::option::Option;
+use std::{fmt::Debug, option::Option};
 
 #[derive(Clone)]
 pub struct ApiState {
@@ -56,6 +56,7 @@ pub async fn set_leaderboard(
     )
     .await
     .expect("Falied to enter leaderboard entry");
+    
 
     Json(serde_json::json!({
         "value_name":payload.value_name,

@@ -37,7 +37,7 @@ async fn setup_initial_user_data(db_name: &str) {
     ];
 
     for user in users {
-        create_user(&user.id, &user.name, db_name);
+        create_user(&user.id, &user.name, db_name).await;
     }
 }
 
@@ -48,13 +48,13 @@ async fn setup_initial_game_data(db_name: &str) {
     }];
 
     for game in games {
-        insert_game(&game.id, &game.name, db_name);
+        insert_game(&game.id, &game.name, db_name).await;
     }
 }
 
 async fn setup_initial_data(db_name: &str) {
     setup_initial_game_data(db_name).await;
-    setup_initial_game_data(db_name).await;
+    setup_initial_user_data(db_name).await;
 }
 
 #[tokio::test]
@@ -78,7 +78,7 @@ async fn read_and_write_leaderboard_data() {
     let test_context = TestContext::new("read_and_write_leaderboard_data");
     let leaderboard_path = "/api/v1/leaderboard";
 
-    setup_initial_data(&test_context.db_name);
+    setup_initial_data(&test_context.db_name).await;
 
     let app: axum::Router = create_router(&test_context.db_name);
 

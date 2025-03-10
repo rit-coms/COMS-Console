@@ -42,12 +42,13 @@ pub fn establish_connection(db_name: &str) -> SqliteConnection {
     // TODO handle database connection error
 }
 
-pub async fn insert_game(id_s: &str, name_s: &str, db_name: &str) -> QueryResult<usize> {
+pub async fn insert_game(id_s: &str, name_s: &str, db_name: &str) -> usize {
     use self::schema::games::dsl::*;
     let connection = &mut establish_connection(db_name);
     insert_into(games)
         .values((id.eq(id_s), name.eq(name_s)))
         .execute(connection)
+        .expect("Failed to insert game")
 }
 
 pub async fn insert_leaderboard_entry(
