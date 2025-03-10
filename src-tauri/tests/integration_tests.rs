@@ -4,9 +4,13 @@ use app::{
     db::{
         create_user, get_user, insert_game,
         models::{Game, User},
-        schema::games,
+        schema::{games, leaderboard},
     },
-    game_dev_api::{create_router, handlers::LeaderboardEntry, setup_game_dev_api},
+    game_dev_api::{
+        create_router,
+        handlers::{LeaderboardEntry, LeaderboardGetParams, LeaderboardScope},
+        setup_game_dev_api,
+    },
 };
 use axum::ServiceExt;
 use axum_test::TestServer;
@@ -72,6 +76,7 @@ async fn read_and_write_user_table_db() {
 #[tokio::test]
 async fn read_and_write_leaderboard_data() {
     let test_context = TestContext::new("read_and_write_leaderboard_data");
+    let leaderboard_path = "/api/v1/leaderboard";
 
     setup_initial_data(&test_context.db_name);
 
@@ -82,17 +87,35 @@ async fn read_and_write_leaderboard_data() {
     let value_name: String = String::from("score");
     let value_num: i64 = 100;
 
-    let response: axum_test::TestResponse = server
-        .post("/api/v1/leaderboard")
+    let post_response: axum_test::TestResponse = server
+        .post(leaderboard_path)
         .json(&LeaderboardEntry {
             value_name: value_name.clone(),
             value_num: value_num,
         })
         .await;
 
-    response.assert_status_ok();
-    let response_entry: LeaderboardEntry = response.json::<LeaderboardEntry>();
+    post_response.assert_status_ok();
+    let post_response_entry: LeaderboardEntry = post_response.json::<LeaderboardEntry>();
 
-    assert_eq!(response_entry.value_name, value_name);
-    assert_eq!(response_entry.value_num, value_num);
+    assert_eq!(post_response_entry.value_name, value_name);
+    assert_eq!(post_response_entry.value_num, value_num);
+
+    let get_response: axum_test::TestResponse = server
+        .get(leaderboard_path)
+        .add_query_params(LeaderboardGetParams {
+            scope: Some(LeaderboardScope::User),
+            count: Some(1),
+            ascending: None,
+            value_name: Some(value_name.clone()),
+            offset: None,
+        })
+        .await;
+
+    get_response.assert_status_ok();
+    let get_response_entries = get_response.json::<Vec<LeaderboardEntry>>();
+    let get_response_entry = get_response_entries.get(0).expect("No entries in leaderboard get response");
+
+    assert_eq!(get_response_entry.value_name, value_name);
+    assert_eq!(get_response_entry.value_num, value_num);
 }

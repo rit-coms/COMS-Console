@@ -31,8 +31,8 @@ pub struct SaveDataEntry {
     data: serde_json::Value, // This data should be stored in the database as BSON data, is this the correct type?
 }
 
-#[derive(Deserialize)]
-enum LeaderboardScope {
+#[derive(Deserialize, Serialize)]
+pub enum LeaderboardScope {
     User,
     Global,
 }
@@ -47,14 +47,15 @@ pub async fn set_leaderboard(
 
     // Save entry to database
     // TODO: Can I return the query response from this function?
-    let _ = db::insert_leaderboard_entry(
+    db::insert_leaderboard_entry(
         user_id,
         game_id,
         payload.value_name.as_str(),
         payload.value_num,
         &state.db_name,
     )
-    .await;
+    .await
+    .expect("Falied to enter leaderboard entry");
 
     Json(serde_json::json!({
         "value_name":payload.value_name,
@@ -62,13 +63,13 @@ pub async fn set_leaderboard(
     }))
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct LeaderboardGetParams {
-    scope: Option<LeaderboardScope>,
-    count: Option<i64>,
-    ascending: Option<bool>,
-    value_name: Option<String>,
-    offset: Option<i64>,
+    pub scope: Option<LeaderboardScope>,
+    pub count: Option<i64>,
+    pub ascending: Option<bool>,
+    pub value_name: Option<String>,
+    pub offset: Option<i64>,
 }
 
 pub async fn get_leaderboard(

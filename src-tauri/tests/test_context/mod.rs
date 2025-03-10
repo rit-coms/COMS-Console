@@ -5,8 +5,8 @@ use std::{env, fs::remove_file, path::Path};
 use app::db::{establish_connection, get_db_path};
 use app::game_dev_api::setup_game_dev_api;
 use diesel::RunQueryDsl;
-use dotenvy::dotenv;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
+use dotenvy::dotenv;
 
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
 
