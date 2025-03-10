@@ -230,14 +230,13 @@ pub async fn get_save(user_id_s: &str, game_id_s: &str, file_name_s: &str, db_na
 }
 
 mod tests {
-    
-    extern crate tokio;
+    use super::*;
+    use crate::db::test_context::TestContext;
 
     #[tokio::test]
     pub async fn test_db() {
         use uuid::Uuid;
-
-        let db_name = "local";
+        let test_context = TestContext::new("test_db");
 
         let mut buffer = Uuid::encode_buffer();
         // create test user
@@ -245,17 +244,25 @@ mod tests {
         let name_s = "A random user";
 
         let mut buffer = Uuid::encode_buffer();
-        let user = create_user(user_id_s, name_s, db_name).await;
+        let user = create_user(user_id_s, name_s, &test_context.db_name).await;
         let game_id_s = Uuid::new_v4().as_simple().encode_lower(&mut buffer);
         let example_game_name = "Example Game";
 
-        insert_game(game_id_s, example_game_name, db_name).await;
+        insert_game(game_id_s, example_game_name, &test_context.db_name).await;
 
-        insert_leaderboard_entry(user_id_s, game_id_s, "spaghetti", 10, db_name).await;
+        insert_leaderboard_entry(user_id_s, game_id_s, "spaghetti", 10, &test_context.db_name)
+            .await;
 
         let file_name_s = "testpath";
         let data_b = "random_data".as_bytes().to_owned();
 
-        set_save(user_id_s, game_id_s, file_name_s, &data_b, db_name).await;
+        set_save(
+            user_id_s,
+            game_id_s,
+            file_name_s,
+            &data_b,
+            &test_context.db_name,
+        )
+        .await;
     }
 }
