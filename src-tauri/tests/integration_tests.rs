@@ -14,7 +14,6 @@ use app::{
 };
 use axum_test::TestServer;
 
-#[macro_use]
 extern crate diesel_migrations;
 
 async fn setup_initial_user_data(db_name: &str) {
