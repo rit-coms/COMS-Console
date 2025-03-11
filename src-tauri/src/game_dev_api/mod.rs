@@ -20,13 +20,17 @@ pub mod handlers;
 /// # Example
 ///
 /// ```rust
-/// let app = create_router("local");
+/// use app::game_dev_api::create_router;
 ///
-/// let listener = tokio::net::TcpListener::bind("127.0.0.1:8000")
-///     .await
-///     .unwrap();
+/// async fn setup_api() {
+///     let app = create_router("local");
+///
+///     let listener = tokio::net::TcpListener::bind("127.0.0.1:8000")
+///         .await
+///         .unwrap();
 ///     
-/// axum::serve(listener, app).await.unwrap();
+///     axum::serve(listener, app).await.unwrap();
+/// }
 /// ```
 pub fn create_router(db_name: &str) -> Router {
     let route_prefix: String = format!("/api/v{}", VERSION.to_string());
