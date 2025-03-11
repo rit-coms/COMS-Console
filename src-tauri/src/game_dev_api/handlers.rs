@@ -32,6 +32,8 @@ pub enum LeaderboardScope {
     Global,
 }
 
+/// Handles HTTP post requests for the axum webserver by inserting the given entry in the
+/// SQLite database.
 pub async fn set_leaderboard(
     State(state): State<ApiState>,
     Json(payload): Json<LeaderboardEntry>,
@@ -67,6 +69,7 @@ pub struct LeaderboardGetParams {
     pub offset: Option<i64>,
 }
 
+/// Handles HTTP leaderboard get requests for the axum webserver
 pub async fn get_leaderboard(
     State(state): State<ApiState>,
     params: Query<LeaderboardGetParams>,
@@ -120,6 +123,7 @@ pub async fn get_leaderboard(
     Json(json_response)
 }
 
+// Handles save-data HTTP post requests for the axum webserver
 pub async fn set_save_data(
     State(state): State<ApiState>,
     Json(payload): Json<SaveDataEntry>,
@@ -152,8 +156,9 @@ pub struct SaveDataGetParams {
     pub ascending: Option<bool>,
 }
 
+/// Handles save-data HTTP get requests for the axum webserver.
 /// Can either get a list of save files for current user or
-/// get a specific file by user and name
+/// get a specific file by user and name.
 pub async fn get_save_data(
     State(state): State<ApiState>,
     params: Query<SaveDataGetParams>,
