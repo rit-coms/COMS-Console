@@ -6,7 +6,28 @@ use dotenvy::dotenv;
 
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
 
-/// This struct is to be used for setting up and automatically deleting database instances for testing
+/// This struct is to be used for setting up and automatically deleting database instances for testing.
+/// * When this struct is created with new(), a temporary sqlite database is setup in the path designated
+/// by the DATABASE_URL environment variable.
+/// * When this struct falls out of scope, the temporary database file is automatically deleted.
+/// # Usage
+/// ```rust
+/// #[test]
+/// fn test_db() {
+///     let test_context = TestContext::new("read_and_write_user_table_db");
+///
+///     // create test user
+///     let user_id_s = "1141245215512";
+///     let name_s = "A random user";
+///
+///     create_user(user_id_s, name_s, &test_context.db_name).await;
+///
+///     let result = get_user(name_s, user_id_s, &test_context.db_name).await;
+///
+///     assert_eq!(user_id_s, result.id.as_str());
+///     assert_eq!(name_s, result.name.as_str());
+/// }
+/// ```
 pub struct TestContext {
     pub db_name: String,
 }
