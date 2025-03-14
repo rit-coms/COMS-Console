@@ -171,3 +171,52 @@ async fn read_and_write_save_data() {
     assert_eq!(get_response_entry.file_name, file_name);
     assert_eq!(get_response_entry.data, data);
 }
+
+#[tokio::test]
+async fn get_save_data_error() {
+    let test_context = TestContext::new("get_save_data_error");
+    let save_data_path = "/api/v1/save-data";
+
+    setup_initial_data(&test_context.db_name).await;
+
+    let app: axum::Router = create_router(&test_context.db_name);
+
+    let server: TestServer = TestServer::new(app).expect("Failed to set up test server");
+
+    let file_name: String = String::from("test data");
+    let data: serde_json::Value = serde_json::json!({
+        "level":12,
+        "money":1515,
+        "BAC":0.31,
+        "items": [
+            {"name": "Excalibur", "damage": 43},
+            {"name": "healing potion", "damage": 0}
+        ]
+    });
+
+    let post_response: axum_test::TestResponse = server
+        .post(save_data_path)
+        .json(&SaveDataEntry {
+            file_name: file_name.clone(),
+            data: data.clone(),
+        })
+        .await;
+
+    post_response.assert_status_ok();
+    let post_response_entry: SaveDataEntry = post_response.json::<SaveDataEntry>();
+
+    assert_eq!(post_response_entry.file_name, file_name);
+    assert_eq!(post_response_entry.data, data);
+
+    let get_missing_params_error_response: axum_test::TestResponse = server
+        .get(save_data_path)
+        .add_query_params(SaveDataGetParams {
+            file_name: Some(file_name.clone()),
+            count: Some(10),
+            offset: None,
+            ascending: None,
+        })
+        .await;
+
+    get_missing_params_error_response.assert_status_bad_request();
+}

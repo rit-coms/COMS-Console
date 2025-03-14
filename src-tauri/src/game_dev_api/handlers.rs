@@ -173,7 +173,9 @@ pub async fn get_save_data(
     let file_name_s: Option<String>;
     let entry_count: Option<i64>;
     match (params.file_name.clone(), params.count) {
-        (Some(_), Some(_)) => return StatusCode::BAD_REQUEST.into_response(),
+        (Some(_), Some(_)) => {
+            return StatusCode::BAD_REQUEST.into_response();
+        }
         (Some(filename), None) => {
             file_name_s = Some(filename);
             entry_count = None;
@@ -212,7 +214,7 @@ pub async fn get_save_data(
         }));
     }
 
-    println!("{}", serde_json::to_string_pretty(&json_response).unwrap());
+    // println!("{}", serde_json::to_string_pretty(&json_response).unwrap());
 
     Json(json_response).into_response()
 }
