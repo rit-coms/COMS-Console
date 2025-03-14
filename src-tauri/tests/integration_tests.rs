@@ -219,4 +219,59 @@ async fn get_save_data_error() {
         .await;
 
     get_missing_params_error_response.assert_status_bad_request();
+
+    let get_too_large_error_response: axum_test::TestResponse = server
+        .get(save_data_path)
+        .add_query_params(SaveDataGetParams {
+            file_name: None,
+            count: Some(100),
+            offset: None,
+            ascending: None,
+        })
+        .await;
+
+    get_too_large_error_response.assert_status_payload_too_large();
+}
+
+#[tokio::test]
+async fn get_leaderboard_data_error() {
+    let test_context = TestContext::new("get_leaderboard_data_error");
+    let leaderboard_path = "/api/v1/leaderboard";
+
+    setup_initial_data(&test_context.db_name).await;
+
+    let app: axum::Router = create_router(&test_context.db_name);
+
+    let server: TestServer = TestServer::new(app).expect("Failed to set up test server");
+
+    let value_name: String = String::from("score");
+    let value_num: i64 = 100;
+
+    let post_response: axum_test::TestResponse = server
+        .post(leaderboard_path)
+        .json(&LeaderboardEntry {
+            value_name: value_name.clone(),
+            value_num: value_num,
+        })
+        .await;
+
+    post_response.assert_status_ok();
+
+    let post_response_entry: LeaderboardEntry = post_response.json::<LeaderboardEntry>();
+
+    assert_eq!(post_response_entry.value_name, value_name);
+    assert_eq!(post_response_entry.value_num, value_num);
+
+    let get_response: axum_test::TestResponse = server
+        .get(leaderboard_path)
+        .add_query_params(LeaderboardGetParams {
+            scope: Some(LeaderboardScope::User),
+            count: Some(101),
+            ascending: None,
+            value_name: Some(value_name.clone()),
+            offset: None,
+        })
+        .await;
+
+    get_response.assert_status_payload_too_large();
 }

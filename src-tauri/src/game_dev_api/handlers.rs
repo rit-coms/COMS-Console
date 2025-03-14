@@ -81,7 +81,7 @@ pub async fn get_leaderboard(
     // TODO: add error http response to handle when count > 100
     if let Some(entry_count) = params.count {
         if entry_count > 100 {
-            count = Some(100);
+            return StatusCode::PAYLOAD_TOO_LARGE.into_response();
         } else {
             count = Some(entry_count);
         }
@@ -120,7 +120,7 @@ pub async fn get_leaderboard(
         }));
     }
 
-    Json(json_response)
+    Json(json_response).into_response()
 }
 
 // Handles save-data HTTP post requests for the axum webserver
