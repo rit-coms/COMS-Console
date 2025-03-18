@@ -76,6 +76,7 @@ dependencies = [
  "dotenvy",
  "http-body-util",
  "libsqlite3-sys",
+ "regex",
  "serde",
  "serde_json",
  "serde_with",
