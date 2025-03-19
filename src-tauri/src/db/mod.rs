@@ -134,6 +134,9 @@ fn validate_save_data_params(
     }
 }
 
+/// # Errors
+/// * If both regx and filename_s parameters are passed as Some
+/// * If regex is invalid or greater than the size limit
 pub async fn get_save_data(
     game_id_s: &Option<String>,
     user_id_s: &Option<String>,
