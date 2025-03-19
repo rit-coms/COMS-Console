@@ -10,7 +10,7 @@ pub struct LeaderboardEntry {
     pub user_id: String,
     pub game_id: String,
     pub value_name: String,
-    pub value_num: i64
+    pub value_num: f64
 }
 
 #[derive(Queryable, Selectable, Debug)]

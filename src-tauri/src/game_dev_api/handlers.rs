@@ -17,7 +17,7 @@ pub struct ApiState {
 #[derive(Deserialize, Serialize)]
 pub struct LeaderboardEntry {
     pub value_name: String,
-    pub value_num: i64,
+    pub value_num: f64,
 }
 
 #[derive(Deserialize, Serialize)]

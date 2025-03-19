@@ -54,7 +54,7 @@ pub async fn insert_leaderboard_entry(
     user_id_s: &str,
     game_id_s: &str,
     value_name_s: &str,
-    value_num_i: i64,
+    value_num_f: f64,
     db_name: &str,
 ) -> QueryResult<usize> {
     use self::schema::leaderboard::dsl::*;
@@ -65,7 +65,7 @@ pub async fn insert_leaderboard_entry(
             user_id.eq(user_id_s),
             game_id.eq(game_id_s),
             value_name.eq(value_name_s),
-            value_num.eq(value_num_i),
+            value_num.eq(value_num_f),
         ))
         .on_conflict((user_id, game_id, value_name))
         .do_update()
@@ -274,7 +274,7 @@ mod tests {
 
         insert_game(game_id_s, example_game_name, &test_context.db_name).await;
 
-        insert_leaderboard_entry(user_id_s, game_id_s, "spaghetti", 10, &test_context.db_name)
+        insert_leaderboard_entry(user_id_s, game_id_s, "spaghetti", 10.0, &test_context.db_name)
             .await;
 
         let file_name_s = "testpath";

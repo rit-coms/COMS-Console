@@ -79,7 +79,7 @@ async fn read_and_write_leaderboard_data() {
     let server: TestServer = TestServer::new(app).expect("Failed to set up test server");
 
     let value_name: String = String::from("score");
-    let value_num: i64 = 100;
+    let value_num: f64 = 100.0;
 
     let post_response: axum_test::TestResponse = server
         .post(leaderboard_path)
@@ -239,7 +239,7 @@ async fn get_leaderboard_data_error() {
     let server: TestServer = TestServer::new(app).expect("Failed to set up test server");
 
     let value_name: String = String::from("score");
-    let value_num: i64 = 100;
+    let value_num: f64 = 100.0;
 
     let post_response: axum_test::TestResponse = server
         .post(leaderboard_path)
