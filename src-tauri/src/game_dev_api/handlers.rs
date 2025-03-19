@@ -151,9 +151,7 @@ pub async fn set_save_data(
 #[derive(Deserialize, Serialize)]
 pub struct SaveDataGetParams {
     pub file_name: Option<String>,
-    pub count: Option<i64>,
-    pub offset: Option<i64>,
-    pub ascending: Option<bool>,
+    pub regex: Option<String>,
 }
 
 /// Handles save-data HTTP get requests for the axum webserver.
@@ -167,54 +165,31 @@ pub async fn get_save_data(
     let game_id: String = String::from("0"); // Example for now
     let user_id: String = String::from("0");
 
-    // File names should be unique per game, so if both file_name and count are
-    // provided, the developer should know that they can't do that. One and only
-    // one of these parameters should be provided.
-    let file_name_s: Option<String>;
-    let entry_count: Option<i64>;
-    match (params.file_name.clone(), params.count) {
-        (Some(_), Some(_)) => {
-            return StatusCode::BAD_REQUEST.into_response();
-        }
-        (Some(filename), None) => {
-            file_name_s = Some(filename);
-            entry_count = None;
-        }
-        (None, Some(num_entries)) => {
-            if num_entries > 50 {
-                return StatusCode::PAYLOAD_TOO_LARGE.into_response();
-            }
-            file_name_s = None;
-            entry_count = Some(num_entries);
-        }
-        (None, None) => {
-            file_name_s = None;
-            entry_count = Some(10)
-        }
-    }
-
     let save_data_entries = db::get_save_data(
-        Some(game_id),
-        Some(user_id),
-        entry_count,
-        params.offset,
-        params.ascending,
+        &Some(game_id),
+        &Some(user_id),
+        &params.file_name,
+        &params.regex,
         &state.db_name,
     )
     .await;
 
-    let mut json_response = Vec::new();
+    match save_data_entries {
+        Ok(save_data) => {
+            let mut json_response = Vec::new();
 
-    // TODO: add time_stamp
-    // TODO: parse binary data into json
-    for entry in save_data_entries {
-        json_response.push(serde_json::json!({
-            "data":serde_json::from_slice::<Value>(&entry.data).expect("Failed to deserialize BSON data"),
-            "file_name": entry.file_name
-        }));
+            // TODO: add time_stamp
+            // TODO: parse binary data into json
+            for entry in save_data {
+                json_response.push(serde_json::json!({
+                            "data":serde_json::from_slice::<Value>(&entry.data).expect("Failed to deserialize BSON data"),
+                            "file_name": entry.file_name
+                        }));
+            }
+            return Json(json_response).into_response();
+        }
+        Err(e) => (StatusCode::BAD_REQUEST, e.to_string()).into_response(),
     }
 
     // println!("{}", serde_json::to_string_pretty(&json_response).unwrap());
-
-    Json(json_response).into_response()
 }

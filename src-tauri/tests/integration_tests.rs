@@ -156,9 +156,7 @@ async fn read_and_write_save_data() {
         .get(save_data_path)
         .add_query_params(SaveDataGetParams {
             file_name: Some(file_name.clone()),
-            count: None,
-            offset: None,
-            ascending: None,
+            regex: None,
         })
         .await;
 
@@ -208,29 +206,25 @@ async fn get_save_data_error() {
     assert_eq!(post_response_entry.file_name, file_name);
     assert_eq!(post_response_entry.data, data);
 
-    let get_missing_params_error_response: axum_test::TestResponse = server
-        .get(save_data_path)
-        .add_query_params(SaveDataGetParams {
-            file_name: Some(file_name.clone()),
-            count: Some(10),
-            offset: None,
-            ascending: None,
-        })
-        .await;
-
-    get_missing_params_error_response.assert_status_bad_request();
-
-    let get_too_large_error_response: axum_test::TestResponse = server
+    let get_invalid_regex_error_response: axum_test::TestResponse = server
         .get(save_data_path)
         .add_query_params(SaveDataGetParams {
             file_name: None,
-            count: Some(100),
-            offset: None,
-            ascending: None,
+            regex: Some(String::from(r"\")),
         })
         .await;
 
-    get_too_large_error_response.assert_status_payload_too_large();
+    get_invalid_regex_error_response.assert_status_bad_request();
+
+    let get_invalid_params_error_response: axum_test::TestResponse = server
+        .get(save_data_path)
+        .add_query_params(SaveDataGetParams {
+            file_name: Some(String::from("test")),
+            regex: Some(String::from("test")),
+        })
+        .await;
+
+    get_invalid_params_error_response.assert_status_bad_request();
 }
 
 #[tokio::test]

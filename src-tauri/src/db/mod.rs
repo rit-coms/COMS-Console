@@ -1,6 +1,9 @@
+use anyhow::{Error, Ok};
+use axum::http::StatusCode;
 use diesel::{insert_into, prelude::*, upsert::excluded};
 use dotenvy::dotenv;
 use models::*;
+use regex::Regex;
 use std::env;
 use std::option::Option;
 use std::path::Path;
@@ -121,15 +124,26 @@ pub async fn get_leaderboard(
     results
 }
 
+fn validate_save_data_params(
+    file_name: &Option<String>,
+    regx: &Option<String>,
+) -> Result<(), Error> {
+    match (file_name, regx) {
+        (Some(_), Some(_)) => Err(Error::msg("Save data con only be searched by file name or matching a regular expression, not both")),
+        _ => Ok(())
+    }
+}
+
 pub async fn get_save_data(
-    game_id_s: Option<String>,
-    user_id_s: Option<String>,
-    num_entries: Option<i64>,
-    offset: Option<i64>,
-    ascending: Option<bool>, // By time_stamp
+    game_id_s: &Option<String>,
+    user_id_s: &Option<String>,
+    file_name_s: &Option<String>,
+    regx: &Option<String>,
     db_name: &str,
-) -> Vec<Save> {
+) -> Result<Vec<Save>, Error> {
     use self::schema::saves::dsl::*;
+    validate_save_data_params(file_name_s, regx)?;
+
     let mut connection = establish_connection(db_name);
 
     let mut query = saves.into_boxed();
@@ -142,12 +156,8 @@ pub async fn get_save_data(
         query = query.filter(user_id.eq(user_id_s));
     }
 
-    if let Some(num_entries) = num_entries {
-        query = query.limit(num_entries)
-    }
-
-    if let Some(offset) = offset {
-        query = query.offset(offset)
+    if let Some(file_name_s) = file_name_s {
+        query = query.filter(file_name.eq(file_name_s));
     }
 
     // TODO: uncomment when time_stamps implemented
@@ -161,11 +171,22 @@ pub async fn get_save_data(
     //     query = query.order(time_stamp.desc());
     // }
 
-    let results = query
+    let mut results: Vec<Save> = query
         .get_results(&mut connection)
         .expect("Error loading save data");
 
-    results
+    if let Some(regex) = regx {
+        let re = Regex::new(&regex)?;
+
+        results = results
+            .into_iter()
+            .filter(|entry| re.is_match(&entry.file_name))
+            .collect();
+
+        Ok(results)
+    } else {
+        Ok(results)
+    }
 }
 
 pub async fn create_user(id_s: &str, name_s: &str, db_name: &str) -> User {
