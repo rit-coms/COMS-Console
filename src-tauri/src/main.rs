@@ -21,8 +21,11 @@ fn main() {
         .setup(|app| {
             app.manage(Mutex::new(AppState::default()));
             // tauri::async_runtime::spawn(db::test_db());
-            app.autolaunch().enable()?;
             tauri::async_runtime::spawn(setup_game_dev_api("local"));
+            if cfg!(feature = "autostart") {
+                // Only enable autolaunch on raspberry pi
+                app.autolaunch().enable()?;
+            }
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![get_game_info, play_game])
