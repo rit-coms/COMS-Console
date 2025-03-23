@@ -2,12 +2,15 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use frontend_api::{get_game_info, play_game, AppState};
+use game_dev_api::setup_game_dev_api;
 use tauri::Manager;
 use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 
 use std::sync::Mutex;
 
 mod frontend_api;
+mod game_dev_api;
+mod db;
 
 fn main() {
     tauri::Builder::default()
@@ -17,8 +20,10 @@ fn main() {
         ))
         .setup(|app| {
             app.manage(Mutex::new(AppState::default()));
+            // tauri::async_runtime::spawn(db::test_db());
+            tauri::async_runtime::spawn(setup_game_dev_api("local"));
             if cfg!(feature = "autostart") {
-                // Only enable on raspberry pi
+                // Only enable autolaunch on raspberry pi
                 app.autolaunch().enable()?;
             }
             Ok(())

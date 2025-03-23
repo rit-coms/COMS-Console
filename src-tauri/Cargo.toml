@@ -22,6 +22,21 @@ chrono = { version = "0.4.31", features = ["serde"] }
 anyhow = "1.0.89"
 url = "2.5.2"
 tauri-plugin-autostart = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
+diesel = { version = "2.2.0", features = ["sqlite", "returning_clauses_for_sqlite_3_35", "chrono"] }
+# build libsqlite3 as part of the build process
+# uncomment this line if you run into setup issues
+libsqlite3-sys = { version = "0.30", features = ["bundled"] }
+dotenvy = "0.15"
+uuid = "1.11.0"
+tokio = { version = "1.29.1", features = ["full"] }
+axum = "0.8.1"
+serde_with = "3.0.0"
+tower = "0.5.2"
+http-body-util = "0.1.2"
+axum-macros = "0.3.8"
+diesel_migrations = "2.0.0"
+axum-test = "17.2.0"
+regex = "1.9.6"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem and the built-in dev server is disabled.
