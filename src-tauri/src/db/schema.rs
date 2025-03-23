@@ -4,6 +4,7 @@ diesel::table! {
     games (id) {
         id -> Text,
         name -> Text,
+        installed -> Bool
     }
 }
 

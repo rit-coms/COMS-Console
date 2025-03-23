@@ -1,3 +1,4 @@
+use crate::db::insert_game;
 use anyhow::Error;
 use chrono::{serde::ts_seconds_option, DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -256,10 +257,14 @@ pub fn get_game_info(
     state: State<'_, Mutex<AppState>>,
     app_handle: AppHandle,
 ) -> Result<Vec<GameInfo>, ErrorType> {
-    if cfg!(feature = "autostart") {
+    if cfg!(feature = "quackbox-raspi") {
         get_game_info_database(state, app_handle)
     } else {
-        get_game_info_files(state, app_handle)
+        let games = get_game_info_files(state, app_handle)?;
+        for game in games.iter() {
+            insert_game(&game.id.to_string(), &game.title, true, "local");
+        }
+        Ok(games)
     }
 }
 

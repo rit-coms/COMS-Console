@@ -41,11 +41,11 @@ pub fn establish_connection(db_name: &str) -> SqliteConnection {
     // TODO handle database connection error
 }
 
-pub async fn insert_game(id_s: &str, name_s: &str, db_name: &str) -> usize {
+pub fn insert_game(id_s: &str, name_s: &str, is_installed: bool, db_name: &str) -> usize {
     use self::schema::games::dsl::*;
     let connection = &mut establish_connection(db_name);
     insert_into(games)
-        .values((id.eq(id_s), name.eq(name_s)))
+        .values((id.eq(id_s), name.eq(name_s), installed.eq(is_installed)))
         .execute(connection)
         .expect("Failed to insert game")
 }
@@ -272,7 +272,7 @@ mod tests {
         let game_id_s = Uuid::new_v4().as_simple().encode_lower(&mut buffer);
         let example_game_name = "Example Game";
 
-        insert_game(game_id_s, example_game_name, &test_context.db_name).await;
+        insert_game(game_id_s, example_game_name, true, &test_context.db_name);
 
         insert_leaderboard_entry(user_id_s, game_id_s, "spaghetti", 10.0, &test_context.db_name)
             .await;

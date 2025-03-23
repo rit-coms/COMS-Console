@@ -27,7 +27,8 @@ pub struct User {
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct Game {
     pub id: String,
-    pub name: String
+    pub name: String,
+    pub installed: bool
 }
 
 #[derive(Queryable, Selectable, Debug)]
