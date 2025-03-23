@@ -39,10 +39,11 @@ async fn setup_initial_game_data(db_name: &str) {
     let games = vec![Game {
         id: String::from("0"),
         name: String::from("game0"),
+        installed: true,
     }];
 
     for game in games {
-        insert_game(&game.id, &game.name, db_name).await;
+        insert_game(&game.id, &game.name, game.installed, db_name);
     }
 }
 

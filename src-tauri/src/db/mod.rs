@@ -19,6 +19,7 @@ pub mod test_context;
 ///
 /// Ex: if DATABASE_URL="C:/Users/username/AppData/Roaming/coms-console/local.db", then db_name should be "local".
 pub fn get_db_path(db_name: &str) -> String {
+    dotenvy::dotenv().expect("Please create a .env file in the root directory of the project");
     Path::new(&env::var("DATABASE_URL").expect("DATABASE_URL must be set"))
         .parent()
         .unwrap()
