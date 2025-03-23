@@ -46,6 +46,9 @@ pub fn insert_game(id_s: &str, name_s: &str, is_installed: bool, db_name: &str) 
     let connection = &mut establish_connection(db_name);
     insert_into(games)
         .values((id.eq(id_s), name.eq(name_s), installed.eq(is_installed)))
+        .on_conflict(name)
+        .do_update()
+        .set(installed.eq(is_installed))
         .execute(connection)
         .expect("Failed to insert game")
 }
@@ -274,8 +277,14 @@ mod tests {
 
         insert_game(game_id_s, example_game_name, true, &test_context.db_name);
 
-        insert_leaderboard_entry(user_id_s, game_id_s, "spaghetti", 10.0, &test_context.db_name)
-            .await;
+        insert_leaderboard_entry(
+            user_id_s,
+            game_id_s,
+            "spaghetti",
+            10.0,
+            &test_context.db_name,
+        )
+        .await;
 
         let file_name_s = "testpath";
         let data_b = "random_data".as_bytes().to_owned();
