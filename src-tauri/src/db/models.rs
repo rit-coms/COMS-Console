@@ -1,7 +1,8 @@
 use diesel::prelude::*;
+use serde::Serialize;
 
 
-#[derive(Queryable, Selectable, Debug)]
+#[derive(Queryable, Selectable, Debug, Serialize)]
 #[diesel(table_name = crate::db::schema::leaderboard)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct LeaderboardEntry {
@@ -9,7 +10,7 @@ pub struct LeaderboardEntry {
     pub user_id: String,
     pub game_id: String,
     pub value_name: String,
-    pub value_num: i64
+    pub value_num: f64
 }
 
 #[derive(Queryable, Selectable, Debug)]
@@ -26,7 +27,8 @@ pub struct User {
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct Game {
     pub id: String,
-    pub name: String
+    pub name: String,
+    pub installed: bool
 }
 
 #[derive(Queryable, Selectable, Debug)]

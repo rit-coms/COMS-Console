@@ -4,6 +4,7 @@ diesel::table! {
     games (id) {
         id -> Text,
         name -> Text,
+        installed -> Bool,
     }
 }
 
@@ -13,7 +14,7 @@ diesel::table! {
         user_id -> Text,
         game_id -> Text,
         value_name -> Text,
-        value_num -> BigInt,
+        value_num -> Double,
     }
 }
 
