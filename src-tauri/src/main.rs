@@ -8,6 +8,7 @@ use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 use std::sync::Mutex;
 
 mod frontend_api;
+mod db;
 
 fn main() {
     tauri::Builder::default()
