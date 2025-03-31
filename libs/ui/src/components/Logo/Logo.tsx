@@ -18,6 +18,7 @@ export const Logo = ({
     // Base Props
     className,
     id,
+    dataId,
     ...props
 
 }: LogoProps): ReactNode => {
@@ -32,13 +33,23 @@ export const Logo = ({
     return (
         <div 
             className={classNames}
+            data-id={dataId && dataId}
             {...props}
         >
             {variant !== "text" &&
-                <img src={src} className={styles.logoImage}/>
+                <img 
+                    src={src} 
+                    className={styles.logoImage} 
+                    data-id={dataId && `${dataId}-logo`}
+                />
             }
             {variant !== "logo" &&
-                <span className={styles.logoText}>QuackBox</span>
+                <span 
+                    className={styles.logoText}
+                    data-id={dataId && `${dataId}-name`}
+                >
+                    QuackBox
+                </span>
             }
         </div>
     )

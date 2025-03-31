@@ -23,6 +23,7 @@ export const Icon = ({
     // Base Props
     className,
     id,
+    dataId,
     ...props
 
 }: IconProps): ReactNode => {
@@ -40,6 +41,7 @@ export const Icon = ({
     return (
         <div 
             className={classNames}
+            data-id={dataId && dataId}
             {...props}
         >
             <Icon />

@@ -27,6 +27,7 @@ export const Alert = ({
     // Base Props
     className,
     id,
+    dataId,
     ...props
 
 }: AlertProps): ReactNode => {
@@ -57,17 +58,21 @@ export const Alert = ({
     return (
         isVisible && 
             <div 
-                className={classNames} 
+                className={classNames}
+                data-id={dataId && dataId} 
                 {...props}
             >
                 <div className={styles.alertContent}>
                     
-                    <span className={styles.alertMessage}>
+                    <span 
+                        className={styles.alertMessage}
+                        data-id={dataId && `${dataId}-message`}>
                         {message}
                     </span> 
                    
                     <CloseButton 
                         className={styles.alertClose}
+                        dataId={dataId && `${dataId}-close-button`}
                         onClick={onClose || handleOnClose}
                         height={"small"} 
                     />

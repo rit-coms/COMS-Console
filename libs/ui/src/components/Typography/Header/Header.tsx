@@ -24,6 +24,7 @@ export const Header = ({
     // Base Props
     className,
     id,
+    dataId,
     ...props
 
 }: HeaderProps): ReactNode => {
@@ -42,6 +43,7 @@ export const Header = ({
     return (
         <Tag 
             className={classNames}
+            data-id={dataId && dataId}
             {...props}
         >
             {children}

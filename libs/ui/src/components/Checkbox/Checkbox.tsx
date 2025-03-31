@@ -26,6 +26,7 @@ export const Checkbox = ({
     // Base Props
     className,
     id,
+    dataId,
     ...props
 
 }: CheckboxProps): ReactNode => {
@@ -41,12 +42,17 @@ export const Checkbox = ({
     return (
         <div 
             className={classNames} 
+            data-id={dataId && dataId}
             {...props}
         >
-             <label className={styles.checkboxLabel}>
+             <label 
+                className={styles.checkboxLabel}
+                data-id={dataId && `${dataId}-label`}
+            >
                 
                 <input
                     className={styles.checkbox}
+                    data-id={dataId && `${dataId}-checkbox`}
                     checked={checked}
                     disabled={disabled}
                     onChange={(e) => onChange(e.target.checked)}

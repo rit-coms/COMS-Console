@@ -15,7 +15,7 @@ export const GameVariants_PlaceholderImage: Story = {
     render: () => (
         <Game
             title={"Horizon"}
-            imageUrl={"/assets/coming_soon.png"}
+            coverImage={"/assets/coming_soon.png"}
             placeholder={true}
             onClick={()=>{}}
         />

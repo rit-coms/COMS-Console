@@ -21,6 +21,7 @@ export const Caret_Default: Story = {
     args: {
         size: "5em",
         direction: "left",
+        disabled: false,
         color: "#99D6DE",
         strokeWidth: 4
     }

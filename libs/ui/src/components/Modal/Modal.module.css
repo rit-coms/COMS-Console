@@ -1,6 +1,5 @@
 
-.modalOverlay {
-    background-color: var(--color-black-30);
+.modalContainer {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -8,7 +7,11 @@
     width: 100vw;
     height: 100vh;
     top: 0;
-    z-index: 11;
+    z-index: 99;
+
+    &.modalOverlay {
+        background-color: var(--color-black-30);
+    }
 
     .modal {
         background-color: var(--color-white);
@@ -19,11 +22,13 @@
         border-radius: var(--border-radius);
         box-sizing: border-box;
         font-family: var(--font-family);
-        z-index: 12;
+        z-index: 100;
 
         &.default {
-            width: calc(100vw - (100vh * 0.2));
-            height: calc(100vh - (100vh * 0.2));
+            min-width: calc(100vw - (100vh * 0.2));
+            min-height: calc(100vh - (100vh * 0.2));
+            width: fit-content;
+            height: fit-content;
         }
 
         &.gameInfo {
@@ -31,6 +36,34 @@
             width: calc(70vw - (70vh * 0.2));
             min-height: 300px;
             height: calc(65vh - (65vh * 0.2));
+
+            .gameInfoContent {
+                display: flex;
+                flex-direction: row;
+                align-content: center;
+                overflow: hidden;
+                flex-grow: 1;
+                padding: 1.25em 1.25em 0em;
+                min-height: 0;
+
+                .gameImage {
+                    background-color: var(--color-grey);
+                    background-size: cover;
+                    position: relative;
+                    object-fit: cover;
+                    flex-shrink: 0;
+                    aspect-ratio: 3 / 4;
+                    width: 35%;
+                    height: auto;
+                    border-radius: var(--border-radius);
+                    overflow: hidden;
+                }
+
+                .gameDescription {
+                    display: flex;
+                    padding: 1em;
+                }
+            }
         }
 
         &.dialog {
@@ -58,29 +91,43 @@
             left: auto;
         }
 
-        & > .title {
+        & > .header {
+            flex-shrink: 0;
             padding: 1.25em 1em;
-            margin-bottom: 2vh;
+            margin-top: 2vh;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: clip;
         }
 
-        &.left > .title {
+        &.left > .header {
             text-align: left;
         }
 
-        &.center > .title {
+        &.center > .header {
             text-align: center;
         }
 
-        &.right > .title{
+        &.right > .header {
             text-align: right;
         }
 
-        & > .content {
+        & > .content, & > .alignContentCenter {
+            display: flex;
+            overflow: hidden;
             flex-grow: 1;
-            padding: 0em 1em;
+            padding: 2rem;
+            min-height: 0;
+        }
+
+        & > .alignContentCenter {
+            align-items: center;
+        }
+
+        & > .footer {
+            flex-shrink: 0;
+            margin-top: auto;
+            padding-top: 1.25em;
         }
 
         & > .gameInfoAction {

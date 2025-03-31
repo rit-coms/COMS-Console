@@ -1,4 +1,9 @@
 
+:root {
+    --x-offset: 12px;
+    --y-offset: 12px;
+}
+
 .toast {
     display: flex;
     align-items: center;
@@ -11,25 +16,27 @@
     font-size: var(--font-size-md);
     font-weight: bold;
     text-wrap: nowrap;
+    z-index: 101;
+    transition: opacity 0.5s ease-in-out;
 
     &.top-right {
-        top: var(--edge-offset);
-        right: var(--edge-offset);
+        top: var(--y-offset, --edge-offset);
+        right: var(--x-offset, --edge-offset);
     }
 
     &.bottom-right {
-        bottom: var(--edge-offset);
-        right: var(--edge-offset);
+        bottom: var(--y-offset, --edge-offset);
+        right: var(--x-offset, --edge-offset);
     }
 
     &.bottom-left {
-        bottom: var(--edge-offset);
-        left: var(--edge-offset);
+        bottom: var(--y-offset, --edge-offset);
+        left: var(--x-offset, --edge-offset);
     }
 
     &.top-left {
-        top: var(--edge-offset);
-        left: var(--edge-offset);
+        top: var(--y-offset, --edge-offset);
+        left: var(--x-offset, --edge-offset);
     }
 
     &.info {

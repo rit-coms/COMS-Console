@@ -13,19 +13,13 @@ type Story = StoryObj<typeof Caret>
 export const CaretDirections_Left: Story = {
     name: "Left",
     render: () => (
-        <Caret
-            direction={"left"}
-            onClick={() => {}}
-        />
+        <Caret direction={"left"} />
     )
 }
 
 export const CaretDirections_Right: Story = {
     name: "Right",
     render: () => (
-        <Caret
-            direction={"right"}
-            onClick={() => {}}
-        />
+        <Caret direction={"right"} />
     )
 }

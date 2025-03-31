@@ -20,7 +20,7 @@ export const Game_Default: Story = {
     args: {
         title: "Horizon",
         fontSize: "xlarge",
-        imageUrl: "/assets/horizon.png",
+        coverImage: "/assets/horizon.png",
         placeholder: false,
         onClick: () => {}
     }

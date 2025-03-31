@@ -13,8 +13,8 @@
     font-family: var(--font-family);
     font-size: calc(var(--font-size-sm) + 0.25rem);
     text-wrap: nowrap;
+    z-index: 101;
     
-    /* ALERT POSITIONS */
     &.top-right {
         top: var(--edge-offset);
         right: var(--edge-offset);
@@ -35,7 +35,6 @@
         left: var(--edge-offset);
     }
 
-    /* ALERT VARIANTS */
     &.info {
         background-color: var(--color-info);
         color: var(--color-info-outline);
@@ -87,7 +86,6 @@
             width: auto;
             height: 5vh;
 
-            /* ALERT CLOSE VARIANTS */
             .info &:hover {
                 background-color: var(--color-info-outline-30);
                 & path {

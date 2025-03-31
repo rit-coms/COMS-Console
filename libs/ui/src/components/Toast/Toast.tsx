@@ -1,5 +1,5 @@
 
-import { ReactNode, useEffect, useState } from "react"
+import { CSSProperties, ReactNode, useEffect, useState } from "react"
 import { AlertVariants, BaseProps, Positions } from "../../types"
 import { Logo } from "../Logo/Logo"
 import styles from "./Toast.module.css"
@@ -7,6 +7,7 @@ import styles from "./Toast.module.css"
 export interface ToastProps extends BaseProps {
 
     // Content Props
+    toastId?: string
     message: string
 
     // Action Props
@@ -16,19 +17,25 @@ export interface ToastProps extends BaseProps {
     iconSrc?: string
     position?: Positions
     variant: AlertVariants
+    xOffset?: string
+    yOffset?: string
 
 }
 
 export const Toast = ({
+    toastId,
     message,
     duration = 3000,
     iconSrc,
     position = "bottom-right",
     variant,
+    xOffset,
+    yOffset,
 
     // Base Props
     className,
     id,
+    dataId,
     ...props
 
 }: ToastProps): ReactNode => {
@@ -54,19 +61,26 @@ export const Toast = ({
     return (
         isVisible && 
             <div 
-                className={classNames} 
+                className={classNames}
+                style={{ "--x-offset": xOffset, "--y-offset": yOffset} as CSSProperties}
+                data-id={dataId && dataId}
+                id={toastId && toastId}
                 {...props}
             >
                 <div className={styles.toastContent}>
                     { iconSrc && 
                         <Logo 
                             className={styles.toastIcon}
+                            dataId={dataId && `${dataId}-logo`}
                             src={iconSrc}
                             variant={"logo"}
                         />
                     }
 
-                    <span className={styles.toastMessage}>
+                    <span 
+                        className={styles.toastMessage}
+                        data-id={dataId && `${dataId}-message`}
+                    >
                         {message}
                     </span> 
                 </div>

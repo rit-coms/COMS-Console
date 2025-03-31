@@ -1,9 +1,16 @@
 
 .pill {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
     border: var(--border-stroke-sm) solid var(--color-blue);
     border-radius: var(--border-radius);
     padding: 1vh 1.5vw;
     font-family: var(--font-family);
+    width: auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
 
     &.primary {
         background-color: var(--color-blue);

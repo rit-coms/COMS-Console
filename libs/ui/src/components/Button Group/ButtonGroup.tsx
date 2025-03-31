@@ -40,6 +40,7 @@ export const ButtonGroup = ({
     // Base Props
     className,
     id,
+    dataId,
     ...props
 
 }: ButtonGroupProps): ReactNode => {
@@ -62,6 +63,7 @@ export const ButtonGroup = ({
     return (
         <div 
             className={classNames}
+            data-id={dataId && dataId}
             style={{gap: gap}}
             {...props}
         >

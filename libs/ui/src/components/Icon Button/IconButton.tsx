@@ -26,6 +26,7 @@ export const IconButton = ({
     // Base Props
     className,
     id,
+    dataId,
     ...props
 
 }: IconButtonProps): ReactNode => {
@@ -46,6 +47,7 @@ export const IconButton = ({
     return (
         <button 
             className={classNames}
+            data-id={dataId && dataId}
             disabled={disabled} 
             {...props}
         >

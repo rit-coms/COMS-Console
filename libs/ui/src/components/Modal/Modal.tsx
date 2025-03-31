@@ -5,6 +5,7 @@ import { ActionButton } from "../Action Button/ActionButton"
 import { ButtonGroup } from "../Button Group/ButtonGroup"
 import { CloseButton } from "../Close Button/CloseButton"
 import { Header } from "../Typography/Header/Header"
+import { Text } from "../Typography/Text/Text"
 import styles from "./Modal.module.css"
 
 export interface ModalProps extends BaseProps {
@@ -15,6 +16,7 @@ export interface ModalProps extends BaseProps {
     confirmLabel?: string
     isOpen: boolean
     title?: string | ReactNode
+    subtitle?: string
 
     // Action Props
     onCancellation?: () => void
@@ -22,7 +24,12 @@ export interface ModalProps extends BaseProps {
     onConfirmation?: () => void
     
     // Styling Props
+    alignContentCenter?: boolean
     alignTitle?: "left" | "center" | "right"
+    confirmLabelColorPrimary?: boolean
+    disableActionButtons?: boolean
+    gameImageSrc?: string
+    overlay?: boolean
     variant?: "default" | "gameInfo" | "dialog" | "drawerLeft" | "drawerRight"
     
 }
@@ -33,15 +40,22 @@ export const Modal = ({
     confirmLabel,
     isOpen,
     title,
+    subtitle,
     onCancellation,
     onClose,
     onConfirmation,
+    alignContentCenter,
     alignTitle = "left",
+    confirmLabelColorPrimary = false,
+    disableActionButtons,
+    gameImageSrc,
+    overlay,
     variant = "default",
 
     // Base Props
     className,
     id,
+    dataId,
     ...props
 
 }: ModalProps): ReactNode => {
@@ -57,138 +71,80 @@ export const Modal = ({
 
     if (!isOpen) return null
 
-    const Actions = () => {
-
-        if (confirmLabel !== undefined && cancelLabel !== undefined) {
-
-            switch (variant) {
-                
-                case "gameInfo":
-                    return null
-
-                case "drawerLeft":
-                    return (
-                        <ButtonGroup bRLast bLFirstUnset>
-                            <ActionButton variant={"danger"} onClick={onCancellation}>{cancelLabel}</ActionButton>
-                            <ActionButton variant={"success"} onClick={onConfirmation}>{confirmLabel}</ActionButton>
-                        </ButtonGroup>
-                    )
-
-                case "drawerRight":
-                    return (
-                        <ButtonGroup bLFirst bRLastUnset>
-                            <ActionButton variant={"danger"} onClick={onCancellation}>{cancelLabel}</ActionButton>
-                            <ActionButton variant={"success"} onClick={onConfirmation}>{confirmLabel}</ActionButton>
-                        </ButtonGroup>
-                    )
-
-                default:
-                    return (
-                        <ButtonGroup bLFirst bRLast>
-                            <ActionButton variant={"danger"} onClick={onCancellation}>{cancelLabel}</ActionButton>
-                            <ActionButton variant={"success"} onClick={onConfirmation}>{confirmLabel}</ActionButton>
-                        </ButtonGroup>
-                    )
-            }
-
-        } else if (confirmLabel !== undefined) {
-
-            switch (variant) {
-
-                case "gameInfo":
-                    return (
-                        <div className={styles.gameInfoAction}>
-                            <ActionButton
-                                width={"stretch"}
-                                height={"medium"}
-                                variant={"success"} 
-                                onClick={onConfirmation}
-                            >
-                                {confirmLabel}
-                            </ActionButton>
-                        </div>
-                    )
-
-                case "drawerLeft":
-                    return (
-                        <ButtonGroup bR bLFirstUnset>
-                            <ActionButton variant={"success"} onClick={onConfirmation}>{confirmLabel}</ActionButton>
-                        </ButtonGroup>
-                    )
-
-                case "drawerRight":
-                    return (
-                        <ButtonGroup bL bRLastUnset>
-                            <ActionButton variant={"success"} onClick={onConfirmation}>{confirmLabel}</ActionButton>
-                        </ButtonGroup>
-                    )
-
-                default:
-                    return (
-                        <ButtonGroup bL bR>
-                            <ActionButton variant={"success"} onClick={onConfirmation}>{confirmLabel}</ActionButton>
-                        </ButtonGroup>
-                    )
-            }
-
-        } else if (cancelLabel !== undefined) {
-            switch (variant) {
-
-                case "gameInfo":
-                    return null
-
-                case "drawerLeft":
-                    return (
-                        <ButtonGroup bR bLFirstUnset>
-                            <ActionButton variant={"danger"} onClick={onCancellation}>{cancelLabel}</ActionButton>
-                        </ButtonGroup>
-                    )
-
-                case "drawerRight":
-                    return (
-                        <ButtonGroup bL bRLastUnset>
-                            <ActionButton variant={"danger"} onClick={onCancellation}>{cancelLabel}</ActionButton>
-                        </ButtonGroup>
-                    )
-
-                default:
-                    return (
-                        <ButtonGroup bR bL>
-                            <ActionButton variant={"danger"} onClick={onCancellation}>{cancelLabel}</ActionButton>
-                        </ButtonGroup>
-                    )
-            }
-        } else {
-            return null
-        }
-    }
-
     return (
-        <div className={styles.modalOverlay}>
+        <div 
+            className={!overlay ? styles.modalContainer : `${styles.modalContainer} ${styles.modalOverlay}`}
+            data-id={dataId && `${dataId}-container`}
+        >
             <dialog
                 className={classNames}
+                data-id={dataId && `${dataId}`}
                 onClose={onClose && onClose}
                 open={true}
                 {...props}
             >
                 {onClose && 
-                    <CloseButton onClick={onClose}/>
+                    <CloseButton 
+                        dataId={dataId && `${dataId}-close-button`}
+                        onClick={onClose}
+                    />
                 }
                 
-                <div className={styles.title}>
-                    <Header
-                        level={1}
-                        fontSize={"xlarge"}
-                    >
-                        {title}
-                    </Header>
-                </div>
-                
-                <div className={styles.content}>
-                    {children}
-                </div>
+                {variant === "gameInfo" ?
+                    <div className={styles.gameInfoContent}>
+                        <img className={styles.gameImage} src={gameImageSrc !== undefined ? gameImageSrc : undefined} />
+                        <div className={styles.gameDescription}>
+                            {children}
+                        </div>
+                    </div>
+                    
+                :
+                    <>
+                        <div 
+                            className={styles.header} 
+                            data-id={dataId && `${dataId}-header`}
+                        >
+                            {title && 
+                                <Header
+                                    dataId={dataId && `${dataId}-title`}
+                                    level={1}
+                                    fontSize={"xlarge"}
+                                >
+                                    {title}
+                                </Header>
+                            }
+                            {subtitle && 
+                                <Text dataId={dataId && `${dataId}-subtitle`}>
+                                    {subtitle}
+                                </Text>
+                            }
+                        </div>
 
-                <Actions />
+                        <div 
+                            className={!alignContentCenter ? styles.content : styles.alignContentCenter}
+                            data-id={dataId && `${dataId}-content`}
+                        >
+                            {children}
+                        </div>
+                    </>
+                }
+                
+                
+
+                {(cancelLabel || confirmLabel) && (
+                    <ButtonGroup className={styles.footer} bL bR dataId={dataId && `${dataId}-action-button-group`}>
+                        {cancelLabel &&
+                            <ActionButton disabled={disableActionButtons} variant={"danger"} onClick={onCancellation} dataId={dataId && `${dataId}-cancel-button`}>
+                                <Text dataId={dataId && `${dataId}-cancel-button-label`}>{cancelLabel}</Text>
+                            </ActionButton>
+                        }
+                        {confirmLabel &&
+                            <ActionButton disabled={disableActionButtons} variant={!confirmLabelColorPrimary ? "success" : undefined} onClick={onConfirmation} dataId={dataId && `${dataId}-confirm-button`}>
+                                <Text dataId={dataId && `${dataId}-confirm-button-label`}>{confirmLabel}</Text>
+                            </ActionButton>
+                        }
+                    </ButtonGroup>
+                )}
                 
             </dialog>
         </div>

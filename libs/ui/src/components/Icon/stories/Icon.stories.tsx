@@ -17,7 +17,7 @@ export default {
 type Story = StoryObj<typeof Icon>
 
 export const Icon_Default: Story = {
-    name: "Icon",
+    name: "Default",
     args: {
         iconName: "LuALargeSmall",
         variant: "tertiary"

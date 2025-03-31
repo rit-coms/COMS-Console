@@ -1,7 +1,7 @@
 
 :root {
-    --gap: 1vw;
-    --size: 9vw;
+    --gap: 0.5em;
+    --size: 8vw;
 }
 
 .keyboard {
@@ -10,8 +10,8 @@
     flex-direction: column;
     align-items: center;
     gap: var(--gap);
-    width: fit-content;
-    height: 100%;
+    max-width: 100%;
+    height: fit-content;
     border-radius: var(--border-radius);
     padding: 1.5vw;
 
@@ -28,9 +28,9 @@
             flex-basis: var(--size);
             justify-content: center;
             align-items: center;
-            min-width: var(--size);
+            min-width: 6vw;
             max-width: var(--size);
-            height: calc(var(--size) - 2vw);
+            height: calc(var(--size) - 3.75vw);
             border: none;
             border-radius: var(--border-radius);
             box-sizing: border-box;

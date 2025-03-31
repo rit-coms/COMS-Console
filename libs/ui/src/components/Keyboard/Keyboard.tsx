@@ -22,6 +22,7 @@ export const Keyboard = ({
     // Base Props
     className,
     id,
+    dataId,
     ...props
 
 }: KeyboardProps): ReactNode => {
@@ -62,6 +63,7 @@ export const Keyboard = ({
     return (
         <div
             className={classNames}
+            data-id={dataId && dataId}
             {...props}
         >
             {getKeys().map((keyboardRow, index) => {
@@ -70,18 +72,20 @@ export const Keyboard = ({
                     <div 
                         key={index}
                         className={styles.keyboardRow}
+                        data-id={dataId && `${dataId}-row-${index}`}
                     >
                         {keyboardRow.map((key, index) => {
 
                             let classNames: string = styles.keyboardKey
 
-                            if (key === "space") classNames = `${className} ${styles.span3}`
-                            if (key === "clear") classNames = `${className} ${styles.span2}`
+                            if (key === "space") classNames = `${classNames} ${styles.span3}`
+                            if (key === "clear") classNames = `${classNames} ${styles.span2}`
                             
                             return (
                                 <Button
                                     key={index}
                                     className={classNames}
+                                    dataId={dataId && `${dataId}-key-${key}`}
                                     onClick={() => onKeyPress(key)}
                                 >
                                     {

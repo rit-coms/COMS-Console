@@ -32,6 +32,7 @@ export const CheckboxGroup = ({
     // Base Props
     className,
     id,
+    dataId,
     ...props
 
 }: CheckboxGroupProps): ReactNode => {
@@ -62,15 +63,18 @@ export const CheckboxGroup = ({
     return (
         <div 
             className={classNames}
+            data-id={dataId && dataId}
             {...props}
         >
             {options.map((option) => (
                 <label 
                     className={styles.checkboxLabel}
+                    data-id={dataId && `${dataId}-label`}
                     key={option.label}
                 >
                     <input
                         className={styles.checkbox}
+                        data-id={dataId && `${dataId}-checkbox`}
                         checked={internalValues.includes(option.label)}
                         disabled={disabled}
                         onChange={() => handleChange(option.label)}

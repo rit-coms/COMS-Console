@@ -28,6 +28,7 @@ export const Search = ({
     // Base Props
     className,
     id,
+    dataId,
     ...props
 
 }: SearchProps): ReactNode => {
@@ -42,6 +43,7 @@ export const Search = ({
     return (
         <input
             className={classNames}
+            data-id={dataId && dataId}
             autoComplete={"off"}
             disabled={disabled}
             maxLength={maxLength}

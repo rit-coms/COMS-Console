@@ -11,6 +11,7 @@ export interface CaretProps extends BaseProps {
     // Styling Props
     color?: string
     direction: "right" | "left"
+    disabled?: boolean
     size?: number | string
     strokeWidth?: number
     
@@ -20,18 +21,21 @@ export const Caret = ({
     onClick,
     color = "#99D6DE",
     direction = "left",
+    disabled = false,
     size = "5em",
     strokeWidth = 4,
     
     // Base Props
     className,
     id,
+    dataId,
     ...props
 
 }: CaretProps): ReactNode => {
 
     const classNames: string = [
         styles.caret,
+        disabled && styles.disabled,
 
         className,
         id
@@ -46,6 +50,7 @@ export const Caret = ({
     return (
         <div
             className={classNames}
+            data-id={dataId && dataId}
             onClick={onClick}
             {...props}
         >

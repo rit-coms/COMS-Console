@@ -22,6 +22,7 @@ export const Pill = ({
     // Base Props
     className,
     id,
+    dataId,
     ...props
 
 }: PillProps): ReactNode => {
@@ -38,6 +39,7 @@ export const Pill = ({
     return (
         <span 
             className={classNames} 
+            data-id={dataId && dataId}
             {...props}
         >
             {children}

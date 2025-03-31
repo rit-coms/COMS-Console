@@ -27,8 +27,10 @@ export const Modal_Default: Story = {
         title: "Modal",
         onClose: () => {},
         variant: "default",
+        overlay: true,
         confirmLabel: "Save",
         cancelLabel: "Exit",
+        alignContentCenter: false,
         alignTitle: "left"
     }
 }

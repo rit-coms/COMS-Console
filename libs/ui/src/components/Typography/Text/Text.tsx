@@ -24,6 +24,7 @@ export const Text = ({
     // Base Props
     className,
     id,
+    dataId,
     ...props
 
 }: TextProps): ReactNode => {
@@ -40,6 +41,7 @@ export const Text = ({
     return (
         <Tag 
             className={classNames}
+            data-id={dataId && dataId}
             {...props}
         >
             {children}

@@ -7,7 +7,7 @@ const preview: Preview = {
             disableSaveFromUI: true,
             matchers: {
                 color: /(background|color)$/i,
-                date: /Date$/i,
+                date: /Date$/i
             },
             sort: "requiredFirst"
         },

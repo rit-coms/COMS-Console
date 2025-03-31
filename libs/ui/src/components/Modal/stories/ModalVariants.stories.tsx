@@ -44,6 +44,7 @@ export const ModalVariants_GameInfo: Story = {
             title={"Game Info"}
             isOpen={true}
             variant={"gameInfo"}
+            gameImageSrc={"/assets/coming_soon.png"}
             onClose={() => {}}
         >
             Game Info children

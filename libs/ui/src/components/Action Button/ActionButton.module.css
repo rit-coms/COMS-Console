@@ -1,7 +1,6 @@
 
 .actionButton {
 
-    /* ACTION BUTTON VARIANTS */
     &.info {
         background-color: var(--color-info);
         border: var(--border-stroke-md) solid var(--color-info-outline);

@@ -22,6 +22,7 @@ export const CloseButton = ({
     // Base Props
     className,
     id,
+    dataId,
     ...props
 
 }: CloseButtonProps): ReactNode => {
@@ -42,6 +43,7 @@ export const CloseButton = ({
     return (
         <IconButton
             className={classNames}
+            dataId={dataId && dataId}
             iconName={"LuX"}
             onClick={onClick}
             variant={variant}

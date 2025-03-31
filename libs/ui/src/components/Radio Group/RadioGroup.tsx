@@ -33,6 +33,7 @@ export const RadioGroup = ({
     // Base Props
     className,
     id,
+    dataId,
     ...props
 
 }: RadioGroupProps): ReactNode => {
@@ -59,15 +60,18 @@ export const RadioGroup = ({
     return (
         <div 
             className={classNames}
+            data-id={dataId && dataId}
             {...props}
         >
             {options.map((option) => (
                 <label 
                     className={styles.radioLabel}
+                    data-id={dataId && `${dataId}-label`}
                     key={option.label}
                 >
                     <input
                         className={styles.radioInput}
+                        data-id={dataId && `${dataId}-radio`}
                         checked={(selectedValue ?? internalValue) === option.label}
                         disabled={disabled} 
                         onChange={() => handleChange(option.label)}

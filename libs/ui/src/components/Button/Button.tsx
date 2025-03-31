@@ -30,6 +30,7 @@ export const Button = ({
     // Base Props
     className,
     id,
+    dataId,
     ...props
 
 }: ButtonProps): ReactNode => {
@@ -45,8 +46,9 @@ export const Button = ({
     ].filter(Boolean).join(" ")
 
     return (
-        <button 
+        <button
             className={classNames}
+            data-id={dataId && dataId}
             disabled={disabled}
             onClick={onClick}
             {...props}
