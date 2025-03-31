@@ -1,76 +1,76 @@
-import { BsSliders2, BsSortDown, BsTriangle, BsXLg } from "react-icons/bs";
-import React, { useState } from 'react';
-import '../styles/Navigation.css'
-// import 'bootstrap/dist/css/bootstrap.min.css';
+import React from "react";
+import { useModal } from "../hooks/useModal";
+import { useNavigationContext, usePageContext } from "../context/contexts";
 import SearchModal from "./SearchModal";
-import { useContext } from "react";
-import { SortContext } from "../context/SortContext";
-import FilterModal from "./FilterModal";
-import { SearchContext } from "../context/SearchContext";
-import { PageContext } from "../context/PageContext";
+import { IconButton, Logo, Search } from "quackbox-design-system";
+import "../styles/Navigation.css";
 
 export default function Navigation() {
 
-    const [showSearchModal, setShowSearchModal] = useState(false)
-    const [showFilterModal, setShowFilterModal] = useState(false)
-    const { updateSort } = useContext(SortContext)
-    let { search, clear } = useContext(SearchContext)
-    const { changePage } = useContext(PageContext)
+    const [showSearchModal, openSearchModal, closeSearchModal] = useModal();
+    const {updatePage} = usePageContext();
+
+    const handleOpenSearchModal = () => {
+        openSearchModal();
+        setTimeout(() => {
+          updatePage("search modal");
+        }, 0);
+    };
+
+    const handleCloseSearchModal = () => {
+        closeSearchModal();
+        setTimeout(() => {
+            updatePage("home page");
+        }, 0);
+    };
+
+    const { savedSearchValue, sortOption, updateSortOption } = useNavigationContext();
+
+    const getSortIcon = () => {
+        switch (sortOption) {
+            case "none": return "LuArrowUpDown";
+            case "alphabetical": return "LuArrowDownAZ";
+            case "reverse alphabetical": return "LuArrowUpAZ";
+            default: return "LuArrowUpDown";
+        }
+    };
 
     return (
-        <div>
-            {/* Navigation Modals */}
-            <SearchModal showModal={showSearchModal} toggleModal={() => setShowSearchModal(false)} />
-            <FilterModal showModal={showFilterModal} toggleModal={() => setShowFilterModal(false)} />
-
-            {/* Navigation Bar */}
-            <nav className="navigation-bar">
-
-                {/* Duck */}
-                <div className="mascot" ></div >
-
-                {/* Navigation Container */}
-                <div className="navigation-container">
-
-                    {/* Search Bar */}
-                    <button className="search-bar" 
-                        onClick={() => {
-                            changePage('search modal')
-                            setShowSearchModal(!showSearchModal);
-                            clear()
-                        }}
-                    >
-                        <div className="search-title">
-                            {
-                                search != "" ?
-                                search : <span>Search</span>
-                            }
-                        </div>
-                            
-                        {
-                            search != ""
-                                ? <BsXLg className="search-icon" onClick={clear}/>
-                                : <BsTriangle className="search-icon no-fill-triangle" />
-                        }
-                        
-                    </button>
-
-                    {/* Filter and Sort Buttons */}
-                    <div className="search-query-buttons">
-                        <button className="search-button search-filter-button"
-                            onClick={() => {
-                                changePage('filter modal')
-                                setShowFilterModal(!showFilterModal)
-                            }}
-                        >
-                            <BsSliders2 />
-                        </button>
-                        <button className="search-button search-sort-button" onClick={updateSort}>
-                            <BsSortDown />
-                        </button>
-                    </div>
+        <>
+            <SearchModal showModal={showSearchModal} closeModal={handleCloseSearchModal}/>
+            <div className="navigation-container">
+                <div className="navigation-logo">
+                    <Logo src={"src/assets/duck.png"}/>
                 </div>
-            </nav>
-        </div>
-    )
+
+                <div className="navigation-search">
+                    <Search 
+                        onChange={() => {}} 
+                        onClick={handleOpenSearchModal} 
+                        placeholder={savedSearchValue === "" ? "Search" : savedSearchValue} 
+                        dataId="navigation-search-bar"
+                    />
+                    <IconButton 
+                        iconName={getSortIcon()} 
+                        dataId="navigation-sort-button"
+                        onClick={updateSortOption}
+                    />
+                    <IconButton 
+                        iconName={"LuListFilter"} 
+                        disabled
+                        dataId="navigation-filter-button"
+                    />
+                    
+                </div>
+
+                <div className="navigation-menu">
+                    <IconButton 
+                        iconName={"LuMenu"} 
+                        disabled 
+                        dataId="navigation-menu-button"
+                    />
+                </div>
+            </div>
+        </>
+    );
 }

@@ -1,57 +1,60 @@
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 
 const BUTTONS = {
-    0: 'B',
-    1: 'A',
-    2: 'Y',
-    3: 'X',
-    4: 'LEFT TRIGGER',
-    5: 'RIGHT TRIGGER',
-    6: 'LEFT TRIGGER',
-    7: 'RIGHT TRIGGER',
-    8: 'SELECT',
-    9: 'START',
+    0: "B",
+    1: "A",
+    2: "Y",
+    3: "X",
+    4: "LEFT TRIGGER",
+    5: "RIGHT TRIGGER",
+    6: "LEFT TRIGGER",
+    7: "RIGHT TRIGGER",
+    8: "SELECT",
+    9: "START",
     10: null,
     11: null,
-    12: 'UP',
-    13: 'DOWN',
-    14: 'LEFT',
-    15: 'RIGHT',
-}
-
-const KEYMAP = {
-    "b": 0,             // B
-    "a": 1,             // A
-    "y": 2,             // Y
-    "x": 3,             // X
-    "L": 4,             // LEFT TRIGGER
-    "R": 5,             // RIGHT TRIGGER
-    
-    "Escape": 8,        // SELECT
-    "Enter": 9,         // START
-    
-    "ArrowUp": 12,      // UP
-    "ArrowDown": 13,    // DOWN
-    "ArrowLeft": 14,    // LEFT
-    "ArrowRight": 15,   // RIGHT
-    
+    12: "UP",
+    13: "DOWN",
+    14: "LEFT",
+    15: "RIGHT",
 };
 
-const GamepadContext = createContext();
+const KEYMAP = [
+    { // MOCK PLAYER ONE BUTTONS
+        "ArrowUp": 12,      // MOCK DPAD UP
+        "ArrowDown": 13,    // MOCK DPAD DOWN
+        "ArrowLeft": 14,    // MOCK DPAD LEFT
+        "ArrowRight": 15,   // MOCK DPAD RIGHT
+        "R": 5,             // MOCK RIGHT TRIGGER
+        "A": 1,             // MOCK A
+        "j": 8,
+        "k": 9
+    },
+    { // MOCK PLAYER TWO BUTTONS
+        "w": 12,            // MOCK DPAD UP
+        "s": 13,            // MOCK DPAD DOWN
+        "a": 14,            // MOCK DPAD LEFT
+        "d": 15,            // MOCK DPAD RIGHT
+        "L": 5,             // MOCK RIGHT TRIGGER
+        "Enter": 1          // MOCK A
+    },
+];
 
-export const useGamepadContext = () => useContext(GamepadContext);
+
+export const GamepadContext = createContext();
 
 export const GamepadProvider = ({ children }) => {
 
-    const [gamepads, setGamepads] = useState([])
-    const [pressedButton, setPressedButton] = useState({})
-    const [allPlayersConnected, setAllPlayersConnected] = useState(false)
+    const [gamepads, setGamepads] = useState([]);
+    const [players, setPlayers] = useState([]);
+    const [pressedButton, setPressedButton] = useState({});
+    const [allPlayersConnected, setAllPlayersConnected] = useState(false);
   
     useEffect(() => {
 
         const handleGamepadConnected = (e) => {
             setGamepads((prevGamepads) => {
-                const updatedGamepads = prevGamepads.filter((gamepad) => gamepad.index != e.gamepad.index)
+                const updatedGamepads = prevGamepads.filter((gamepad) => gamepad.index !== e.gamepad.index);
                 return [
                     ...updatedGamepads, 
                     {
@@ -62,18 +65,18 @@ export const GamepadProvider = ({ children }) => {
                             value: btn.value,
                         }))
                     }
-                ]
-            })
-        }
+                ];
+            });
+        };
 
         const handleGamepadDisconnected = (e) => {
             setGamepads((prevGamepads) =>
                 prevGamepads.filter((gamepad) => gamepad.index !== e.gamepad.index)
-            )
-        }
+            );
+        };
 
-        window.addEventListener("gamepadconnected", handleGamepadConnected)
-        window.addEventListener("gamepaddisconnected", handleGamepadDisconnected)
+        window.addEventListener("gamepadconnected", handleGamepadConnected);
+        window.addEventListener("gamepaddisconnected", handleGamepadDisconnected);
         
         const intervalId = setInterval(() => {
             const gamepadsState = navigator.getGamepads();
@@ -93,7 +96,7 @@ export const GamepadProvider = ({ children }) => {
                                 setPressedButton((prev) => ({
                                     ...prev,
                                     [gamepad.index]: BUTTONS[index]
-                                }))
+                                }));
                             } 
                             // else if (!isPressed && previouslyPressed) {
                             //     console.log(`Button ${BUTTONS[index]} released by Player ${gamepad.index+1}`);
@@ -116,43 +119,69 @@ export const GamepadProvider = ({ children }) => {
         }, 100);
         
         return () => {
-            window.removeEventListener("gamepadconnected", handleGamepadConnected)
-            window.removeEventListener("gamepaddisconnected", handleGamepadDisconnected)
-            clearInterval(intervalId)
-        }
+            window.removeEventListener("gamepadconnected", handleGamepadConnected);
+            window.removeEventListener("gamepaddisconnected", handleGamepadDisconnected);
+            clearInterval(intervalId);
+        };
 
-    })
+    });
 
     const disconnectGamepad = (index) => {
         setGamepads((prevGamepads) => {
-            return prevGamepads.filter((gamepad) => gamepad.index != index)
-        })
-    }
+            return prevGamepads.filter((gamepad) => gamepad.index !== index);
+        });
+    };
+
+    useEffect(() => {
+        setPlayers((prevPlayers) => {
+            if (prevPlayers.length > 0) {
+                const updatedPlayers = [...prevPlayers];
+                gamepads.forEach((_, index) => {
+                    if (updatedPlayers[index]) {
+                        updatedPlayers[index] = { ...updatedPlayers[index], playerIndex: index };
+                    } else {
+                        updatedPlayers.push({
+                            playerIndex: index,
+                            isConnected: false
+                        });
+                    }
+                });
+                return updatedPlayers;
+            } else {
+
+                return gamepads.map((_, index) => ({
+                    playerIndex: index,
+                    isConnected: false
+                }));
+            }
+        });
+    }, [gamepads]);
+
 
     useEffect(() => {
 
-        window.addEventListener('keydown', (event) => {
-            if (event.key === 'C') {
+        window.addEventListener("keydown", (event) => {
+            if (event.key === "C") {
                 event.preventDefault();
             
                 // Create a new gamepadconnected event
-                const gamepadEvent = new Event('simulatedGamepadConnected')
-                    gamepadEvent.gamepad = {
+                const gamepadEvent = new Event("simulatedGamepadConnected");
+                gamepadEvent.gamepad = {
                     index: 0,
                     connected: true,
                     buttons: Array(16).fill().map(() => ({
                         pressed: false,
                         value: 0
                     }))
-                }
+                };
                 window.dispatchEvent(gamepadEvent);
             }
     
-            if (event.key === 'D') {
+            if (event.key === "D") {
                 event.preventDefault();
             
                 // Create a new gamepadconnected event
-                const gamepadEvent = new Event('simulatedGamepadConnected')
+                const gamepadEvent = new Event("simulatedGamepadConnected");
                 gamepadEvent.gamepad = {
                     index: 1,
                     connected: true,
@@ -160,14 +189,15 @@ export const GamepadProvider = ({ children }) => {
                         pressed: false,
                         value: 0
                     }))
-                }
+                };
                 window.dispatchEvent(gamepadEvent);
             }
+
           });
 
           window.addEventListener("simulatedGamepadConnected", (e) => {
             setGamepads((prevGamepads) => {
-                const updatedGamepads = prevGamepads.filter((gamepad) => gamepad.index != e.gamepad.index)
+                const updatedGamepads = prevGamepads.filter((gamepad) => gamepad.index !== e.gamepad.index);
                 return [
                     ...updatedGamepads, 
                     {
@@ -178,17 +208,24 @@ export const GamepadProvider = ({ children }) => {
                             value: btn.value,
                         }))
                     }
-                ]
-            })
-          })
+                ];
+            });
+            
+          });
 
-    })
+    });
     
 
     useEffect(() => {
         window.addEventListener("keydown", (event) => {
-            if (KEYMAP[event.key] !== undefined) {
-                const buttonIndex = KEYMAP[event.key];
+            
+            const playerIndex = KEYMAP[0][event.key] !== undefined ? 0 : KEYMAP[1][event.key] !== undefined ? 1 : undefined;
+            if (playerIndex === undefined) return;
+            
+            if (KEYMAP[playerIndex][event.key] !== undefined) {
+                
+                event.stopImmediatePropagation();
+                const buttonIndex = KEYMAP[playerIndex][event.key];
                 // Only update the state if the button hasn't been pressed already
                 setGamepads((prevGamepads) => {
                     return prevGamepads.map((gamepad) => {
@@ -209,14 +246,19 @@ export const GamepadProvider = ({ children }) => {
                 // Optionally update the pressed button state
                 setPressedButton((prev) => ({
                     ...prev,
-                    [0]: BUTTONS[buttonIndex],
+                    [playerIndex]: BUTTONS[buttonIndex],
                 }));
             }
         });
 
         window.addEventListener("keyup", (event) => {
-            if (KEYMAP[event.key] !== undefined) {
-                const buttonIndex = KEYMAP[event.key];
+
+            const playerIndex = KEYMAP[0][event.key] !== undefined ? 0 : KEYMAP[1][event.key] !== undefined ? 1 : undefined;
+            if (playerIndex === undefined) return;
+
+            if (KEYMAP[playerIndex][event.key] !== undefined) {
+                event.stopImmediatePropagation();
+                const buttonIndex = KEYMAP[playerIndex][event.key];
                 // Only update the state if the button is currently pressed
                 setGamepads((prevGamepads) => {
                     return prevGamepads.map((gamepad) => {
@@ -237,15 +279,48 @@ export const GamepadProvider = ({ children }) => {
                 // Optionally update the pressed button state
                 setPressedButton((prev) => ({
                     ...prev,
-                    [0]: null, // Assuming button is released
+                    [playerIndex]: null, // Assuming button is released
                 }));
             }
         });
     }, []);
-    
+
+    const setButtonAction = (keyOrButton, action) => {
+        // if string, keyboard key, else gamepad button
+        if (typeof keyOrButton === 'string') {
+
+            const playerIndex = KEYMAP[0][keyOrButton] !== undefined ? 0 : KEYMAP[1][keyOrButton] !== undefined ? 1 : undefined;
+            if (playerIndex === undefined) return;
+
+            window.addEventListener('keydown', (event) => {
+                if (KEYMAP[playerIndex][event.key] === KEYMAP[playerIndex][keyOrButton]) {
+                    action(event);
+                }
+            });
+
+        }
+        else {
+            const gamepadIndex = keyOrButton; 
+            setInterval(() => {
+                const currentGamepad = navigator.getGamepads()[gamepadIndex];
+                if (currentGamepad) {
+                    currentGamepad.buttons.forEach((btn, index) => {
+                        if (btn.pressed) {
+                            action(index, btn);
+                        }
+                    });
+                }
+            }, 100);    
+
+        }
+    };
 
   return (
-    <GamepadContext.Provider value={{gamepads, pressedButton, allPlayersConnected, setAllPlayersConnected, disconnectGamepad}}>
+    <GamepadContext.Provider value={{
+        gamepads, players, setPlayers, pressedButton, 
+        allPlayersConnected, setAllPlayersConnected, disconnectGamepad,
+        setButtonAction
+    }}>
       {children}
     </GamepadContext.Provider>
   );
