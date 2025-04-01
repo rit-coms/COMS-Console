@@ -248,7 +248,7 @@ fn get_game_info_list(
 
 #[derive(Deserialize)]
 struct GameDataList {
-    games: Vec<GameData>
+    games: Vec<GameData>,
 }
 
 #[derive(Deserialize)]
@@ -258,9 +258,7 @@ struct GameData {
 }
 
 /// Make sure every game listed in the games\all-games.json file is in the local database
-fn check_all_games(
-    app_handle: &AppHandle,
-) {
+fn check_all_games(app_handle: &AppHandle) {
     // getting the app data directory
     let app_data_dir = app_handle
         .path_resolver()
@@ -279,10 +277,18 @@ fn check_all_games(
     let reader = BufReader::new(all_games_file);
     // If this reading is ever too slow, we can switch to reading the file into memory as a string
     // and then converting that string into a JSON Value
-    let games_list: GameDataList = serde_json::from_reader(reader).expect("Failed to read all-games.json");
+    let games_list: GameDataList =
+        serde_json::from_reader(reader).expect("Failed to read all-games.json");
 
     for game in games_list.games {
         db::make_sure_game_exists(&game.name, &game.id, "local");
+    }
+}
+
+// Given a list of games, set them to be installed in the database
+fn set_games_installed(games: &Vec<GameInfo>) {
+    for game in games {
+        db::insert_game(&game.id.to_string(), &game.title, true, "local");
     }
 }
 
@@ -292,6 +298,7 @@ pub fn get_game_info(
     app_handle: AppHandle,
 ) -> Result<Vec<GameInfo>, ErrorType> {
     let games = get_game_info_list(&state, &app_handle)?;
+    set_games_installed(&games);
     // Only populate the database with all games if code is running on the quackbox
     if cfg!(feature = "quackbox-raspi") {
         check_all_games(&app_handle);
