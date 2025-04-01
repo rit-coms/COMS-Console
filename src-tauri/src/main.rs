@@ -1,16 +1,16 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use frontend_api::{get_game_info, play_game, AppState};
+use frontend_api::{get_game_info, play_game, LoadedGamesState};
 use game_dev_api::setup_game_dev_api;
+use gamepad_manager::{swap_player_slots, update_controller_task, PlayerSlotState};
 use tauri::Manager;
 use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
-
-use std::sync::Mutex;
 
 mod frontend_api;
 mod game_dev_api;
 mod db;
+mod gamepad_manager;
 
 fn main() {
     tauri::Builder::default()
@@ -19,9 +19,11 @@ fn main() {
             Some(vec![""]),
         ))
         .setup(|app| {
-            app.manage(Mutex::new(AppState::default()));
+            app.manage(LoadedGamesState::default());
+            app.manage(PlayerSlotState::default());
             // tauri::async_runtime::spawn(db::test_db());
             tauri::async_runtime::spawn(setup_game_dev_api("local"));
+            tauri::async_runtime::spawn(update_controller_task(app.app_handle()));
             if cfg!(feature = "autostart") {
                 // Only enable autolaunch on raspberry pi
                 app.autolaunch().enable()?;
@@ -29,6 +31,7 @@ fn main() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![get_game_info, play_game])
+        .invoke_handler(tauri::generate_handler![swap_player_slots])
         .on_page_load(|window, _| {
             window.show().expect("Failed to show window");
         })

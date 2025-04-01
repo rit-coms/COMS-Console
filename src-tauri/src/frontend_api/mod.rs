@@ -8,7 +8,7 @@ use std::{
     io::BufReader,
     path::PathBuf,
     process::Command,
-    sync::Mutex,
+    sync::RwLock,
 };
 use tauri::{AppHandle, State};
 use url::Url;
@@ -95,9 +95,11 @@ impl TryFrom<GameInfoJS> for GameInfo {
 }
 
 #[derive(Default)]
-pub struct AppState {
+pub struct LoadedGamesInner {
     games_list: Vec<GameInfo>,
 }
+
+pub type LoadedGamesState = RwLock<LoadedGamesInner>;
 
 #[derive(Serialize)]
 #[serde(transparent)]
@@ -154,10 +156,10 @@ impl<T: ToString> From<T> for ErrorType {
 /// fetchGameInfo();
 /// ```
 fn get_game_info_files(
-    state: State<'_, Mutex<AppState>>,
+    state: State<'_, LoadedGamesState>,
     app_handle: AppHandle,
 ) -> Result<Vec<GameInfo>, ErrorType> {
-    let mut state = state.lock().unwrap();
+    let mut state = state.write().unwrap();
     let games_list = &mut state.games_list;
     games_list.clear();
 
@@ -246,7 +248,7 @@ fn get_game_info_files(
 }
 
 fn get_game_info_database(
-    state: State<'_, Mutex<AppState>>,
+    state: State<'_, LoadedGamesState>,
     app_handle: AppHandle,
 ) -> Result<Vec<GameInfo>, ErrorType> {
     todo!()
@@ -254,7 +256,7 @@ fn get_game_info_database(
 
 #[tauri::command]
 pub fn get_game_info(
-    state: State<'_, Mutex<AppState>>,
+    state: State<'_, LoadedGamesState>,
     app_handle: AppHandle,
 ) -> Result<Vec<GameInfo>, ErrorType> {
     if cfg!(feature = "quackbox-raspi") {
@@ -310,12 +312,12 @@ pub fn get_game_info(
 /// ```
 #[tauri::command]
 pub fn play_game(
-    state: State<'_, Mutex<AppState>>,
+    state: State<'_, LoadedGamesState>,
     window: tauri::Window,
     app_handle: AppHandle,
     id: String,
 ) -> Result<(), ErrorType> {
-    let games_list = &state.lock()?.games_list;
+    let games_list = &state.write()?.games_list;
     let path = env::current_dir()?;
     let id = id.parse::<u64>()?;
     let game_info = games_list
