@@ -23,7 +23,7 @@ export default function HomePage() {
     }, [allPlayersConnected]);
 
 	return (
-		allPlayersConnected ?
+		allPlayersConnected || (import.meta.env.DEV) ? // disables controller connect when running in dev mode
 			<NavigationProvider>
 				<div className="home-page">
 					<Navigation />

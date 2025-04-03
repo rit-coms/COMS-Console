@@ -25,7 +25,11 @@ export default function GameGallery() {
 			});
 			console.log(games);
 			Promise.all(games).then(games => setGames(games));
-		});
+		}, 
+        (err) => {
+            console.error(err)
+        }
+    );
 	}, []);
 
     const getModifiedGamesList = () => {
