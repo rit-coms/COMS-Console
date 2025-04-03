@@ -25,7 +25,7 @@ export default function GameGallery() {
 			});
 			console.log(games);
 			Promise.all(games).then(games => setGames(games));
-		}, 
+		},
         (err) => {
             console.error(err)
         }
@@ -55,22 +55,6 @@ export default function GameGallery() {
 
         return newGames;
     };
-
-
-	// useEffect(() => {
-	// 	async function fetchGameInfo() {
-	// 	  try {
-	// 		const response = await fetch("http://127.0.0.1:8000/games");
-	// 		const data = await response.json();
-	// 		setGames(data);
-	// 	  } catch (error) {
-	// 		console.error("Error fetching game info:", error);
-	// 	  }
-	// 	}
-	// 	fetchGameInfo();
-	//   }, []);
-	//   console.log(games);
-
 
     const handleGameClick = (game) => {
         setCurrentGame(game);

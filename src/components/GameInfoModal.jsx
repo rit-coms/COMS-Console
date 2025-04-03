@@ -1,32 +1,15 @@
 import React from "react";
 import { Modal, Pill, Text } from "quackbox-design-system";
 import "../styles/GameInfoModal.css";
+import { invoke } from "@tauri-apps/api/tauri";
+import { usePageContext } from "../context/contexts";
 
 export default function GameInfoModal({ showModal, closeModal, game}) {
-
-	// TODO: reimplement for tauri
-	// const playGame = () => {
-		
-	// 	fetch("http://127.0.0.1:8000/launch?id=" + game.id)
-	// 	.then(response => {
-	// 		if(response.ok)
-	// 		{
-	// 			console.log("PLAY: ", game.title)
-	// 		} else {
-	// 			console.log("Error triggering script:", response.statusText)
-	// 		}
-	// 	})
-	// 	.catch(error => {
-	// 		console.error("Error:" + error)
-	// 	})
-	// }
-	// const playGame = async id => {
-	// 	invoke("play_game", {id: game.id})
-	// }
 
 	if (!showModal)
         return null;
 
+	const { updatePage } = usePageContext();
 	const isPlaceholder = game.title.toLowerCase().includes("coming soon");
 	const hasCoverImage = !game.coverImage?.includes("null");
 
@@ -40,12 +23,24 @@ export default function GameInfoModal({ showModal, closeModal, game}) {
 		return date.toLocaleDateString("en-US", options);
 	};
 
-	const handlePlayGame = () => {
-		if (!isPlaceholder)
-			console.log("play game: ", game.exec);
-		closeModal();
+	const startGame = async (gameId) => {
+		try {
+			await invoke("play_game", { id: gameId });
+			console.log(`Started Game ${game.title}`);
+		} catch (error) {
+			console.error(error);
+		}
 	};
 
+	const handlePlayGame = () => {
+		if (!isPlaceholder)
+			startGame(game.id);
+
+		closeModal();
+		setTimeout(() => {
+			updatePage("home page");
+		}, 0);
+	};
 	
 	return (
 		<Modal
