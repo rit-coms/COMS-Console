@@ -21,22 +21,35 @@ const BUTTONS = {
 
 const KEYMAP = [
     { // MOCK PLAYER ONE BUTTONS
+        "k": 0,             // MOCK B
+        "l": 1,             // MOCK A
+        "j": 2,             // MOCK Y
+        "i": 3,             // MOCK X
+        "u": 4,             // MOCK LEFT TRIGGER
+        "o": 5,             // MOCK RIGHT TRIGGER
+        "9": 8,             // MOCK SELECT
+        "0": 9,             // MOCK START
+
         "ArrowUp": 12,      // MOCK DPAD UP
         "ArrowDown": 13,    // MOCK DPAD DOWN
         "ArrowLeft": 14,    // MOCK DPAD LEFT
         "ArrowRight": 15,   // MOCK DPAD RIGHT
-        "R": 5,             // MOCK RIGHT TRIGGER
-        "A": 1,             // MOCK A
-        "j": 8,
-        "k": 9
     },
     { // MOCK PLAYER TWO BUTTONS
+
+        "g": 0,             // MOCK B
+        "h": 1,             // MOCK A
+        "f": 2,             // MOCK Y
+        "t": 3,             // MOCK X
+        "r": 4,             // MOCK LEFT TRIGGER
+        "y": 5,             // MOCK RIGHT TRIGGER
+        "4": 8,             // MOCK SELECT
+        "5": 9,             // MOCK START
+
         "w": 12,            // MOCK DPAD UP
         "s": 13,            // MOCK DPAD DOWN
         "a": 14,            // MOCK DPAD LEFT
         "d": 15,            // MOCK DPAD RIGHT
-        "L": 5,             // MOCK RIGHT TRIGGER
-        "Enter": 1          // MOCK A
     },
 ];
 
