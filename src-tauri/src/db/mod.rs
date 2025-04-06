@@ -196,22 +196,22 @@ pub async fn get_save_data(
     }
 }
 
-pub async fn create_user(id_s: &str, name_s: &str, db_name: &str) -> User {
+pub async fn create_user(id_s: &str, username_s: &str, db_name: &str) -> User {
     use self::schema::users::dsl::*;
     let connection = &mut establish_connection(db_name);
     insert_into(users)
-        .values((id.eq(id_s), username.eq(name_s)))
+        .values((id.eq(id_s), username.eq(username_s)))
         .get_result::<User>(connection)
         .expect("Could not create User")
 }
 
-pub async fn get_user(name_s: &str, user_id_s: &str, db_name: &str) -> User {
+pub async fn get_user(username_s: &str, user_id_s: &str, db_name: &str) -> User {
     use self::schema::users::dsl::*;
     let connection = &mut establish_connection(db_name);
 
     users
         .select(User::as_select())
-        .filter(username.eq(name_s))
+        .filter(username.eq(username_s))
         .filter(id.eq(user_id_s))
         .first(connection)
         .expect("Error loading user data")
