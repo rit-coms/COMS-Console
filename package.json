@@ -6,7 +6,8 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "cargo": "cd src-tauri && cargo"
   },
   "author": "Kenzie & Matt",
   "license": "ISC",
