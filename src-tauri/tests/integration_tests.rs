@@ -17,18 +17,18 @@ async fn setup_initial_user_data(db_name: &str) {
     let users = vec![
         User {
             id: String::from("1"),
-            name: String::from("user0"),
+            username: String::from("user0"),
             rit_id: None,
         },
         User {
             id: String::from("2"),
-            name: String::from("user1"),
+            username: String::from("user1"),
             rit_id: None,
         },
     ];
 
     for user in users {
-        create_user(&user.id, &user.name, db_name).await;
+        create_user(&user.id, &user.username, db_name).await;
     }
 }
 
@@ -70,7 +70,7 @@ async fn read_and_write_user_table_db() {
     let result = get_user(name_s, user_id_s, &test_context.db_name).await;
 
     assert_eq!(user_id_s, result.id.as_str());
-    assert_eq!(name_s, result.name.as_str());
+    assert_eq!(name_s, result.username.as_str());
 }
 
 #[tokio::test]
