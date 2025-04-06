@@ -31,7 +31,7 @@ diesel::table! {
 diesel::table! {
     users (id) {
         id -> Text,
-        name -> Text,
+        username -> Text,
         rit_id -> Nullable<Text>,
     }
 }
