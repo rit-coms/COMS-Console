@@ -1,7 +1,7 @@
 use std::{
     collections::{HashMap, HashSet},
     pin::Pin,
-    sync::RwLock,
+    sync::{mpsc::Sender, RwLock},
     time::{Duration, SystemTime},
 };
 
@@ -32,9 +32,7 @@ pub enum PlayerSlotConnectionStatus {
 pub struct PlayerSlotInner([PlayerSlotConnectionStatus; MAX_CONTROLLERS as usize]); // slots range from [0..MAX_CONTROLLERS)
 pub type PlayerSlotState = RwLock<PlayerSlotInner>;
 
-// TODO: remove all unwraps with the RwLock (not gilrs initialization)
-// and handle poisoning of the RwLock
-pub async fn update_controller_task(app_handle: AppHandle) -> Result<(), Error> {
+pub async fn update_controller_task(sender: Sender<[PlayerSlotConnectionStatus; MAX_CONTROLLERS]>) -> Result<(), Error> {
     let mut gilrs = Gilrs::new().unwrap();
     let mut player_slots = [PlayerSlotConnectionStatus::default(); MAX_CONTROLLERS];
     let mut gamepad_map: HashMap<GamepadId, GamepadConnectionStatus> = HashMap::new(); // This stores all information regarding gamepad connections
@@ -123,10 +121,6 @@ pub async fn update_controller_task(app_handle: AppHandle) -> Result<(), Error> 
         });
         print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
         println!("{:#?}", gamepad_map);
-        println!(
-            "{:#?}",
-            get_player_slot_states(app_handle.state::<PlayerSlotState>())
-        );
         sleep(Duration::from_millis(50)).await;
     }
 }
