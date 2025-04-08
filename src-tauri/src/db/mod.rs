@@ -257,6 +257,37 @@ pub async fn get_save(user_id_s: &str, game_id_s: &str, file_name_s: &str, db_na
         .expect("Could not get save")
 }
 
+/// Returns all leadboard data for a given game title.
+/// In cases other than testing, db_name should be "local"
+pub fn get_leaderboard_game_data(
+    game_title: &str,
+    db_name: &str,
+) -> Result<Vec<LeaderboardEntry>, Error> {
+    use self::schema::games::dsl::{games, name};
+    use self::schema::leaderboard::dsl::{game_id, leaderboard};
+    let connection = &mut establish_connection(db_name);
+
+    let game = games
+        .select(Game::as_select())
+        .filter(name.eq(game_title))
+        .first(connection)?;
+
+    let data = leaderboard
+        .select(LeaderboardEntry::as_select())
+        .filter(game_id.eq(game.id))
+        .get_results(connection)?;
+
+    Ok(data)
+}
+
+/// Given an id, return the corresponding username
+pub fn get_username(id_s: &str, db_name: &str) -> Result<String, Error> {
+    use self::schema::users::dsl::*;
+    let connection = &mut establish_connection(db_name);
+
+    Ok(users.select(name).filter(id.eq(id_s)).first(connection)?)
+}
+
 mod tests {
     use super::*;
     use crate::db::test_context::TestContext;

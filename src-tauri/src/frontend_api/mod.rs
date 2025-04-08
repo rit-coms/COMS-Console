@@ -1,8 +1,10 @@
-use crate::db::insert_game;
+use crate::db::{get_leaderboard, get_leaderboard_game_data, insert_game};
 use anyhow::Error;
+use app::db::get_username;
 use chrono::{serde::ts_seconds_option, DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::{
+    collections::HashMap,
     env, fs,
     hash::{DefaultHasher, Hash, Hasher},
     io::BufReader,
@@ -266,6 +268,44 @@ pub fn get_game_info(
         }
         Ok(games)
     }
+}
+
+#[derive(Serialize)]
+struct FrontendLeaderboardEntry {
+    value_num: f64,
+    username: String,
+    time_stamp: String,
+}
+
+#[tauri::command]
+pub async fn get_leaderboard_data(game_title: String) -> Result<impl Serialize, ErrorType> {
+    let data = get_leaderboard_game_data(&game_title, "local")?;
+
+    let mut sorted_data: HashMap<String, Vec<FrontendLeaderboardEntry>> = HashMap::new();
+    for entry in data {
+        match sorted_data.get_mut(&entry.value_name) {
+            Some(entries) => entries.push(FrontendLeaderboardEntry {
+                value_num: entry.value_num,
+                username: get_username(&entry.user_id, "local")?,
+                time_stamp: "placeholder time".to_string(),
+            }),
+            None => {
+                sorted_data.insert(
+                    entry.value_name,
+                    vec![FrontendLeaderboardEntry {
+                        value_num: entry.value_num,
+                        username: get_username(&entry.user_id, "local")?,
+                        time_stamp: "placeholder time".to_string(),
+                    }],
+                );
+            }
+        }
+    }
+
+    Ok(serde_json::json!({
+        "title": game_title,
+        "data": sorted_data
+    }))
 }
 
 /// Runs a game based on its ID.
