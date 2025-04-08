@@ -54,7 +54,7 @@ pub fn insert_game(id_s: &str, name_s: &str, is_installed: bool, db_name: &str) 
         .expect("Failed to insert game")
 }
 
-pub async fn insert_leaderboard_entry(
+pub fn insert_leaderboard_entry(
     user_id_s: &str,
     game_id_s: &str,
     value_name_s: &str,
@@ -271,11 +271,13 @@ pub fn get_leaderboard_game_data(
         .select(Game::as_select())
         .filter(name.eq(game_title))
         .first(connection)?;
+    println!("Found game with title: {}", game.name);
 
     let data = leaderboard
         .select(LeaderboardEntry::as_select())
         .filter(game_id.eq(game.id))
         .get_results(connection)?;
+    println!("Found {} entries for {}", data.len(), game.name);
 
     Ok(data)
 }
@@ -316,7 +318,6 @@ mod tests {
             10.0,
             &test_context.db_name,
         )
-        .await
         .expect("Failed to insert entry");
 
         let file_name_s = "testpath";
@@ -346,6 +347,16 @@ mod tests {
         let context = TestContext::new("get_leaderboard_game_data");
         setup_initial_data(&context.db_name).await;
 
-
+        let data = get_leaderboard_game_data("game0", &context.db_name)
+            .expect("Failed to get leaderboard game data");
+        assert!(data.len() == 3);
+        println!("{:?}", data);
+        data.iter()
+            .find(|&entry| {
+                entry.game_id == "0"
+                    && entry.user_id == "1".to_string()
+                    && entry.value_name == "Score".to_string()
+            })
+            .expect("Failed to find expected data!");
     }
 }

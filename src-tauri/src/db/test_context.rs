@@ -5,7 +5,7 @@ use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use dotenvy::dotenv;
 
 use super::{
-    create_user, insert_game,
+    create_user, insert_game, insert_leaderboard_entry,
     models::{Game, LeaderboardEntry, User},
 };
 
@@ -97,28 +97,42 @@ pub fn setup_initial_game_data(db_name: &str) {
 }
 
 pub fn setup_initial_leaderboard_data(db_name: &str) {
-    let entries = vec![LeaderboardEntry {
-        user_id: "1".to_string(),
-        game_id: "0".to_string(),
-        value_name: "Score".to_string(),
-        time_stamp: "timestamp".to_string(),
-        value_num: 100.0,
-        row_id: 0, // placeholder
-    }, LeaderboardEntry {
-        user_id: "2".to_string(),
-        game_id: "0".to_string(),
-        value_name: "Score".to_string(),
-        time_stamp: "timestamp".to_string(),
-        value_num: 125.0,
-        row_id: 0, // placeholder
-    }, LeaderboardEntry {
-        user_id: "1".to_string(),
-        game_id: "0".to_string(),
-        value_name: "Money".to_string(),
-        time_stamp: "timestamp".to_string(),
-        value_num: 423.50,
-        row_id: 0, // placeholder
-    }];
+    let entries = vec![
+        LeaderboardEntry {
+            user_id: "1".to_string(),
+            game_id: "0".to_string(),
+            value_name: "Score".to_string(),
+            time_stamp: "timestamp".to_string(),
+            value_num: 100.0,
+            row_id: 0, // placeholder
+        },
+        LeaderboardEntry {
+            user_id: "2".to_string(),
+            game_id: "0".to_string(),
+            value_name: "Score".to_string(),
+            time_stamp: "timestamp".to_string(),
+            value_num: 125.0,
+            row_id: 0, // placeholder
+        },
+        LeaderboardEntry {
+            user_id: "1".to_string(),
+            game_id: "0".to_string(),
+            value_name: "Money".to_string(),
+            time_stamp: "timestamp".to_string(),
+            value_num: 423.50,
+            row_id: 0, // placeholder
+        },
+    ];
+
+    for entry in entries {
+        insert_leaderboard_entry(
+            &entry.user_id,
+            &entry.game_id,
+            &entry.value_name,
+            entry.value_num,
+            db_name,
+        ).expect("Failed to insert leaderboard entry");
+    }
 }
 
 pub async fn setup_initial_data(db_name: &str) {
