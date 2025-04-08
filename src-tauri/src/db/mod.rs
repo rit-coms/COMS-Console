@@ -196,7 +196,7 @@ pub async fn get_save_data(
     }
 }
 
-pub async fn create_user(id_s: &str, name_s: &str, db_name: &str) -> User {
+pub fn create_user(id_s: &str, name_s: &str, db_name: &str) -> User {
     use self::schema::users::dsl::*;
     let connection = &mut establish_connection(db_name);
     insert_into(users)
@@ -303,7 +303,7 @@ mod tests {
         let name_s = "A random user";
 
         let mut buffer = Uuid::encode_buffer();
-        let user = create_user(user_id_s, name_s, &test_context.db_name).await;
+        let user = create_user(user_id_s, name_s, &test_context.db_name);
         let game_id_s = Uuid::new_v4().as_simple().encode_lower(&mut buffer);
         let example_game_name = "Example Game";
 
@@ -339,5 +339,13 @@ mod tests {
 
         let username = get_username("1", &context.db_name).expect("Failed to retrieve username");
         assert_eq!(username, "user1".to_string())
+    }
+
+    #[tokio::test]
+    pub async fn test_get_leaderboard_game_data() {
+        let context = TestContext::new("get_leaderboard_game_data");
+        setup_initial_data(&context.db_name).await;
+
+
     }
 }

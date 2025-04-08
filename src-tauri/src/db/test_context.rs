@@ -4,7 +4,10 @@ use crate::db::{establish_connection, get_db_path};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use dotenvy::dotenv;
 
-use super::{create_user, insert_game, models::{Game, User}};
+use super::{
+    create_user, insert_game,
+    models::{Game, LeaderboardEntry, User},
+};
 
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
 
@@ -55,7 +58,7 @@ impl Drop for TestContext {
     }
 }
 
-pub async fn setup_initial_user_data(db_name:&str) {
+pub async fn setup_initial_user_data(db_name: &str) {
     let users = vec![
         User {
             id: String::from("1"),
@@ -70,11 +73,11 @@ pub async fn setup_initial_user_data(db_name:&str) {
     ];
 
     for user in users {
-        create_user(&user.id, &user.name, db_name).await;
+        create_user(&user.id, &user.name, db_name);
     }
 }
 
-pub async fn setup_initial_game_data(db_name: &str) {
+pub fn setup_initial_game_data(db_name: &str) {
     let games = vec![
         Game {
             id: String::from("1"),
@@ -93,8 +96,34 @@ pub async fn setup_initial_game_data(db_name: &str) {
     }
 }
 
+pub fn setup_initial_leaderboard_data(db_name: &str) {
+    let entries = vec![LeaderboardEntry {
+        user_id: "1".to_string(),
+        game_id: "0".to_string(),
+        value_name: "Score".to_string(),
+        time_stamp: "timestamp".to_string(),
+        value_num: 100.0,
+        row_id: 0, // placeholder
+    }, LeaderboardEntry {
+        user_id: "2".to_string(),
+        game_id: "0".to_string(),
+        value_name: "Score".to_string(),
+        time_stamp: "timestamp".to_string(),
+        value_num: 125.0,
+        row_id: 0, // placeholder
+    }, LeaderboardEntry {
+        user_id: "1".to_string(),
+        game_id: "0".to_string(),
+        value_name: "Money".to_string(),
+        time_stamp: "timestamp".to_string(),
+        value_num: 423.50,
+        row_id: 0, // placeholder
+    }];
+}
+
 pub async fn setup_initial_data(db_name: &str) {
-    setup_initial_game_data(db_name).await;
+    setup_initial_game_data(db_name);
     setup_initial_user_data(db_name).await;
+    setup_initial_leaderboard_data(db_name);
     println!("Setup initial data!")
 }

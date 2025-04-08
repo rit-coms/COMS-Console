@@ -22,7 +22,7 @@ async fn read_and_write_user_table_db() {
     let user_id_s = "1141245215512";
     let name_s = "A random user";
 
-    create_user(user_id_s, name_s, &test_context.db_name).await;
+    create_user(user_id_s, name_s, &test_context.db_name);
 
     let result = get_user(name_s, user_id_s, &test_context.db_name).await;
 
