@@ -331,4 +331,13 @@ mod tests {
         )
         .await;
     }
+
+    #[tokio::test]
+    pub async fn test_get_username() {
+        let context = TestContext::new("get_username");
+        setup_initial_data(&context.db_name).await;
+
+        let username = get_username("1", &context.db_name).expect("Failed to retrieve username");
+        assert_eq!(username, "user1".to_string())
+    }
 }
