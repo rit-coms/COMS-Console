@@ -4,6 +4,8 @@ use crate::db::{establish_connection, get_db_path};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use dotenvy::dotenv;
 
+use super::{create_user, insert_game, models::{Game, User}};
+
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
 
 /// This struct is to be used for setting up and automatically deleting database instances for testing.
@@ -51,4 +53,48 @@ impl Drop for TestContext {
     fn drop(&mut self) {
         remove_file(get_db_path(&self.db_name)).expect("Failed to delete file");
     }
+}
+
+pub async fn setup_initial_user_data(db_name:&str) {
+    let users = vec![
+        User {
+            id: String::from("1"),
+            name: String::from("user1"),
+            rit_id: None,
+        },
+        User {
+            id: String::from("2"),
+            name: String::from("user2"),
+            rit_id: None,
+        },
+    ];
+
+    for user in users {
+        create_user(&user.id, &user.name, db_name).await;
+    }
+}
+
+pub async fn setup_initial_game_data(db_name: &str) {
+    let games = vec![
+        Game {
+            id: String::from("1"),
+            name: String::from("game1"),
+            installed: true,
+        },
+        Game {
+            id: String::from("0"),
+            name: String::from("game0"),
+            installed: true,
+        },
+    ];
+
+    for game in games {
+        insert_game(&game.id, &game.name, game.installed, db_name);
+    }
+}
+
+pub async fn setup_initial_data(db_name: &str) {
+    setup_initial_game_data(db_name).await;
+    setup_initial_user_data(db_name).await;
+    println!("Setup initial data!")
 }

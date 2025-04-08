@@ -290,7 +290,7 @@ pub fn get_username(id_s: &str, db_name: &str) -> Result<String, Error> {
 
 mod tests {
     use super::*;
-    use crate::db::test_context::TestContext;
+    use crate::db::test_context::{setup_initial_data, TestContext};
 
     #[tokio::test]
     pub async fn test_db() {
@@ -316,7 +316,8 @@ mod tests {
             10.0,
             &test_context.db_name,
         )
-        .await;
+        .await
+        .expect("Failed to insert entry");
 
         let file_name_s = "testpath";
         let data_b = "random_data".as_bytes().to_owned();
