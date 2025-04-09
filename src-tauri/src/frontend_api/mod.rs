@@ -101,7 +101,7 @@ pub struct AppState {
     games_list: Vec<GameInfo>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 #[serde(transparent)]
 pub struct ErrorType(String);
 
@@ -270,7 +270,7 @@ pub fn get_game_info(
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 struct FrontendLeaderboardEntry {
     value_num: f64,
     username: String,
@@ -278,8 +278,17 @@ struct FrontendLeaderboardEntry {
 }
 
 #[tauri::command]
-pub async fn get_leaderboard_data(game_title: String) -> Result<impl Serialize, ErrorType> {
-    let data = get_leaderboard_game_data(&game_title, "local")?;
+pub async fn get_leaderboard_data(game_title: String) -> Result<serde_json::Value, ErrorType> {
+    get_leaderboard_data_helper(game_title, "local")
+}
+
+/// This function allows us to mock databases for testing without having a db_name parameter
+/// at the front end
+fn get_leaderboard_data_helper(
+    game_title: String,
+    db_name: &str,
+) -> Result<serde_json::Value, ErrorType> {
+    let data = get_leaderboard_game_data(&game_title, db_name)?;
 
     let mut sorted_data: HashMap<String, Vec<FrontendLeaderboardEntry>> = HashMap::new();
     for entry in data {
@@ -301,6 +310,7 @@ pub async fn get_leaderboard_data(game_title: String) -> Result<impl Serialize, 
             }
         }
     }
+    println!("{:?}", sorted_data);
 
     Ok(serde_json::json!({
         "title": game_title,
@@ -410,4 +420,20 @@ pub fn play_game(
     window.set_focus()?;
     window.set_fullscreen(true)?;
     Ok(())
+}
+
+mod tests {
+    use super::*;
+    use crate::db::test_context::{setup_initial_data, TestContext};
+
+    #[tokio::test]
+    async fn test_get_leaderboard_data() {
+        let context = TestContext::new("test_get_leaderboard_data_frontend");
+        setup_initial_data(&context.db_name).await;
+
+        let data = get_leaderboard_data_helper("game0".to_string(), &context.db_name)
+            .expect("Failed to get leaderboard data");
+
+        println!("{:?}", data);
+    }
 }
