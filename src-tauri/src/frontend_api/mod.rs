@@ -277,6 +277,15 @@ struct FrontendLeaderboardEntry {
     time_stamp: String,
 }
 
+/// Retrieves a json object of all leaderboard data for a given game.
+///
+/// # Arguments
+/// `game_title` - The title of the game to get data for (case sensitive)
+///
+///
+/// # Returns
+/// * `Result<serde_json::Value, ErrorType>` - A JSON object representing the leaderboard data of a
+/// specific game or an `ErrorType` if an error occurs.
 #[tauri::command]
 pub async fn get_leaderboard_data(game_title: String) -> Result<serde_json::Value, ErrorType> {
     get_leaderboard_data_helper(game_title, "local")
