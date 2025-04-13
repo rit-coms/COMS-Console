@@ -1,12 +1,28 @@
 .game-description {
     display: flex;
     flex-direction: column;
-    padding: 1em;
+    gap: 2vh;
 
-    .game-tags {
+    .game-author {
         display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        justify-content: flex-start;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .game-details {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+
+        .game-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: flex-start;
+        }
+    }
+
+    .game-leaderboard {
+        display: flex;
     }
 }

@@ -36,7 +36,8 @@ const getPageHierarchy = (page) => {
 
         case "game info modal": return {
             0: document.body.querySelectorAll("[data-id='game-info-close-button']"),
-            1: document.body.querySelectorAll("[data-id='game-info-confirm-button']")
+            1: document.body.querySelectorAll("[data-id^='tab']"),
+            2: document.body.querySelectorAll("[data-id='game-info-confirm-button']")
         };
 
     }
