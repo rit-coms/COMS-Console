@@ -1,56 +1,45 @@
 use std::{
+    char::MAX,
     collections::{HashMap, HashSet},
     pin::Pin,
-    sync::{mpsc::Sender, RwLock},
+    sync::{Arc, Mutex, RwLock},
     time::{Duration, SystemTime},
 };
 
 use anyhow::{anyhow, Error};
 use gilrs::{Event, EventType, GamepadId, Gilrs};
 use tauri::{AppHandle, Manager, State};
-use tokio::time::{sleep, Sleep};
+use tokio::{
+    task::JoinHandle,
+    time::{sleep, Sleep},
+};
 
 pub const MAX_CONTROLLERS: usize = 8;
-const CONTROLLER_STALE_TIME: Duration = Duration::new(30, 0);
+const CONTROLLER_STALE_TIME: Duration = Duration::from_secs(30);
 
 #[derive(Debug)]
-struct GamepadConnectionStatus {
-    connected: bool,
-    disconnect_time: Option<SystemTime>,
-    player_slot: usize, // This is the same as the index for the list of player slots
-}
-
-#[derive(Default, PartialEq, Eq, Clone, Copy, Debug)]
 pub enum PlayerSlotConnectionStatus {
     Connected(GamepadId),
-    #[default]
     Disconnected,
-    Stale(GamepadId),
+    Stale(GamepadId, JoinHandle<()>),
 }
 
-#[derive(Default)]
-pub struct PlayerSlotInner([PlayerSlotConnectionStatus; MAX_CONTROLLERS as usize]); // slots range from [0..MAX_CONTROLLERS)
-pub type PlayerSlotState = RwLock<PlayerSlotInner>;
+type Slots = Arc<RwLock<[PlayerSlotConnectionStatus; MAX_CONTROLLERS]>>;
 
-pub async fn update_controller_task(sender: Sender<[PlayerSlotConnectionStatus; MAX_CONTROLLERS]>) -> Result<(), Error> {
+pub async fn update_controller_task() -> Result<(), Error> {
     let mut gilrs = Gilrs::new().unwrap();
-    let mut player_slots = [PlayerSlotConnectionStatus::default(); MAX_CONTROLLERS];
-    let mut gamepad_map: HashMap<GamepadId, GamepadConnectionStatus> = HashMap::new(); // This stores all information regarding gamepad connections
-    let mut stale_sleep: HashMap<GamepadId, Pin<Box<Sleep>>> = HashMap::new();
+    let mut player_slots = [const { PlayerSlotConnectionStatus::Disconnected }; MAX_CONTROLLERS];
+    // This maps GamepadId's to player slot indicies
+    let mut gamepad_map: HashMap<GamepadId, usize> = HashMap::new();
     let mut connected_num = 0;
 
     // populate gamepad_map with initial connected gamepads
     let mut slot_num: usize = 0;
     for (id, _) in gilrs.gamepads() {
-        let slot = GamepadConnectionStatus {
-            connected: true,
-            disconnect_time: None,
-            player_slot: slot_num,
-        };
-        gamepad_map.insert(id, slot);
+        gamepad_map.insert(id, slot_num);
 
         if connected_num < MAX_CONTROLLERS {
-            player_slots[slot_num] = PlayerSlotConnectionStatus::Connected(id); 
+            player_slots[slot_num] = PlayerSlotConnectionStatus::Connected(id);
             slot_num += 1;
         } else {
             println!("Ignoring overflow controller with id: {}", id)
@@ -59,33 +48,42 @@ pub async fn update_controller_task(sender: Sender<[PlayerSlotConnectionStatus; 
         connected_num += 1;
     }
 
+    // Now that the player slots are initialized, wrap the array in and Arc and a RwLock
+    // Note: the std RwLock is being used here because no async code will be run when the lock is held (I think)
+    let mut player_slots: Slots = Arc::new(RwLock::new(player_slots));
+    let mut gamepad_map = Arc::new(RwLock::new(gamepad_map));
+
     loop {
         while let Some(event) = gilrs.next_event() {
+        let slots_handle = Arc::clone(&player_slots);
+        let map_handle = Arc::clone(&gamepad_map);
             match event {
                 Event {
                     id,
                     event: EventType::Connected,
                     ..
                 } => {
-                    let slot_num = next_slot_num_under_max(&player_slots);
-                    if let Some(slot_num) = slot_num {
-                        if let Some(slot) = gamepad_map.get_mut(&id) {
-                            slot.connected = true;
-                            slot.disconnect_time = None;
-                            slot.player_slot = slot_num;
-                            player_slots[slot_num] = PlayerSlotConnectionStatus::Connected(id);
-                        } else {
-                            let slot: GamepadConnectionStatus = GamepadConnectionStatus {
-                                connected: true,
-                                disconnect_time: None,
-                                player_slot: slot_num,
-                            };
-                            gamepad_map.insert(id, slot);
-                            stale_sleep.remove(&id);
+                    let mut locked_slots = slots_handle.write().unwrap();
+                    let mut locked_map = map_handle.write().unwrap();
+                    // Check if the connected controller was previously stale
+                    if let Some(slot) = locked_map.get(&id) {
+                        match &locked_slots[*slot] {
+                            PlayerSlotConnectionStatus::Stale(_, timer) => {
+                                timer.abort(); // Cancel the timer
+                                locked_slots[*slot] = PlayerSlotConnectionStatus::Connected(id);
+                                println!("Slot {} reconnected!", slot);
+                            }
+                            _ => panic!("Controller {} is not stale but is being reconnected", id),
                         }
-                        println!("Controller connected with id : {}", id);
                     } else {
-                        println!("Connected controller with id {} ignored due to no open controller slots", id)
+                        // Connect the new controller
+                        let next_slot = next_slot_num_under_max(&*locked_slots);
+                        if let Some(open_slot) = next_slot {
+                            locked_map.insert(id, open_slot);
+                            println!("ID of {} associated with slot {}", id, open_slot);
+                            locked_slots[open_slot] = PlayerSlotConnectionStatus::Connected(id);
+                            println!("Controller to slot {} with id : {}", open_slot, id);
+                        }
                     }
                 }
                 Event {
@@ -93,17 +91,28 @@ pub async fn update_controller_task(sender: Sender<[PlayerSlotConnectionStatus; 
                     event: EventType::Disconnected,
                     time,
                 } => {
-                    if let Some(slot) = gamepad_map.get_mut(&id) {
-                        slot.connected = false;
-                        slot.disconnect_time = Some(time);
-                        player_slots[slot.player_slot] = PlayerSlotConnectionStatus::Disconnected;
-                        println!("Disconnected slot with id: {}", &id);
+                    let slots_handle = Arc::clone(&player_slots);
+                    let mut locked_slots = slots_handle.write().unwrap();
+                    let slot_num;
+                    {
+                        let map_handle = Arc::clone(&gamepad_map);
+                        let lock = map_handle.read().unwrap();
+                        slot_num = lock.get(&id);
+                    }
+                    if let Some(slot) = slot_num {
+                        // Here the Stale enum will store a handle for the async operation that can be canceled by other threads
+                        locked_slots[*slot] = PlayerSlotConnectionStatus::Stale(
+                            id,
+                            tokio::spawn(async move {
+                                sleep(CONTROLLER_STALE_TIME);
+                                // Lock the id to slot map and the slots
+                                let slots_lock = slots_handle.write().unwrap();
+                                let map_lock = map_handle.write().unwrap();
+                                // Update map and player slots
+                            }),
+                        );
 
                         connected_num -= 1;
-
-                        let new_sleep = Box::pin(sleep(CONTROLLER_STALE_TIME));
-                        stale_sleep.insert(id, new_sleep);
-                        stale_sleep.get_mut(&id).unwrap().await;
                     } else {
                         println!("Unidentified gamepad is disconnecting!");
                     }
@@ -112,13 +121,6 @@ pub async fn update_controller_task(sender: Sender<[PlayerSlotConnectionStatus; 
                 _ => (),
             }
         }
-        stale_sleep.retain(|id, sleep| {
-            if sleep.is_elapsed() {
-                gamepad_map.remove(id);
-                return false;
-            }
-            true
-        });
         print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
         println!("{:#?}", gamepad_map);
         sleep(Duration::from_millis(50)).await;
@@ -126,10 +128,9 @@ pub async fn update_controller_task(sender: Sender<[PlayerSlotConnectionStatus; 
 }
 
 #[tauri::command]
-pub fn get_player_slot_states(
-    state: State<'_, PlayerSlotState>,
-) -> [PlayerSlotConnectionStatus; MAX_CONTROLLERS as usize] {
-    state.read().unwrap().0
+pub async fn get_player_slot_states(
+) -> Result<[PlayerSlotConnectionStatus; MAX_CONTROLLERS as usize], Error> {
+    Ok(*state.read().await)
 }
 
 #[tauri::command]
@@ -138,7 +139,7 @@ pub fn swap_player_slots(state: State<'_, PlayerSlotState>, slot_num_1: usize, s
     player_slots.swap(slot_num_1, slot_num_2);
 }
 
-/// Get the index of the lowest slot number that is disconnected in a given array of
+/// Get the index of the lowest slot number that is disconnected in a given array of player slot connections
 fn next_slot_num_under_max(connections: &[PlayerSlotConnectionStatus]) -> Option<usize> {
     for (i, connection) in connections.iter().enumerate() {
         if connection == &PlayerSlotConnectionStatus::Disconnected {
