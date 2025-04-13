@@ -1,28 +1,20 @@
 use std::{
-    char::MAX,
-    collections::{HashMap, HashSet},
-    pin::Pin,
-    sync::{Arc, Mutex, RwLock},
-    time::{Duration, SystemTime},
+    collections::HashMap,
+    sync::{Arc, RwLock},
+    time::Duration,
 };
 
 use anyhow::{anyhow, Error};
+use gamepad_state::MAX_CONTROLLERS;
 use gilrs::{Event, EventType, GamepadId, Gilrs};
 use tauri::{AppHandle, Manager, State};
 use tokio::{
     task::JoinHandle,
     time::{sleep, Sleep},
 };
+mod gamepad_state;
 
-pub const MAX_CONTROLLERS: usize = 8;
 const CONTROLLER_STALE_TIME: Duration = Duration::from_secs(30);
-
-#[derive(Debug)]
-pub enum PlayerSlotConnectionStatus {
-    Connected(GamepadId),
-    Disconnected,
-    Stale(GamepadId, JoinHandle<()>),
-}
 
 type Slots = Arc<RwLock<[PlayerSlotConnectionStatus; MAX_CONTROLLERS]>>;
 
@@ -55,8 +47,8 @@ pub async fn update_controller_task() -> Result<(), Error> {
 
     loop {
         while let Some(event) = gilrs.next_event() {
-        let slots_handle = Arc::clone(&player_slots);
-        let map_handle = Arc::clone(&gamepad_map);
+            let slots_handle = Arc::clone(&player_slots);
+            let map_handle = Arc::clone(&gamepad_map);
             match event {
                 Event {
                     id,
@@ -77,12 +69,6 @@ pub async fn update_controller_task() -> Result<(), Error> {
                         }
                     } else {
                         // Connect the new controller
-                        let next_slot = next_slot_num_under_max(&*locked_slots);
-                        if let Some(open_slot) = next_slot {
-                            locked_map.insert(id, open_slot);
-                            println!("ID of {} associated with slot {}", id, open_slot);
-                            locked_slots[open_slot] = PlayerSlotConnectionStatus::Connected(id);
-                            println!("Controller to slot {} with id : {}", open_slot, id);
                         }
                     }
                 }
@@ -137,16 +123,6 @@ pub async fn get_player_slot_states(
 pub fn swap_player_slots(state: State<'_, PlayerSlotState>, slot_num_1: usize, slot_num_2: usize) {
     let player_slots = &mut state.write().unwrap().0;
     player_slots.swap(slot_num_1, slot_num_2);
-}
-
-/// Get the index of the lowest slot number that is disconnected in a given array of player slot connections
-fn next_slot_num_under_max(connections: &[PlayerSlotConnectionStatus]) -> Option<usize> {
-    for (i, connection) in connections.iter().enumerate() {
-        if connection == &PlayerSlotConnectionStatus::Disconnected {
-            return Some(i);
-        }
-    }
-    return None;
 }
 
 #[cfg(test)]
