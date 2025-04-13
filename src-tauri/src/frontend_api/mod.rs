@@ -1,3 +1,4 @@
+use crate::db::insert_game;
 use anyhow::Error;
 use chrono::{serde::ts_seconds_option, DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -152,8 +153,7 @@ impl<T: ToString> From<T> for ErrorType {
 ///
 /// fetchGameInfo();
 /// ```
-#[tauri::command]
-pub fn get_game_info(
+fn get_game_info_files(
     state: State<'_, Mutex<AppState>>,
     app_handle: AppHandle,
 ) -> Result<Vec<GameInfo>, ErrorType> {
@@ -243,6 +243,29 @@ pub fn get_game_info(
     println!("{}", serde_json::to_string_pretty(games_list).unwrap());
 
     Ok(state.games_list.clone())
+}
+
+fn get_game_info_database(
+    state: State<'_, Mutex<AppState>>,
+    app_handle: AppHandle,
+) -> Result<Vec<GameInfo>, ErrorType> {
+    todo!()
+}
+
+#[tauri::command]
+pub fn get_game_info(
+    state: State<'_, Mutex<AppState>>,
+    app_handle: AppHandle,
+) -> Result<Vec<GameInfo>, ErrorType> {
+    if cfg!(feature = "quackbox-raspi") {
+        get_game_info_database(state, app_handle)
+    } else {
+        let games = get_game_info_files(state, app_handle)?;
+        for game in games.iter() {
+            insert_game(&game.id.to_string(), &game.title, true, "local");
+        }
+        Ok(games)
+    }
 }
 
 /// Runs a game based on its ID.
