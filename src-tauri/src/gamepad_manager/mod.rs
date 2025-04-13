@@ -1,28 +1,20 @@
 use std::{
-    char::MAX,
-    collections::{HashMap, HashSet},
-    pin::Pin,
-    sync::{Arc, Mutex, RwLock},
-    time::{Duration, SystemTime},
+    collections::HashMap,
+    sync::{Arc, RwLock},
+    time::Duration,
 };
 
 use anyhow::{anyhow, Error};
+use gamepad_state::MAX_CONTROLLERS;
 use gilrs::{Event, EventType, GamepadId, Gilrs};
 use tauri::{AppHandle, Manager, State};
 use tokio::{
     task::JoinHandle,
     time::{sleep, Sleep},
 };
+mod gamepad_state;
 
-pub const MAX_CONTROLLERS: usize = 8;
 const CONTROLLER_STALE_TIME: Duration = Duration::from_secs(30);
-
-#[derive(Debug)]
-pub enum PlayerSlotConnectionStatus {
-    Connected(GamepadId),
-    Disconnected,
-    Stale(GamepadId, JoinHandle<()>),
-}
 
 type Slots = Arc<RwLock<[PlayerSlotConnectionStatus; MAX_CONTROLLERS]>>;
 
@@ -55,8 +47,8 @@ pub async fn update_controller_task() -> Result<(), Error> {
 
     loop {
         while let Some(event) = gilrs.next_event() {
-        let slots_handle = Arc::clone(&player_slots);
-        let map_handle = Arc::clone(&gamepad_map);
+            let slots_handle = Arc::clone(&player_slots);
+            let map_handle = Arc::clone(&gamepad_map);
             match event {
                 Event {
                     id,
