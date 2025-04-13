@@ -6,10 +6,7 @@ use app::{
     },
     game_dev_api::{
         create_router,
-        handlers::{
-            LeaderboardEntry, LeaderboardGetParams, LeaderboardScope, SaveDataEntry,
-            SaveDataGetParams,
-        },
+        handlers::{LeaderboardGetParams, LeaderboardPost, SaveDataGetParams, SaveDataPost},
     },
 };
 use axum_test::TestServer;
@@ -19,12 +16,12 @@ extern crate diesel_migrations;
 async fn setup_initial_user_data(db_name: &str) {
     let users = vec![
         User {
-            id: String::from("0"),
+            id: String::from("1"),
             name: String::from("user0"),
             rit_id: None,
         },
         User {
-            id: String::from("1"),
+            id: String::from("2"),
             name: String::from("user1"),
             rit_id: None,
         },
@@ -36,11 +33,18 @@ async fn setup_initial_user_data(db_name: &str) {
 }
 
 async fn setup_initial_game_data(db_name: &str) {
-    let games = vec![Game {
-        id: String::from("0"),
-        name: String::from("game0"),
-        installed: true,
-    }];
+    let games = vec![
+        Game {
+            id: String::from("1"),
+            name: String::from("game1"),
+            installed: true,
+        },
+        Game {
+            id: String::from("0"),
+            name: String::from("game0"),
+            installed: true,
+        },
+    ];
 
     for game in games {
         insert_game(&game.id, &game.name, game.installed, db_name);
@@ -50,6 +54,7 @@ async fn setup_initial_game_data(db_name: &str) {
 async fn setup_initial_data(db_name: &str) {
     setup_initial_game_data(db_name).await;
     setup_initial_user_data(db_name).await;
+    println!("Setup initial data!")
 }
 
 #[tokio::test]
@@ -81,17 +86,19 @@ async fn read_and_write_leaderboard_data() {
 
     let value_name: String = String::from("score");
     let value_num: f64 = 100.0;
+    let player: i16 = 1;
 
     let post_response: axum_test::TestResponse = server
         .post(leaderboard_path)
-        .json(&LeaderboardEntry {
+        .json(&LeaderboardPost {
             value_name: value_name.clone(),
             value_num: value_num,
+            player_slot: player,
         })
         .await;
 
     post_response.assert_status_ok();
-    let post_response_entry: LeaderboardEntry = post_response.json::<LeaderboardEntry>();
+    let post_response_entry: LeaderboardPost = post_response.json::<LeaderboardPost>();
 
     assert_eq!(post_response_entry.value_name, value_name);
     assert_eq!(post_response_entry.value_num, value_num);
@@ -99,7 +106,7 @@ async fn read_and_write_leaderboard_data() {
     let get_response: axum_test::TestResponse = server
         .get(leaderboard_path)
         .add_query_params(LeaderboardGetParams {
-            scope: Some(LeaderboardScope::User),
+            player_slot: None,
             count: Some(1),
             ascending: None,
             value_name: Some(value_name.clone()),
@@ -108,7 +115,7 @@ async fn read_and_write_leaderboard_data() {
         .await;
 
     get_response.assert_status_ok();
-    let get_response_entries = get_response.json::<Vec<LeaderboardEntry>>();
+    let get_response_entries = get_response.json::<Vec<LeaderboardPost>>();
     let get_response_entry = get_response_entries
         .get(0)
         .expect("No entries in leaderboard get response");
@@ -141,14 +148,15 @@ async fn read_and_write_save_data() {
 
     let post_response: axum_test::TestResponse = server
         .post(save_data_path)
-        .json(&SaveDataEntry {
+        .json(&SaveDataPost {
             file_name: file_name.clone(),
             data: data.clone(),
+            player_slot: 1,
         })
         .await;
 
     post_response.assert_status_ok();
-    let post_response_entry: SaveDataEntry = post_response.json::<SaveDataEntry>();
+    let post_response_entry: SaveDataPost = post_response.json::<SaveDataPost>();
 
     assert_eq!(post_response_entry.file_name, file_name);
     assert_eq!(post_response_entry.data, data);
@@ -158,11 +166,12 @@ async fn read_and_write_save_data() {
         .add_query_params(SaveDataGetParams {
             file_name: Some(file_name.clone()),
             regex: None,
+            player_slot: Some(1)
         })
         .await;
 
     get_filename_response.assert_status_ok();
-    let get_response_entries = get_filename_response.json::<Vec<SaveDataEntry>>();
+    let get_response_entries = get_filename_response.json::<Vec<SaveDataPost>>();
     let get_response_entry = get_response_entries
         .get(0)
         .expect("No entries in leaderboard get response");
@@ -192,17 +201,19 @@ async fn get_save_data_error() {
             {"name": "healing potion", "damage": 0}
         ]
     });
+    let player_slot = 1;
 
     let post_response: axum_test::TestResponse = server
         .post(save_data_path)
-        .json(&SaveDataEntry {
+        .json(&SaveDataPost {
             file_name: file_name.clone(),
             data: data.clone(),
+            player_slot: player_slot,
         })
         .await;
 
     post_response.assert_status_ok();
-    let post_response_entry: SaveDataEntry = post_response.json::<SaveDataEntry>();
+    let post_response_entry: SaveDataPost = post_response.json::<SaveDataPost>();
 
     assert_eq!(post_response_entry.file_name, file_name);
     assert_eq!(post_response_entry.data, data);
@@ -212,6 +223,7 @@ async fn get_save_data_error() {
         .add_query_params(SaveDataGetParams {
             file_name: None,
             regex: Some(String::from(r"\")),
+            player_slot: Some(player_slot)
         })
         .await;
 
@@ -222,6 +234,7 @@ async fn get_save_data_error() {
         .add_query_params(SaveDataGetParams {
             file_name: Some(String::from("test")),
             regex: Some(String::from("test")),
+            player_slot: Some(player_slot)
         })
         .await;
 
@@ -241,18 +254,20 @@ async fn get_leaderboard_data_error() {
 
     let value_name: String = String::from("score");
     let value_num: f64 = 100.0;
+    let player: i16 = 1;
 
     let post_response: axum_test::TestResponse = server
         .post(leaderboard_path)
-        .json(&LeaderboardEntry {
+        .json(&LeaderboardPost {
             value_name: value_name.clone(),
             value_num: value_num,
+            player_slot: player,
         })
         .await;
 
     post_response.assert_status_ok();
 
-    let post_response_entry: LeaderboardEntry = post_response.json::<LeaderboardEntry>();
+    let post_response_entry: LeaderboardPost = post_response.json::<LeaderboardPost>();
 
     assert_eq!(post_response_entry.value_name, value_name);
     assert_eq!(post_response_entry.value_num, value_num);
@@ -260,7 +275,7 @@ async fn get_leaderboard_data_error() {
     let get_response: axum_test::TestResponse = server
         .get(leaderboard_path)
         .add_query_params(LeaderboardGetParams {
-            scope: Some(LeaderboardScope::User),
+            player_slot: Some(1),
             count: Some(101),
             ascending: None,
             value_name: Some(value_name.clone()),

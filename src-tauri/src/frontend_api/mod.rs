@@ -1,4 +1,3 @@
-use crate::db::{self, insert_game};
 use anyhow::Error;
 use chrono::{serde::ts_seconds_option, DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -13,6 +12,8 @@ use std::{
 };
 use tauri::{AppHandle, State};
 use url::Url;
+
+use crate::db;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(try_from = "GameInfoJS")]
