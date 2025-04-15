@@ -13,7 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@tauri-apps/api": "^1.6.0",
-    "quackbox-design-system": "^3.0.0",
+    "quackbox-design-system": "^4.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-icons": "^5.3.0",
@@ -30,6 +30,8 @@
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.1",
+    "eslint": "^9.24.0",
+    "globals": "^16.0.0",
     "typescript": "^5.8.2",
     "vite": "^5.4.5",
     "vite-tsconfig-paths": "^5.0.1"
