@@ -6,7 +6,7 @@
     text-align: center;
     border: var(--border-stroke-sm) solid var(--color-blue);
     border-radius: var(--border-radius);
-    padding: 1vh 1.5vw;
+    padding: 0.5vh 1vw;
     font-family: var(--font-family);
     width: auto;
     overflow: hidden;

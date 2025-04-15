@@ -91,10 +91,38 @@ export const Modal = ({
                 }
                 
                 {variant === "gameInfo" ?
-                    <div className={styles.gameInfoContent}>
-                        <img className={styles.gameImage} src={gameImageSrc !== undefined ? gameImageSrc : undefined} />
-                        <div className={styles.gameDescription}>
-                            {children}
+                    <div className={styles.gameInfoContainer}>
+                        <img 
+                            className={styles.gameImage} 
+                            src={gameImageSrc !== undefined ? gameImageSrc : undefined}
+                            data-id={dataId && `${dataId}-image`}
+                        />
+                        <div className={styles.gameInfoContent}>
+                            <div 
+                                className={styles.gameInfoHeader} 
+                                data-id={dataId && `${dataId}-header`}
+                            >
+                                {title && 
+                                    <Header
+                                        dataId={dataId && `${dataId}-title`}
+                                        level={1}
+                                        fontSize={"xlarge"}
+                                    >
+                                        {title}
+                                    </Header>
+                                }
+                                {subtitle && 
+                                    <Text dataId={dataId && `${dataId}-subtitle`}>
+                                        {subtitle}
+                                    </Text>
+                                }
+                            </div>
+                            <div 
+                                className={styles.gameDescription} 
+                                data-id={dataId && `${dataId}-content`}
+                            >
+                                {children}
+                            </div>
                         </div>
                     </div>
                     

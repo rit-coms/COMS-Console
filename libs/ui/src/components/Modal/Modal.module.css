@@ -32,18 +32,18 @@
         }
 
         &.gameInfo {
-            min-width: 450px;
+            min-width: 700px;
             width: calc(70vw - (70vh * 0.2));
-            min-height: 300px;
-            height: calc(65vh - (65vh * 0.2));
+            min-height: 400px;
+            height: calc(70vh - (70vh * 0.2));
 
-            .gameInfoContent {
+            .gameInfoContainer {
                 display: flex;
                 flex-direction: row;
                 align-content: center;
                 overflow: hidden;
                 flex-grow: 1;
-                padding: 1.25em 1.25em 0em;
+                padding: 1.25em 1.25em;
                 min-height: 0;
 
                 .gameImage {
@@ -53,15 +53,31 @@
                     object-fit: cover;
                     flex-shrink: 0;
                     aspect-ratio: 3 / 4;
-                    width: 35%;
                     height: auto;
                     border-radius: var(--border-radius);
                     overflow: hidden;
                 }
 
-                .gameDescription {
+                .gameInfoContent {
                     display: flex;
-                    padding: 1em;
+                    flex-direction: column;
+                    flex-grow: 1;
+                    padding-left: 1em;
+                    overflow: hidden;
+                    min-width: 0;
+
+                    .gameInfoHeader {
+                        width: 85%;
+                        white-space: nowrap;
+                        margin-bottom: 2vh;
+                    }
+
+                    .gameDescription {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 1em;
+                        flex-grow: 1;
+                    }
                 }
             }
         }
@@ -127,7 +143,6 @@
         & > .footer {
             flex-shrink: 0;
             margin-top: auto;
-            padding-top: 1.25em;
         }
 
         & > .gameInfoAction {

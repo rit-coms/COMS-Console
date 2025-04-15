@@ -24,6 +24,6 @@ export const Text_Default: Story = {
         children: "Text",
         as: "p",
         weight: "normal",
-        fontSize: "default"
+        fontSize: "auto"
     }
 }

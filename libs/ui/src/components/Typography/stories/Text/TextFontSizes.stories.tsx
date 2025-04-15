@@ -22,7 +22,7 @@ export const TextFontSizes_Small: Story = {
 export const TextFontSizes_Default: Story = {
     name: "Default",
     render: () => (
-        <Text fontSize={"default"}>
+        <Text fontSize={"auto"}>
             Text - Font Size Default
         </Text>
     )
