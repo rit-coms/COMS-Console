@@ -3,10 +3,11 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { appWindow } from '@tauri-apps/api/window';
+// import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
+// const appWindow = getCurrentWebviewWindow()
 
 
-appWindow.setFullscreen(true);
+// appWindow.setFullscreen(true);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

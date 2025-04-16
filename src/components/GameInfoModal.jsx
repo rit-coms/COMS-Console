@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import "../styles/GameInfoModal.css"
 import { BsXLg } from "react-icons/bs";
 import { PageContext } from '../context/PageContext';
-import { invoke } from '@tauri-apps/api/tauri';
+import { invoke } from '@tauri-apps/api/core';
 
 const GameInfoModal = ({ isOpen, toggleModal, game}) => {
 
