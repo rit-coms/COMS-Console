@@ -12,6 +12,8 @@ use tokio::{
     task::JoinHandle,
     time::{sleep, Sleep},
 };
+
+use crate::frontend_api::ErrorType;
 pub mod gamepad_manager;
 
 pub async fn update_controller_task(app_handle: AppHandle) -> Result<(), Error> {
@@ -49,9 +51,9 @@ pub async fn update_controller_task(app_handle: AppHandle) -> Result<(), Error> 
 }
 
 #[tauri::command]
-pub async fn get_player_slot_states(
+pub fn get_player_slot_states(
     manager: State<'_, GamepadManager>,
-) -> Result<Vec<FrontendPlayerSlotConnection>, Error> {
+) -> Result<Vec<FrontendPlayerSlotConnection>, ErrorType> {
     Ok(manager.get_slots())
 }
 

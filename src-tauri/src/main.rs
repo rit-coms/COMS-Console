@@ -8,7 +8,10 @@ use std::sync::{
 
 use frontend_api::{get_game_info, play_game, LoadedGamesState};
 use game_dev_api::setup_game_dev_api;
-use gamepad_manager::{gamepad_manager::GamepadManager, swap_player_slots, update_controller_task};
+use gamepad_manager::{
+    gamepad_manager::GamepadManager, get_player_slot_states, swap_player_slots,
+    update_controller_task,
+};
 use tauri::Manager;
 use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 
@@ -36,7 +39,10 @@ fn main() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![get_game_info, play_game])
-        .invoke_handler(tauri::generate_handler![swap_player_slots])
+        .invoke_handler(tauri::generate_handler![
+            swap_player_slots,
+            get_player_slot_states
+        ])
         .on_page_load(|window, _| {
             window.show().expect("Failed to show window");
         })

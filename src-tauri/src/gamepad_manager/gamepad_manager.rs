@@ -4,6 +4,7 @@ use std::time::Duration;
 
 use gilrs::GamepadId;
 use inner::GamepadManagerInner;
+use serde::Serialize;
 use std::sync::Arc;
 use std::sync::RwLock;
 use tokio::task::JoinHandle;
@@ -20,6 +21,7 @@ enum PlayerSlotConnectionStatus {
     Stale(GamepadId, JoinHandle<()>),
 }
 
+#[derive(Serialize)]
 pub enum FrontendPlayerSlotConnection {
     Connected,
     Disconnected,
@@ -202,7 +204,7 @@ mod inner {
                 self.register_id(id, slot1);
             }
 
-            // Make sure we don't go out of the memory rangeo the array
+            // Make sure we don't go out of the memory range of the array
             assert!(slot1 < self.player_slots.len() && slot2 < self.player_slots.len());
             unsafe {
                 let ptr_1 = self.player_slots.as_mut_ptr().add(slot1);
