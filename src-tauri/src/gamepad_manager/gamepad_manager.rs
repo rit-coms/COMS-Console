@@ -21,6 +21,16 @@ enum PlayerSlotConnectionStatus {
     Stale(GamepadId, JoinHandle<()>),
 }
 
+impl Into<FrontendPlayerSlotConnection> for &PlayerSlotConnectionStatus {
+    fn into(self) -> FrontendPlayerSlotConnection {
+        match self {
+            PlayerSlotConnectionStatus::Connected(_) => FrontendPlayerSlotConnection::Connected,
+            PlayerSlotConnectionStatus::Disconnected => FrontendPlayerSlotConnection::Disconnected,
+            PlayerSlotConnectionStatus::Stale(_, _) => FrontendPlayerSlotConnection::Stale,
+        }
+    }
+}
+
 #[derive(Serialize)]
 pub enum FrontendPlayerSlotConnection {
     Connected,
@@ -38,9 +48,9 @@ pub struct GamepadManager {
 }
 
 impl GamepadManager {
-    pub fn new() -> Self {
+    pub fn new(sender: Sender<Vec<FrontendPlayerSlotConnection>>) -> Self {
         GamepadManager {
-            state: Arc::new(RwLock::new(GamepadManagerInner::new())),
+            state: Arc::new(RwLock::new(GamepadManagerInner::new(sender))),
         }
     }
 
@@ -81,59 +91,59 @@ impl GamepadManager {
     }
 
     /// Note: arguments are one-indexed NOT zero indexed.
-    pub fn swap_slots(&self, mut slot1: usize, mut slot2: usize) {
+    pub async fn swap_slots(&self, mut slot1: usize, mut slot2: usize) {
         slot1 -= 1;
         slot2 -= 1;
-        let mut lock = self.state.write().unwrap();
+        let mut lock = self.state.write().await;
         lock.swap_slots(slot1, slot2);
     }
 
-    pub fn get_slots(&self) -> Vec<FrontendPlayerSlotConnection> {
-        let lock = self.state.read().unwrap();
-        lock.get_slots()
-            .iter()
-            .map(|status| match status {
-                PlayerSlotConnectionStatus::Connected(_) => FrontendPlayerSlotConnection::Connected,
-                PlayerSlotConnectionStatus::Disconnected => {
-                    FrontendPlayerSlotConnection::Disconnected
-                }
-                PlayerSlotConnectionStatus::Stale(_, _) => FrontendPlayerSlotConnection::Stale,
-            })
-            .collect()
+    pub async fn get_slots(&self) -> Vec<FrontendPlayerSlotConnection> {
+        let lock = self.state.read().await;
+        lock.get_slots().iter().map(|value| value.into()).collect()
     }
 
     async fn stale_timer(id: GamepadId, slots: Arc<RwLock<GamepadManagerInner>>) {
         sleep(CONTROLLER_STALE_TIME).await;
-        let mut lock = slots.write().unwrap();
+        let mut lock = slots.write().await;
         let slot: usize;
         if let Some(slot_num) = lock.get_slot_num(&id) {
             slot = *slot_num
         } else {
             panic!("Stale controller not in gamepad map")
         }
-        lock.set_slot(slot, PlayerSlotConnectionStatus::Disconnected);
+        lock.set_slot(slot, PlayerSlotConnectionStatus::Disconnected)
+            .await;
         lock.remove_id(&id);
         println!("Disconnected controller ID {} in slot {}", id, slot);
     }
 }
 
 mod inner {
-    use std::mem::{self, swap};
-
     use super::*;
     pub struct GamepadManagerInner {
         player_slots: [PlayerSlotConnectionStatus; MAX_CONTROLLERS],
         gamepad_map: HashMap<GamepadId, usize>,
         connected_num: u8,
+        sender: Sender<Vec<FrontendPlayerSlotConnection>>,
     }
 
     impl GamepadManagerInner {
-        pub fn new() -> Self {
+        pub fn new(sender: Sender<Vec<FrontendPlayerSlotConnection>>) -> Self {
             GamepadManagerInner {
                 player_slots: [const { PlayerSlotConnectionStatus::Disconnected }; MAX_CONTROLLERS],
                 gamepad_map: HashMap::new(),
                 connected_num: 0,
+                sender: sender,
             }
+        }
+
+        async fn broadcast_state(&self) {
+            // Ignore the error for if the reciever is dropped (it shouldn't be dropped)
+            let _ = self
+                .sender
+                .send(self.player_slots.iter().map(|value| value.into()).collect())
+                .await;
         }
 
         pub fn get_slot(&self, slot_num: usize) -> &PlayerSlotConnectionStatus {

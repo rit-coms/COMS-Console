@@ -38,7 +38,7 @@ pub async fn update_controller_task(app_handle: AppHandle) -> Result<(), Error> 
                 Event {
                     id,
                     event: EventType::Disconnected,
-                    time,
+                    ..
                 } => {
                     state_manager.disconnect_controller(id);
                 }

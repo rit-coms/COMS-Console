@@ -27,8 +27,10 @@ fn main() {
             Some(vec![""]),
         ))
         .setup(|app| {
+            let (controller_slot_tx, controller_slot_rx) =
+                mpsc::channel::<Vec<FrontendPlayerSlotConnection>>(10);
             app.manage(LoadedGamesState::default());
-            app.manage(GamepadManager::new());
+            app.manage(GamepadManager::new(controller_slot_tx));
             // tauri::async_runtime::spawn(db::test_db());
             tauri::async_runtime::spawn(setup_game_dev_api("local"));
             tauri::async_runtime::spawn(update_controller_task(app.handle().clone()));
