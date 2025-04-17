@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt::Debug;
 use std::time::Duration;
 
 use gilrs::GamepadId;
@@ -13,12 +14,23 @@ const CONTROLLER_STALE_TIME: Duration = Duration::from_secs(30);
 pub const MAX_CONTROLLERS: usize = 8;
 
 #[derive(Debug)]
-pub enum PlayerSlotConnectionStatus {
+enum PlayerSlotConnectionStatus {
     Connected(GamepadId),
     Disconnected,
     Stale(GamepadId, JoinHandle<()>),
 }
 
+pub enum FrontendPlayerSlotConnection {
+    Connected,
+    Disconnected,
+    Stale,
+}
+
+/// Represents the state of every controller connection.
+///
+/// All methods are thread save, no Mutex is required for calling any methods with this object.
+/// However, these methods may be blocking if another thread is also reading or modifying this object
+/// through the provided methods.
 pub struct GamepadManager {
     state: Arc<RwLock<GamepadManagerInner>>,
 }
@@ -30,7 +42,7 @@ impl GamepadManager {
         }
     }
 
-    fn onControllerConnect(&self, id: GamepadId) {
+    pub fn connectController(&self, id: GamepadId) {
         // Check if the connected controller was previously stale
         let mut lock = self.state.write().unwrap();
         if let Some(slot) = lock.get_slot_num(&id) {
@@ -52,7 +64,7 @@ impl GamepadManager {
         }
     }
 
-    fn onControllerDisconnect(&self, id: GamepadId) {
+    pub fn disconnectController(&self, id: GamepadId) {
         let mut lock = self.state.write().unwrap();
         if let Some(slot_num) = lock.get_slot_num(&id) {
             let slot_num = *slot_num;
@@ -64,6 +76,28 @@ impl GamepadManager {
                 ),
             );
         }
+    }
+
+    /// Note: arguments are one-indexed NOT zero indexed.
+    pub fn swap_slots(&self, mut slot1: usize, mut slot2: usize) {
+        slot1 -= 1;
+        slot2 -= 1;
+        let mut lock = self.state.write().unwrap();
+        lock.swap_slots(slot1, slot2);
+    }
+
+    pub fn get_slots(&self) -> Vec<FrontendPlayerSlotConnection> {
+        let lock = self.state.read().unwrap();
+        lock.get_slots()
+            .iter()
+            .map(|status| match status {
+                PlayerSlotConnectionStatus::Connected(_) => FrontendPlayerSlotConnection::Connected,
+                PlayerSlotConnectionStatus::Disconnected => {
+                    FrontendPlayerSlotConnection::Disconnected
+                }
+                PlayerSlotConnectionStatus::Stale(_, _) => FrontendPlayerSlotConnection::Stale,
+            })
+            .collect()
     }
 
     async fn stale_timer(id: GamepadId, slots: Arc<RwLock<GamepadManagerInner>>) {
@@ -82,6 +116,8 @@ impl GamepadManager {
 }
 
 mod inner {
+    use std::mem::{self, swap};
+
     use super::*;
     pub struct GamepadManagerInner {
         player_slots: [PlayerSlotConnectionStatus; MAX_CONTROLLERS],
@@ -102,16 +138,22 @@ mod inner {
             &self.player_slots[slot_num]
         }
 
-        pub fn get_slot_mut(&mut self, slot_num: usize) -> &mut PlayerSlotConnectionStatus {
-            &mut self.player_slots[slot_num]
-        }
-
         pub fn get_slot_num(&self, id: &GamepadId) -> Option<&usize> {
             self.gamepad_map.get(id)
         }
 
+        pub fn get_slots(&self) -> &[PlayerSlotConnectionStatus; MAX_CONTROLLERS] {
+            &self.player_slots
+        }
+
         pub fn set_slot(&mut self, slot_num: usize, value: PlayerSlotConnectionStatus) {
+            match value {
+                PlayerSlotConnectionStatus::Connected(_) => self.connected_num += 1,
+                PlayerSlotConnectionStatus::Disconnected => self.connected_num -= 1,
+                _ => (),
+            };
             println!("Slot {} set to be {:?}", slot_num, value);
+            println!("{} controllers connected", self.connected_num);
             self.player_slots[slot_num] = value;
         }
 
@@ -123,6 +165,49 @@ mod inner {
         pub fn remove_id(&mut self, id: &GamepadId) {
             println!("Removed controller with ID {}", id);
             self.gamepad_map.remove(id);
+        }
+
+        pub fn swap_slots(&mut self, slot1: usize, slot2: usize) {
+            let mut slot_1_id = None;
+            let mut slot_2_id = None;
+            {
+                let slot_1_state = self.get_slot(slot1);
+                let slot_2_state = self.get_slot(slot2);
+                // Update id to slot mappings
+                match slot_1_state {
+                    PlayerSlotConnectionStatus::Connected(gamepad_id) => {
+                        slot_1_id = Some(*gamepad_id)
+                    }
+                    PlayerSlotConnectionStatus::Stale(gamepad_id, _) => {
+                        slot_1_id = Some(*gamepad_id)
+                    }
+                    _ => (),
+                }
+
+                match slot_2_state {
+                    PlayerSlotConnectionStatus::Connected(gamepad_id) => {
+                        slot_2_id = Some(*gamepad_id)
+                    }
+                    PlayerSlotConnectionStatus::Stale(gamepad_id, _) => {
+                        slot_2_id = Some(*gamepad_id)
+                    }
+                    _ => (),
+                }
+            }
+
+            if let Some(id) = slot_1_id {
+                self.register_id(id, slot2);
+            }
+            if let Some(id) = slot_2_id {
+                self.register_id(id, slot1);
+            }
+
+            unsafe {
+                let ptr_1 = self.player_slots.as_mut_ptr().add(slot1);
+                let ptr_2 = self.player_slots.as_mut_ptr().add(slot2);
+
+                std::ptr::swap(ptr_1, ptr_2);
+            }
         }
 
         /// Get the index of the lowest slot number that is disconnected in a given array of player slot connections
