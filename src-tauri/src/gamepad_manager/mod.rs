@@ -22,7 +22,7 @@ pub async fn update_controller_task(app_handle: AppHandle) -> Result<(), Error> 
 
     // populate gamepad_map with initial connected gamepads
     for (id, _) in gilrs.gamepads() {
-        state_manager.connectController(id);
+        state_manager.connect_controller(id);
     }
 
     loop {
@@ -33,14 +33,14 @@ pub async fn update_controller_task(app_handle: AppHandle) -> Result<(), Error> 
                     event: EventType::Connected,
                     ..
                 } => {
-                    state_manager.connectController(id);
+                    state_manager.connect_controller(id);
                 }
                 Event {
                     id,
                     event: EventType::Disconnected,
                     time,
                 } => {
-                    state_manager.disconnectController(id);
+                    state_manager.disconnect_controller(id);
                 }
                 _ => (),
             }

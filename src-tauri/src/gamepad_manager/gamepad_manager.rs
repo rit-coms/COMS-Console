@@ -44,7 +44,7 @@ impl GamepadManager {
         }
     }
 
-    pub fn connectController(&self, id: GamepadId) {
+    pub fn connect_controller(&self, id: GamepadId) {
         // Check if the connected controller was previously stale
         let mut lock = self.state.write().unwrap();
         if let Some(slot) = lock.get_slot_num(&id) {
@@ -66,7 +66,7 @@ impl GamepadManager {
         }
     }
 
-    pub fn disconnectController(&self, id: GamepadId) {
+    pub fn disconnect_controller(&self, id: GamepadId) {
         let mut lock = self.state.write().unwrap();
         if let Some(slot_num) = lock.get_slot_num(&id) {
             let slot_num = *slot_num;
