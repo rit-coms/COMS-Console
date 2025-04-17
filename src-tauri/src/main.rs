@@ -2,15 +2,15 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::sync::{
-    mpsc::{Receiver, Sender},
+    mpsc::{self, Receiver, Sender},
     Arc, Mutex,
 };
 
 use frontend_api::{get_game_info, play_game, LoadedGamesState};
 use game_dev_api::setup_game_dev_api;
 use gamepad_manager::{
-    gamepad_manager::GamepadManager, get_player_slot_states, swap_player_slots,
-    update_controller_task,
+    gamepad_manager::{FrontendPlayerSlotConnection, GamepadManager},
+    get_player_slot_states, swap_player_slots, update_controller_task,
 };
 use tauri::Manager;
 use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
@@ -28,7 +28,7 @@ fn main() {
         ))
         .setup(|app| {
             let (controller_slot_tx, controller_slot_rx) =
-                mpsc::channel::<Vec<FrontendPlayerSlotConnection>>(10);
+                mpsc::channel::<Vec<FrontendPlayerSlotConnection>>();
             app.manage(LoadedGamesState::default());
             app.manage(GamepadManager::new(controller_slot_tx));
             // tauri::async_runtime::spawn(db::test_db());

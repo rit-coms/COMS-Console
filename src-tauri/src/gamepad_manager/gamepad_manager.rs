@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::fmt::Debug;
+use std::sync::mpsc::Sender;
 use std::time::Duration;
 
 use gilrs::GamepadId;
@@ -91,35 +92,36 @@ impl GamepadManager {
     }
 
     /// Note: arguments are one-indexed NOT zero indexed.
-    pub async fn swap_slots(&self, mut slot1: usize, mut slot2: usize) {
+    pub fn swap_slots(&self, mut slot1: usize, mut slot2: usize) {
         slot1 -= 1;
         slot2 -= 1;
-        let mut lock = self.state.write().await;
+        let mut lock = self.state.write().unwrap();
         lock.swap_slots(slot1, slot2);
     }
 
-    pub async fn get_slots(&self) -> Vec<FrontendPlayerSlotConnection> {
-        let lock = self.state.read().await;
+    pub fn get_slots(&self) -> Vec<FrontendPlayerSlotConnection> {
+        let lock = self.state.read().unwrap();
         lock.get_slots().iter().map(|value| value.into()).collect()
     }
 
     async fn stale_timer(id: GamepadId, slots: Arc<RwLock<GamepadManagerInner>>) {
         sleep(CONTROLLER_STALE_TIME).await;
-        let mut lock = slots.write().await;
+        let mut lock = slots.write().unwrap();
         let slot: usize;
         if let Some(slot_num) = lock.get_slot_num(&id) {
             slot = *slot_num
         } else {
             panic!("Stale controller not in gamepad map")
         }
-        lock.set_slot(slot, PlayerSlotConnectionStatus::Disconnected)
-            .await;
+        lock.set_slot(slot, PlayerSlotConnectionStatus::Disconnected);
         lock.remove_id(&id);
         println!("Disconnected controller ID {} in slot {}", id, slot);
     }
 }
 
 mod inner {
+    use std::sync::mpsc::Sender;
+
     use super::*;
     pub struct GamepadManagerInner {
         player_slots: [PlayerSlotConnectionStatus; MAX_CONTROLLERS],
@@ -138,12 +140,11 @@ mod inner {
             }
         }
 
-        async fn broadcast_state(&self) {
+        fn broadcast_state(&self) {
             // Ignore the error for if the reciever is dropped (it shouldn't be dropped)
             let _ = self
                 .sender
-                .send(self.player_slots.iter().map(|value| value.into()).collect())
-                .await;
+                .send(self.player_slots.iter().map(|value| value.into()).collect());
         }
 
         pub fn get_slot(&self, slot_num: usize) -> &PlayerSlotConnectionStatus {
@@ -167,6 +168,7 @@ mod inner {
             println!("Slot {} set to be {:?}", slot_num, value);
             println!("{} controllers connected", self.connected_num);
             self.player_slots[slot_num] = value;
+            self.broadcast_state();
         }
 
         pub fn register_id(&mut self, id: GamepadId, slot_num: usize) {
@@ -222,6 +224,8 @@ mod inner {
 
                 std::ptr::swap(ptr_1, ptr_2);
             }
+
+            self.broadcast_state();
         }
 
         /// Get the index of the lowest slot number that is disconnected in a given array of player slot connections
