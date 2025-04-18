@@ -1,17 +1,10 @@
-use std::{
-    collections::HashMap,
-    sync::{Arc, RwLock},
-    time::Duration,
-};
+use std::time::Duration;
 
-use anyhow::{anyhow, Error};
-use gamepad_manager::{FrontendPlayerSlotConnection, GamepadManager, MAX_CONTROLLERS};
-use gilrs::{Event, EventType, GamepadId, Gilrs};
-use tauri::{App, AppHandle, Manager, State};
-use tokio::{
-    task::JoinHandle,
-    time::{sleep, Sleep},
-};
+use anyhow::Error;
+use gamepad_manager::{FrontendPlayerSlotConnection, GamepadManager};
+use gilrs::{Event, EventType, Gilrs};
+use tauri::{AppHandle, Manager, State};
+use tokio::time::sleep;
 
 use crate::frontend_api::ErrorType;
 pub mod gamepad_manager;
