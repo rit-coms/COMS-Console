@@ -1,5 +1,6 @@
 use std::collections::HashMap;
-use std::fmt::Debug;
+use std::fmt;
+use std::fmt::Display;
 use std::sync::mpsc::Sender;
 use std::time::Duration;
 
@@ -20,6 +21,25 @@ enum PlayerSlotConnectionStatus {
     Connected(GamepadId),
     Disconnected,
     Stale(GamepadId, JoinHandle<()>),
+}
+
+impl Display for PlayerSlotConnectionStatus {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        const RED: &str = "\x1b[31m";
+        const YELLOW: &str = "\x1b[33m";
+        const GREEN: &str = "\x1b[32m";
+        const RESET: &str = "\x1b[0m";
+        const SQUARE: &str = "⬛";
+        match self {
+            PlayerSlotConnectionStatus::Connected(gamepad_id) => {
+                write!(f, "{}{} {}", GREEN, gamepad_id, RESET)
+            }
+            PlayerSlotConnectionStatus::Disconnected => write!(f, "{}{}{}", RED, SQUARE, RESET),
+            PlayerSlotConnectionStatus::Stale(gamepad_id, _) => {
+                write!(f, "{}{} {}", YELLOW, gamepad_id, RESET)
+            }
+        }
+    }
 }
 
 impl Into<FrontendPlayerSlotConnection> for &PlayerSlotConnectionStatus {
@@ -115,7 +135,6 @@ impl GamepadManager {
         }
         lock.set_slot(slot, PlayerSlotConnectionStatus::Disconnected);
         lock.remove_id(&id);
-        println!("Disconnected controller ID {} in slot {}", id, slot);
     }
 }
 
@@ -126,8 +145,16 @@ mod inner {
     pub struct GamepadManagerInner {
         player_slots: [PlayerSlotConnectionStatus; MAX_CONTROLLERS],
         gamepad_map: HashMap<GamepadId, usize>,
-        connected_num: u8,
         sender: Sender<Vec<FrontendPlayerSlotConnection>>,
+    }
+
+    impl fmt::Display for GamepadManagerInner {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            for slot in self.player_slots.iter() {
+                write!(f, "{}", slot)?;
+            }
+            Ok(())
+        }
     }
 
     impl GamepadManagerInner {
@@ -135,13 +162,13 @@ mod inner {
             GamepadManagerInner {
                 player_slots: [const { PlayerSlotConnectionStatus::Disconnected }; MAX_CONTROLLERS],
                 gamepad_map: HashMap::new(),
-                connected_num: 0,
                 sender: sender,
             }
         }
 
         fn broadcast_state(&self) {
             // Ignore the error for if the reciever is dropped (it shouldn't be dropped)
+            println!("{}", self);
             let _ = self
                 .sender
                 .send(self.player_slots.iter().map(|value| value.into()).collect());
@@ -160,24 +187,15 @@ mod inner {
         }
 
         pub fn set_slot(&mut self, slot_num: usize, value: PlayerSlotConnectionStatus) {
-            match value {
-                PlayerSlotConnectionStatus::Connected(_) => self.connected_num += 1,
-                PlayerSlotConnectionStatus::Disconnected => self.connected_num -= 1,
-                _ => (),
-            };
-            println!("Slot {} set to be {:?}", slot_num, value);
-            println!("{} controllers connected", self.connected_num);
             self.player_slots[slot_num] = value;
             self.broadcast_state();
         }
 
         pub fn register_id(&mut self, id: GamepadId, slot_num: usize) {
-            println!("ID {:?} associated with slot {}", &id, slot_num);
             self.gamepad_map.insert(id, slot_num);
         }
 
         pub fn remove_id(&mut self, id: &GamepadId) {
-            println!("Removed controller with ID {}", id);
             self.gamepad_map.remove(id);
         }
 
