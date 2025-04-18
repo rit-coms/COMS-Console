@@ -32,7 +32,7 @@ fn main() {
             app.manage(LoadedGamesState::default());
             app.manage(GamepadManager::new(controller_slot_tx));
             // tauri::async_runtime::spawn(db::test_db());
-            tauri::async_runtime::spawn(setup_game_dev_api("local"));
+            tauri::async_runtime::spawn(setup_game_dev_api("local", controller_slot_rx));
             tauri::async_runtime::spawn(update_controller_task(app.handle().clone()));
             if cfg!(feature = "autostart") {
                 // Only enable autolaunch on raspberry pi

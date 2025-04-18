@@ -1,4 +1,6 @@
 use crate::db::{self};
+use axum::extract::ws::WebSocket;
+use axum::extract::WebSocketUpgrade;
 use axum::{
     extract::{Query, State},
     http::StatusCode,
@@ -190,6 +192,10 @@ pub async fn get_save_data(
         }
         Err(e) => (StatusCode::BAD_REQUEST, e.to_string()).into_response(),
     }
-
-    // println!("{}", serde_json::to_string_pretty(&json_response).unwrap());
 }
+
+pub async fn player_slots_socket_handler(ws: WebSocketUpgrade) -> impl IntoResponse {
+    ws.on_upgrade(|socket| handle_player_slots_socket())
+}
+
+async fn handle_player_slots_socket() {}

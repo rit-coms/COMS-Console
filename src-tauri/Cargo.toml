@@ -29,7 +29,7 @@ libsqlite3-sys = { version = "0.30", features = ["bundled"] }
 dotenvy = "0.15"
 uuid = "1.11.0"
 tokio = { version = "1.29.1", features = ["full"] }
-axum = "0.8.1"
+axum = {version = "0.8.1", features = ["ws"]}
 serde_with = "3.0.0"
 tower = "0.5.2"
 http-body-util = "0.1.2"
