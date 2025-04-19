@@ -12,7 +12,7 @@ use std::sync::RwLock;
 use tokio::task::JoinHandle;
 use tokio::time::sleep;
 
-const CONTROLLER_STALE_TIME: Duration = Duration::from_secs(30);
+const CONTROLLER_STALE_TIME: Duration = Duration::from_secs(5);
 
 pub const MAX_CONTROLLERS: usize = 8;
 

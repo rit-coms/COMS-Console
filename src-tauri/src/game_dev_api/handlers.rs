@@ -1,6 +1,7 @@
 use crate::db::{self};
-use axum::extract::ws::WebSocket;
-use axum::extract::WebSocketUpgrade;
+use axum::body::Bytes;
+use axum::extract::ws::{Message, WebSocket};
+use axum::extract::{ConnectInfo, WebSocketUpgrade};
 use axum::{
     extract::{Query, State},
     http::StatusCode,
@@ -9,6 +10,7 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{from_str, Value};
+use std::net::SocketAddr;
 use std::option::Option;
 
 #[derive(Clone)]
@@ -194,8 +196,25 @@ pub async fn get_save_data(
     }
 }
 
-pub async fn player_slots_socket_handler(ws: WebSocketUpgrade) -> impl IntoResponse {
-    ws.on_upgrade(|socket| handle_player_slots_socket())
+pub async fn player_slots_socket_handler(
+    ws: WebSocketUpgrade,
+    ConnectInfo(addr): ConnectInfo<SocketAddr>,
+) -> impl IntoResponse {
+    ws.on_upgrade(move |socket| handle_player_slots_socket(socket, addr))
 }
 
-async fn handle_player_slots_socket() {}
+async fn handle_player_slots_socket(mut socket: WebSocket, who: SocketAddr) {
+    // send a ping (unsupported by some browsers) just to kick things off and get a response
+    if socket
+        .send(Message::Ping(Bytes::from_static(&[1, 2, 3])))
+        .await
+        .is_ok()
+    {
+        println!("Pinged {who}...");
+    } else {
+        println!("Could not send ping {who}!");
+        // no Error here since the only thing we can do is to close the connection.
+        // If we can not send messages, there is no way to salvage the statemachine anyway.
+        return;
+    }
+}

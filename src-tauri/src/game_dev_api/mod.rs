@@ -1,7 +1,13 @@
 use std::sync::mpsc::Receiver;
 
-use axum::{routing::post, Router};
-use handlers::{get_leaderboard, get_save_data, set_leaderboard, set_save_data, ApiState};
+use axum::{
+    routing::{any, post},
+    Router,
+};
+use handlers::{
+    get_leaderboard, get_save_data, player_slots_socket_handler, set_leaderboard, set_save_data,
+    ApiState,
+};
 
 const VERSION: u8 = 1;
 
@@ -24,9 +30,11 @@ use crate::gamepad_manager::gamepad_manager::FrontendPlayerSlotConnection;
 ///
 /// ```rust
 /// use app::game_dev_api::create_router;
+/// use std::sync::mpsc;
 ///
 /// async fn setup_api() {
-///     let app = create_router("local");
+///     let (tx, rx) = mpsc::channel();
+///     let app = create_router("local", rx);
 ///
 ///     let listener = tokio::net::TcpListener::bind("127.0.0.1:8000")
 ///         .await
@@ -53,6 +61,10 @@ pub fn create_router(
         .route(
             &format!("{}/save-data", route_prefix),
             post(set_save_data).get(get_save_data),
+        )
+        .route(
+            &format!("{}/player-slots-ws", route_prefix),
+            any(player_slots_socket_handler),
         )
         .with_state(api_state)
 }

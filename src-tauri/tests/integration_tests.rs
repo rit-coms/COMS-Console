@@ -1,3 +1,5 @@
+use std::sync::mpsc::channel;
+
 use app::{
     db::{
         create_user, get_user, insert_game,
@@ -9,6 +11,7 @@ use app::{
         handlers::{LeaderboardGetParams, LeaderboardPost, SaveDataGetParams, SaveDataPost},
     },
 };
+use axum::Router;
 use axum_test::TestServer;
 
 extern crate diesel_migrations;
@@ -57,6 +60,11 @@ async fn setup_initial_data(db_name: &str) {
     println!("Setup initial data!")
 }
 
+fn create_router_with_dummy_reciever(db_name: &str) -> Router {
+    let (_, rx) = channel();
+    create_router(db_name, rx)
+}
+
 #[tokio::test]
 async fn read_and_write_user_table_db() {
     let test_context = TestContext::new("read_and_write_user_table_db");
@@ -80,7 +88,7 @@ async fn read_and_write_leaderboard_data() {
 
     setup_initial_data(&test_context.db_name).await;
 
-    let app: axum::Router = create_router(&test_context.db_name);
+    let app: axum::Router = create_router_with_dummy_reciever(&test_context.db_name);
 
     let server: TestServer = TestServer::new(app).expect("Failed to set up test server");
 
@@ -131,7 +139,7 @@ async fn read_and_write_save_data() {
 
     setup_initial_data(&test_context.db_name).await;
 
-    let app: axum::Router = create_router(&test_context.db_name);
+    let app: axum::Router = create_router_with_dummy_reciever(&test_context.db_name);
 
     let server: TestServer = TestServer::new(app).expect("Failed to set up test server");
 
@@ -166,7 +174,7 @@ async fn read_and_write_save_data() {
         .add_query_params(SaveDataGetParams {
             file_name: Some(file_name.clone()),
             regex: None,
-            player_slot: Some(1)
+            player_slot: Some(1),
         })
         .await;
 
@@ -187,7 +195,7 @@ async fn get_save_data_error() {
 
     setup_initial_data(&test_context.db_name).await;
 
-    let app: axum::Router = create_router(&test_context.db_name);
+    let app: axum::Router = create_router_with_dummy_reciever(&test_context.db_name);
 
     let server: TestServer = TestServer::new(app).expect("Failed to set up test server");
 
@@ -223,7 +231,7 @@ async fn get_save_data_error() {
         .add_query_params(SaveDataGetParams {
             file_name: None,
             regex: Some(String::from(r"\")),
-            player_slot: Some(player_slot)
+            player_slot: Some(player_slot),
         })
         .await;
 
@@ -234,7 +242,7 @@ async fn get_save_data_error() {
         .add_query_params(SaveDataGetParams {
             file_name: Some(String::from("test")),
             regex: Some(String::from("test")),
-            player_slot: Some(player_slot)
+            player_slot: Some(player_slot),
         })
         .await;
 
@@ -248,7 +256,7 @@ async fn get_leaderboard_data_error() {
 
     setup_initial_data(&test_context.db_name).await;
 
-    let app: axum::Router = create_router(&test_context.db_name);
+    let app: axum::Router = create_router_with_dummy_reciever(&test_context.db_name);
 
     let server: TestServer = TestServer::new(app).expect("Failed to set up test server");
 
