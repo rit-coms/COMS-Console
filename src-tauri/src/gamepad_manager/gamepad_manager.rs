@@ -235,14 +235,7 @@ mod inner {
             }
 
             // Make sure we don't go out of the memory range of the array
-            assert!(slot1 < self.player_slots.len() && slot2 < self.player_slots.len());
-            unsafe {
-                let ptr_1 = self.player_slots.as_mut_ptr().add(slot1);
-                let ptr_2 = self.player_slots.as_mut_ptr().add(slot2);
-
-                std::ptr::swap(ptr_1, ptr_2);
-            }
-
+            self.player_slots.swap(slot1, slot2);
             self.broadcast_state();
         }
 

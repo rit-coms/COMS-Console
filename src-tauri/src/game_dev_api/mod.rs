@@ -9,7 +9,7 @@ use handlers::{
     ApiState,
 };
 
-const VERSION: u8 = 1;
+pub const VERSION: u8 = 1;
 
 pub mod handlers;
 use crate::gamepad_manager::gamepad_manager::FrontendPlayerSlotConnection;
@@ -47,23 +47,23 @@ pub fn create_router(
     db_name: &str,
     controller_slot_rx: Receiver<Vec<FrontendPlayerSlotConnection>>,
 ) -> Router {
-    let route_prefix: String = format!("/api/v{}", VERSION.to_string());
+    let ROUTE_PREFIX: String = format!("/api/v{}", VERSION.to_string());
     let api_state = ApiState {
         db_name: db_name.to_owned(),
     };
 
     Router::new()
         .route(
-            &format!("{}/leaderboard", route_prefix),
+            &format!("{}/leaderboard", ROUTE_PREFIX),
             post(set_leaderboard).get(get_leaderboard),
         )
         .with_state(api_state.clone()) // TODO: wrap the state in an ARC to avoid cloning???
         .route(
-            &format!("{}/save-data", route_prefix),
+            &format!("{}/save-data", ROUTE_PREFIX),
             post(set_save_data).get(get_save_data),
         )
         .route(
-            &format!("{}/player-slots-ws", route_prefix),
+            &format!("{}/player-slots-ws", ROUTE_PREFIX),
             any(player_slots_socket_handler),
         )
         .with_state(api_state)
