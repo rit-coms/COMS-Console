@@ -4,6 +4,7 @@ use diesel::{insert_into, prelude::*, upsert::excluded};
 use dotenvy::dotenv;
 use models::*;
 use regex::Regex;
+use schema::games;
 use std::env;
 use std::option::Option;
 use std::path::Path;
@@ -52,6 +53,18 @@ pub fn insert_game(id_s: &str, name_s: &str, is_installed: bool, db_name: &str) 
         .set(installed.eq(is_installed))
         .execute(connection)
         .expect("Failed to insert game")
+}
+
+/// Ensures a game exists in the data base by inserting the given game into the database
+/// and doing nothing if there is a conflict.
+pub fn make_sure_game_exists(name_s: &str, id_s: &str, db_name: &str) {
+    use self::schema::games::dsl::*;
+    let connection = &mut establish_connection(db_name);
+    insert_into(games)
+        .values((id.eq(id_s), name.eq(name_s), installed.eq(false)))
+        .on_conflict_do_nothing()
+        .execute(connection)
+        .expect("Failed to insert game entry");
 }
 
 pub async fn insert_leaderboard_entry(
