@@ -1,6 +1,7 @@
-use std::ops::ControlFlow;
+use std::{ops::ControlFlow, time::Duration};
 
 use futures_util::{SinkExt, StreamExt};
+use tokio::time::sleep;
 use tokio_tungstenite::{
     connect_async,
     tungstenite::{
@@ -15,7 +16,7 @@ const SERVER: &str = "ws://127.0.0.1:8000/api/v1/player-slots-ws";
 async fn main() {
     println!("Spawning client");
     spawn_client().await;
-    loop {};
+    loop {}
 }
 
 async fn spawn_client() {
@@ -45,37 +46,14 @@ async fn spawn_client() {
 
     //spawn an async sender to push some more messages into the server
     let mut send_task = tokio::spawn(async move {
-        for i in 1..30 {
-            // In any websocket error, break loop.
-            if sender
-                .send(Message::Text(format!("Message number {i}...").into()))
-                .await
-                .is_err()
-            {
-                //just as with server, if send fails there is nothing we can do but exit.
-                return;
-            }
-
-            tokio::time::sleep(std::time::Duration::from_millis(300)).await;
+        loop {
+            sleep(Duration::from_secs(60)).await;
         }
-
-        // When we are done we may want our client to close connection cleanly.
-        println!("Sending close...");
-        if let Err(e) = sender
-            .send(Message::Close(Some(CloseFrame {
-                code: CloseCode::Normal,
-                reason: std::borrow::Cow::Borrowed("Goodbye"),
-            })))
-            .await
-        {
-            println!("Could not send Close due to {e:?}, probably it is ok?");
-        };
     });
 
     //receiver just prints whatever it gets
     let mut recv_task = tokio::spawn(async move {
         while let Some(Ok(msg)) = receiver.next().await {
-            println!("reveived message!!!!!!");
             // print message and break if instructed to do so
             if process_message(msg).is_break() {
                 break;
