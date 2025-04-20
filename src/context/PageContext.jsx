@@ -126,12 +126,12 @@ export const PageProvider = ({ children }) => {
         switch (direction) {
             case "DOWN":
                 updatedFocus.x = Math.min(updatedFocus.x + 1, Object.keys(pageElements).length - 1);
-                updatedFocus.y = 0;
+                updatedFocus.y = Math.min(updatedFocus.y, pageElements[updatedFocus.x].length - 1);
                 break;
 
             case "UP":
                 updatedFocus.x = Math.max(updatedFocus.x - 1, 0);
-                updatedFocus.y = 0;
+                updatedFocus.y = Math.min(updatedFocus.y, pageElements[updatedFocus.x].length - 1);
                 break;
 
             case "RIGHT":
