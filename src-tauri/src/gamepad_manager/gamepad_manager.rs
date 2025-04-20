@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use std::fmt;
 use std::fmt::Display;
-use std::sync::mpsc::Sender;
 use std::time::Duration;
 
 use gilrs::GamepadId;
@@ -9,6 +8,7 @@ use inner::GamepadManagerInner;
 use serde::Serialize;
 use std::sync::Arc;
 use std::sync::RwLock;
+use tokio::sync::broadcast::Sender;
 use tokio::task::JoinHandle;
 use tokio::time::sleep;
 
@@ -52,7 +52,7 @@ impl Into<FrontendPlayerSlotConnection> for &PlayerSlotConnectionStatus {
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub enum FrontendPlayerSlotConnection {
     Connected,
     Disconnected,
@@ -139,8 +139,6 @@ impl GamepadManager {
 }
 
 mod inner {
-    use std::sync::mpsc::Sender;
-
     use super::*;
     pub struct GamepadManagerInner {
         player_slots: [PlayerSlotConnectionStatus; MAX_CONTROLLERS],

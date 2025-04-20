@@ -1,4 +1,5 @@
 use crate::db::{self};
+use crate::gamepad_manager::gamepad_manager::FrontendPlayerSlotConnection;
 use axum::body::Bytes;
 use axum::extract::ws::{Message, WebSocket};
 use axum::extract::{ConnectInfo, WebSocketUpgrade};
@@ -8,14 +9,19 @@ use axum::{
     response::IntoResponse,
     Json,
 };
+use futures_util::{SinkExt, StreamExt};
 use serde::{Deserialize, Serialize};
-use serde_json::{from_str, Value};
+use serde_json::{from_str, json, Value};
 use std::net::SocketAddr;
+use std::ops::ControlFlow;
 use std::option::Option;
+use std::sync::Arc;
+use tokio::sync::broadcast::Receiver;
 
 #[derive(Clone)]
 pub struct ApiState {
     pub db_name: String,
+    pub player_slot_rx: Arc<Receiver<Vec<FrontendPlayerSlotConnection>>>,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -198,24 +204,77 @@ pub async fn get_save_data(
 
 pub async fn player_slots_socket_handler(
     ws: WebSocketUpgrade,
-    ConnectInfo(addr): ConnectInfo<SocketAddr>,
+    State(state): State<ApiState>,
 ) -> impl IntoResponse {
     println!("Upgrading websocket!");
-    ws.on_upgrade(move |socket| handle_player_slots_socket(socket, addr))
+    ws.on_upgrade(move |socket| handle_player_slots_socket(socket, state))
 }
 
-async fn handle_player_slots_socket(mut socket: WebSocket, who: SocketAddr) {
+async fn handle_player_slots_socket(mut socket: WebSocket, state: ApiState) {
     // send a ping (unsupported by some browsers) just to kick things off and get a response
     if socket
         .send(Message::Ping(Bytes::from_static(&[1, 2, 3])))
         .await
         .is_ok()
     {
-        println!("Pinged {who}...");
+        println!("Pinged client...");
     } else {
-        println!("Could not send ping {who}!");
+        println!("Could not send ping client!");
         // no Error here since the only thing we can do is to close the connection.
         // If we can not send messages, there is no way to salvage the statemachine anyway.
         return;
     }
+
+    // receive single message from a client (we can either receive or send with socket).
+    // this will likely be the Pong for our Ping or a hello message from client.
+    // waiting for message from a client will block this task, but will not block other client's
+    // connections.
+    if let Some(msg) = socket.recv().await {
+        if let Ok(msg) = msg {
+            if process_message(msg).is_break() {
+                return;
+            }
+        } else {
+            println!("client abruptly disconnected");
+            return;
+        }
+    }
+
+    let (mut sender, mut reciever) = socket.split();
+
+    let send_task = tokio::spawn(async move {
+        let mut player_slot_receiver = Arc::clone(&state.player_slot_rx).resubscribe();
+        while let Ok(msg) = player_slot_receiver.recv().await {
+            sender
+                .send(Message::Text(json!(msg).to_string().into()))
+                .await
+                .unwrap();
+        }
+    });
+}
+
+fn process_message(msg: Message) -> ControlFlow<(), ()> {
+    match msg {
+        Message::Text(text) => {
+            println!("got str: {text}");
+        }
+        Message::Binary(items) => {
+            println!("got {} bytes: {:?}", items.len(), items);
+        }
+        Message::Ping(items) => {
+            println!("got ping with {items:?}");
+        }
+        Message::Pong(items) => {
+            println!("got pong with {items:?}");
+        }
+        Message::Close(close_frame) => {
+            if let Some(cf) = close_frame {
+                println!("got close with code {} with reason {}", cf.code, cf.reason);
+            } else {
+                println!("got close message without close frame");
+            }
+            return ControlFlow::Break(());
+        }
+    }
+    ControlFlow::Continue(())
 }

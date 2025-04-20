@@ -1,5 +1,3 @@
-use std::sync::mpsc::channel;
-
 use app::{
     db::{
         create_user, get_user, insert_game,
@@ -13,6 +11,7 @@ use app::{
 };
 use axum::Router;
 use axum_test::TestServer;
+use tokio::sync::broadcast::channel;
 
 extern crate diesel_migrations;
 
@@ -61,7 +60,7 @@ async fn setup_initial_data(db_name: &str) {
 }
 
 fn create_router_with_dummy_reciever(db_name: &str) -> Router {
-    let (_, rx) = channel();
+    let (_, rx) = channel(100);
     create_router(db_name, rx)
 }
 

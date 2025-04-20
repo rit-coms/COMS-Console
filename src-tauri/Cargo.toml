@@ -41,7 +41,7 @@ gilrs = "0.10.0"
 tokio-tungstenite = "0.18.0"
 futures-util = "0.3.31"
 tracing-subscriber = { version= "0.3.17", features = ["env-filter"] }
-tower-http = { version="0.4.4", features = ["trace"]}
+tower-http = { version="0.6.1", features = ["trace"] }
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem and the built-in dev server is disabled.

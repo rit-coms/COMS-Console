@@ -15,6 +15,7 @@ const SERVER: &str = "ws://127.0.0.1:8000/api/v1/player-slots-ws";
 async fn main() {
     println!("Spawning client");
     spawn_client().await;
+    loop {};
 }
 
 async fn spawn_client() {
@@ -74,6 +75,7 @@ async fn spawn_client() {
     //receiver just prints whatever it gets
     let mut recv_task = tokio::spawn(async move {
         while let Some(Ok(msg)) = receiver.next().await {
+            println!("reveived message!!!!!!");
             // print message and break if instructed to do so
             if process_message(msg).is_break() {
                 break;
