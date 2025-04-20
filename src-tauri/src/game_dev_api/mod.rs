@@ -33,10 +33,10 @@ use crate::gamepad_manager::gamepad_manager::FrontendPlayerSlotConnection;
 ///
 /// ```rust
 /// use app::game_dev_api::create_router;
-/// use std::sync::mpsc;
+/// use tokio::sync::broadcast;
 ///
 /// async fn setup_api() {
-///     let (tx, rx) = mpsc::channel();
+///     let (tx, rx) = broadcast::channel(100);
 ///     let app = create_router("local", rx);
 ///
 ///     let listener = tokio::net::TcpListener::bind("127.0.0.1:8000")
