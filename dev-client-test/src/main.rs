@@ -12,7 +12,7 @@ use tokio_tungstenite::{
 
 const SERVER: &str = "ws://127.0.0.1:8000/api/v1/player-slots-ws";
 
-#[tokio::test]
+#[tokio::main]
 async fn main() {
     println!("Spawning client");
     spawn_client().await;
@@ -39,7 +39,7 @@ async fn spawn_client() {
     //we can ping the server for start
     sender
         .send(Message::Ping(
-            axum::body::Bytes::from_static(b"Hello, Server!").to_vec(),
+            axum::body::Bytes::from_static(b"Hello, Server!"),
         ))
         .await
         .expect("Can not send!");
