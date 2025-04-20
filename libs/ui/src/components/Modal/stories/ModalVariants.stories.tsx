@@ -1,10 +1,7 @@
 
 import React from "react"
 import { Meta, StoryObj } from "@storybook/react"
-import { Link } from "../../Link/Link"
 import { Modal } from "../Modal"
-import { Pill } from "../../Pill/Pill"
-import { Text } from "../../Typography/Text/Text"
 
 export default {
     title: "Components/Modal/Variants",
@@ -49,7 +46,7 @@ export const ModalVariants_GameInfo: Story = {
             variant={"gameInfo"}
             gameImageSrc={"/assets/coming_soon.png"}
             onClose={() => {}}
-            confirmLabel="Play"
+            confirmLabel={"Play"}
             confirmLabelColorPrimary
         >
             Game Info children

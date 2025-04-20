@@ -1,0 +1,24 @@
+
+.tableContainer {
+    width: 100%;
+
+    .table {
+        width: 100%;
+        border-radius: var(--border-radius);
+        border-collapse: collapse;
+
+        .tableHeader {
+            background-color: var(--color-blue-60);
+            padding: 0.25rem 1rem;
+            border-bottom: var(--border-stroke-sm) solid var(--color-black);
+            text-align: left;
+        }
+
+        .tableData {
+            border-bottom: var(--border-stroke-sm) solid var(--color-black);
+            padding: 0.75rem 1rem;
+        }
+
+    }
+
+}

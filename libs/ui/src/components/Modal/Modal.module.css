@@ -46,17 +46,42 @@
                 padding: 1.25em 1.25em;
                 min-height: 0;
 
+                .gameImageWrapper {
+                    background-color: var(--color-grey);
+                    aspect-ratio: 3 / 4;
+                    width: 40%;
+                    overflow: hidden;
+                    border-radius: var(--border-radius);
+                    flex-shrink: 0;
+                    display: block;
+                    position: relative;
+                }
+
+                .gameImageWrapper .gameImage {
+                    object-fit: cover;
+                    width: 100%;
+                    height: 100%;
+                    display: block;
+                    position: absolute;
+                    top: 0;
+                    bottom: 0;
+                }
+/* 
                 .gameImage {
+                    width: 100%;
+                    max-width: 430px;
+                    aspect-ratio: 3 / 4;
                     background-color: var(--color-grey);
                     background-size: cover;
                     position: relative;
                     object-fit: cover;
                     flex-shrink: 0;
-                    aspect-ratio: 3 / 4;
+                    
                     height: auto;
                     border-radius: var(--border-radius);
                     overflow: hidden;
-                }
+                    display: block;
+                } */
 
                 .gameInfoContent {
                     display: flex;

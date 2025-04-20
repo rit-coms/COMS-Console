@@ -50,10 +50,10 @@ export const Tabs = ({
                 {validChildren.map((tab, index) => (
                     <Tab
                         key={index}
-                        isActive={index == activeIndex}
+                        isActive={index === activeIndex}
                         label={tab.props.label}
                         onClick={() => handleTabClick(index)}
-                        dataId={dataId && `tab-${tab.props.label.toLowerCase().replace(' ', '-')}`}
+                        dataId={dataId && `tab-${tab.props.label.toLowerCase().replace(" ", "-")}`}
                         disabled={tab.props.disabled}
                     />
                 ))}

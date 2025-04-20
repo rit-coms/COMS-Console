@@ -120,7 +120,7 @@ export const Carousel = ({
                 return (
                     <Game
                         key={game.id}
-                        dataId={`game`}
+                        dataId={"game"}
                         gameId={game.id}
                         title={game.title}
                         author={game.author}

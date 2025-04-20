@@ -18,7 +18,7 @@ export const Tabs_Default: Story = {
     name: "Default",
     args: {
         children: (
-            <Tab label="Lorem Ipsum">
+            <Tab label={"Lorem Ipsum"}>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
                 Duis ac orci sed purus pellentesque cursus ut nec leo. 
                 Phasellus at risus quis ante auctor facilisis. Fusce 

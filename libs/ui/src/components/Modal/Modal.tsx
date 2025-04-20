@@ -92,11 +92,13 @@ export const Modal = ({
                 
                 {variant === "gameInfo" ?
                     <div className={styles.gameInfoContainer}>
-                        <img 
-                            className={styles.gameImage} 
-                            src={gameImageSrc !== undefined ? gameImageSrc : undefined}
-                            data-id={dataId && `${dataId}-image`}
-                        />
+                        <div className={styles.gameImageWrapper}>
+                            <img 
+                                className={styles.gameImage} 
+                                src={gameImageSrc !== undefined ? gameImageSrc : undefined}
+                                data-id={dataId && `${dataId}-image`}
+                            />
+                        </div>
                         <div className={styles.gameInfoContent}>
                             <div 
                                 className={styles.gameInfoHeader} 

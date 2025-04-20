@@ -16,7 +16,7 @@ export const TabsVariants_Enabled: Story = {
     render: () => {
         return (
             <Tabs>
-                <Tab label="Enabled Tab">Enabled</Tab>
+                <Tab label={"Enabled Tab"}>Enabled</Tab>
             </Tabs>
         )
     }
@@ -27,7 +27,7 @@ export const TabsVariants_Disabled: Story = {
     render: () => {
         return (
             <Tabs>
-                <Tab disabled label="Disabled Tab">Disabled</Tab>
+                <Tab disabled label={"Disabled Tab"}>Disabled</Tab>
             </Tabs>
         )
     }
