@@ -234,7 +234,6 @@ mod inner {
                 self.register_id(id, slot1);
             }
 
-            // Make sure we don't go out of the memory range of the array
             self.player_slots.swap(slot1, slot2);
             self.broadcast_state();
         }

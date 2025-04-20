@@ -200,6 +200,7 @@ pub async fn player_slots_socket_handler(
     ws: WebSocketUpgrade,
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
 ) -> impl IntoResponse {
+    println!("Upgrading websocket!");
     ws.on_upgrade(move |socket| handle_player_slots_socket(socket, addr))
 }
 
