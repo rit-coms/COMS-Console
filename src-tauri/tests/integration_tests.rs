@@ -13,7 +13,6 @@ use axum_test::TestServer;
 
 extern crate diesel_migrations;
 
-
 #[tokio::test]
 async fn read_and_write_user_table_db() {
     let test_context = TestContext::new("read_and_write_user_table_db");
@@ -123,7 +122,7 @@ async fn read_and_write_save_data() {
         .add_query_params(SaveDataGetParams {
             file_name: Some(file_name.clone()),
             regex: None,
-            player_slot: Some(1)
+            player_slot: Some(1),
         })
         .await;
 
@@ -180,7 +179,7 @@ async fn get_save_data_error() {
         .add_query_params(SaveDataGetParams {
             file_name: None,
             regex: Some(String::from(r"\")),
-            player_slot: Some(player_slot)
+            player_slot: Some(player_slot),
         })
         .await;
 
@@ -191,7 +190,7 @@ async fn get_save_data_error() {
         .add_query_params(SaveDataGetParams {
             file_name: Some(String::from("test")),
             regex: Some(String::from("test")),
-            player_slot: Some(player_slot)
+            player_slot: Some(player_slot),
         })
         .await;
 
