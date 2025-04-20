@@ -88,6 +88,7 @@ dependencies = [
  "tokio",
  "tokio-tungstenite 0.18.0",
  "tower",
+ "tracing",
  "url",
  "uuid",
 ]
