@@ -242,7 +242,7 @@ async fn handle_player_slots_socket(mut socket: WebSocket, state: ApiState) {
 
     let (mut sender, mut reciever) = socket.split();
 
-    let send_task = tokio::spawn(async move {
+    let mut send_task = tokio::spawn(async move {
         let mut player_slot_receiver = Arc::clone(&state.player_slot_rx).resubscribe();
         while let Ok(msg) = player_slot_receiver.recv().await {
             sender
@@ -251,6 +251,27 @@ async fn handle_player_slots_socket(mut socket: WebSocket, state: ApiState) {
                 .unwrap();
         }
     });
+
+    let mut recv_task = tokio::spawn(async move {
+        while let Some(Ok(msg)) = reciever.next().await {
+            if process_message(msg).is_break() {
+                break;
+            }
+        }
+    });
+
+    // If any one of the tasks exit, abort the other.
+    tokio::select! {
+        _ = (&mut send_task) => {
+            recv_task.abort();
+        },
+        _ = (&mut recv_task) => {
+            send_task.abort();
+        }
+    }
+
+    // returning from the handler closes the websocket connection
+    println!("Websocket context destroyed");
 }
 
 fn process_message(msg: Message) -> ControlFlow<(), ()> {
