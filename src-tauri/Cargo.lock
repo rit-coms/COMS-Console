@@ -74,6 +74,7 @@ dependencies = [
  "diesel",
  "diesel_migrations",
  "dotenvy",
+ "futures-util",
  "gilrs",
  "http-body-util",
  "libsqlite3-sys",
