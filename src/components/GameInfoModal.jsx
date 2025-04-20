@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, Modal, Pill, Tab, Tabs, Text } from "quackbox-design-system";
+import { Link, Modal, Pill, Tab, Table, TableData, TableRow, Tabs, Text } from "quackbox-design-system";
 import "../styles/GameInfoModal.css";
 import { invoke } from "@tauri-apps/api/tauri";
 import { usePageContext } from "../context/contexts";
@@ -22,6 +22,26 @@ export default function GameInfoModal({ showModal, closeModal, game}) {
 		const date = new Date(formattedDateString);
 		const options = { year: "numeric", month: "long", day: "numeric" };
 		return date.toLocaleDateString("en-US", options);
+	};
+
+	// useEffect(() => {
+	// 	invoke("").then(leaderboard => {
+	// 		leaderboard = leaderboard.map(async gameInfo => {
+    //             return leaderboard;
+	// 		});
+	// 		console.log(leaderboard);
+	// 		Promise.all(leaderboard).then(leaderboard => setLeaderboard(leaderboard));
+	// 	},
+    //     (err) => {
+    //         console.error(err)
+    //     }
+    // );
+	// }, []);
+
+	const getTopFiveLeaderboard = () => {
+		return [...leaderboard]
+			.sort((a, b) => b.points - a.points)
+			.slice(0, 5);
 	};
 
 	const startGame = async (gameId) => {
@@ -56,7 +76,7 @@ export default function GameInfoModal({ showModal, closeModal, game}) {
 			onConfirmation={handlePlayGame}
 			dataId="game-info"
 		>
-			<div className="game-description">
+			<div className="game-info">
 
 				<div className="game-author">
 					<Text fontSize={"medium"}>{!isPlaceholder ? `Created by ${game.author}` : game.author}</Text>
@@ -66,7 +86,7 @@ export default function GameInfoModal({ showModal, closeModal, game}) {
 				<Tabs dataId="game-tabs">
 					<Tab label={!isPlaceholder ? "Game Details" : "Details"}>
 						<div className="game-details">
-							<div>
+							<div className="game-description">
 								<Text fontSize="small">Description</Text>
 								<Text>
 									{game.summary.length > 250 ?
@@ -75,7 +95,7 @@ export default function GameInfoModal({ showModal, closeModal, game}) {
 									}
 								</Text>
 							</div>
-							<div>
+							<div className="game-genres">
 								
 								{game.genres && 
 									<>
@@ -106,9 +126,23 @@ export default function GameInfoModal({ showModal, closeModal, game}) {
 					</Tab>
 					{!isPlaceholder && 
 						<Tab label="Leaderboard">
-							<div className="game-leaderboard">
-								No leaderboard data to show
-							</div>
+							{leaderboard.length != 0 ?
+								<div className="game-leaderboard">
+									<Table headers={["Date", "Player", "Points"]}>
+										{getTopFiveLeaderboard().map((data, index) => (
+											<TableRow>
+												<TableData>{data.date}</TableData>
+												<TableData>{data.player}</TableData>
+												<TableData>{data.points}</TableData>
+												</TableRow>
+										))}
+									</Table>
+								</div>
+								:
+								<div className="game-leaderboard">
+									No leaderboard data to show
+								</div>
+							}
 						</Tab>
 					}
 				</Tabs>

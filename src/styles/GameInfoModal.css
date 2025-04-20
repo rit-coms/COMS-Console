@@ -1,4 +1,4 @@
-.game-description {
+.game-info {
     display: flex;
     flex-direction: column;
     gap: 2vh;
@@ -12,13 +12,26 @@
     .game-details {
         display: flex;
         flex-direction: column;
+        flex-grow: 1;
+        height: 100%;
+        justify-content: space-between;
         gap: 1rem;
 
-        .game-tags {
+        .game-description {
             display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            justify-content: flex-start;
+            flex-direction: column;
+        }
+
+        .game-genres {
+            display: flex;
+            flex-direction: column;
+
+            .game-tags {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 5px;
+                justify-content: flex-start;
+            }
         }
     }
 
