@@ -105,12 +105,12 @@ pub async fn get_leaderboard(
 
     let mut json_response: Vec<serde_json::Value> = Vec::new();
 
-    // TODO: add time_stamp
     for entry in leaderboard_entries {
         json_response.push(serde_json::json!({
             "value_name": entry.value_name,
             "value_num": entry.value_num,
             "player_slot": str::parse::<i16>(&entry.user_id).unwrap(),
+            "time_stamp": entry.time_stamp
         }));
     }
 
@@ -184,6 +184,7 @@ pub async fn get_save_data(
                             "data":serde_json::from_slice::<Value>(&entry.data).expect("Failed to deserialize BSON data"),
                             "file_name": entry.file_name,
                             "player_slot": str::parse::<i16>(&entry.user_id).unwrap(),
+                            "time_stamp": entry.time_stamp
                         }));
             }
             return Json(json_response).into_response();
