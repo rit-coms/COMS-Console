@@ -1,7 +1,6 @@
 use app::{
     db::{
-        create_user, get_user, insert_game,
-        models::{Game, User},
+        create_user, get_user,
         test_context::{setup_initial_data, TestContext},
     },
     game_dev_api::{
