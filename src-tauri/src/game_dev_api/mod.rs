@@ -57,7 +57,7 @@ pub async fn setup_game_dev_api(db_name: &str) {
     let app = create_router(db_name);
 
     println!("Server started successfully!!!");
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:8000")
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:6174")
         .await
         .unwrap(); // TODO make the port configurable
     axum::serve(listener, app).await.unwrap();
