@@ -6,6 +6,7 @@ import GameGallery from "../components/GameGallery";
 import Footer from "../components/Footer";
 import ControllerConnectPage from "./ControllerConnectPage";
 import "../styles/HomePage.css";
+import { exit } from "@tauri-apps/api/process";
 
 export default function HomePage() {
 
@@ -21,6 +22,19 @@ export default function HomePage() {
 		);
         
     }, [allPlayersConnected]);
+
+	useEffect(() => {
+		const event_listener = document.addEventListener('keypress', async ev => {
+			console.log(ev.key)
+			if (ev.key === 'Escape') {
+				await exit(1)
+			}
+		})
+
+		return () => {
+			document.removeEventListener("keydown", event_listener)
+		}
+	}, [])
 
 	return (
 		allPlayersConnected || (import.meta.env.DEV) ? // disables controller connect when running in dev mode

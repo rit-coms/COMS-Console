@@ -18,6 +18,9 @@
       "all": false,
       "window": {
         "setFullscreen": true
+      },
+      "process": {
+        "exit": true
       }
     },
     "bundle": {
