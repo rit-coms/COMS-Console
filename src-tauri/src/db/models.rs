@@ -10,6 +10,7 @@ pub struct LeaderboardEntry {
     pub user_id: String,
     pub game_id: String,
     pub value_name: String,
+    pub time_stamp: String, // add time stamp
     pub value_num: f64
 }
 
@@ -39,5 +40,6 @@ pub struct Save {
     pub user_id: String,
     pub game_id: String,
     pub file_name: String,
-    pub data: Vec<u8>
+    pub data: Vec<u8>,
+    pub time_stamp: String
 }

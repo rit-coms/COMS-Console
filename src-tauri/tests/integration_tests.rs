@@ -1,8 +1,7 @@
 use app::{
     db::{
-        create_user, get_user, insert_game,
-        models::{Game, User},
-        test_context::TestContext,
+        create_user, get_user,
+        test_context::{setup_initial_data, TestContext},
     },
     game_dev_api::{
         create_router,
@@ -13,50 +12,6 @@ use axum_test::TestServer;
 
 extern crate diesel_migrations;
 
-async fn setup_initial_user_data(db_name: &str) {
-    let users = vec![
-        User {
-            id: String::from("1"),
-            name: String::from("user0"),
-            rit_id: None,
-        },
-        User {
-            id: String::from("2"),
-            name: String::from("user1"),
-            rit_id: None,
-        },
-    ];
-
-    for user in users {
-        create_user(&user.id, &user.name, db_name).await;
-    }
-}
-
-async fn setup_initial_game_data(db_name: &str) {
-    let games = vec![
-        Game {
-            id: String::from("1"),
-            name: String::from("game1"),
-            installed: true,
-        },
-        Game {
-            id: String::from("0"),
-            name: String::from("game0"),
-            installed: true,
-        },
-    ];
-
-    for game in games {
-        insert_game(&game.id, &game.name, game.installed, db_name);
-    }
-}
-
-async fn setup_initial_data(db_name: &str) {
-    setup_initial_game_data(db_name).await;
-    setup_initial_user_data(db_name).await;
-    println!("Setup initial data!")
-}
-
 #[tokio::test]
 async fn read_and_write_user_table_db() {
     let test_context = TestContext::new("read_and_write_user_table_db");
@@ -65,7 +20,7 @@ async fn read_and_write_user_table_db() {
     let user_id_s = "1141245215512";
     let name_s = "A random user";
 
-    create_user(user_id_s, name_s, &test_context.db_name).await;
+    create_user(user_id_s, name_s, &test_context.db_name);
 
     let result = get_user(name_s, user_id_s, &test_context.db_name).await;
 
@@ -166,7 +121,7 @@ async fn read_and_write_save_data() {
         .add_query_params(SaveDataGetParams {
             file_name: Some(file_name.clone()),
             regex: None,
-            player_slot: Some(1)
+            player_slot: Some(1),
         })
         .await;
 
@@ -223,7 +178,7 @@ async fn get_save_data_error() {
         .add_query_params(SaveDataGetParams {
             file_name: None,
             regex: Some(String::from(r"\")),
-            player_slot: Some(player_slot)
+            player_slot: Some(player_slot),
         })
         .await;
 
@@ -234,7 +189,7 @@ async fn get_save_data_error() {
         .add_query_params(SaveDataGetParams {
             file_name: Some(String::from("test")),
             regex: Some(String::from("test")),
-            player_slot: Some(player_slot)
+            player_slot: Some(player_slot),
         })
         .await;
 
