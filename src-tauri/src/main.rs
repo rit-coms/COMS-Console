@@ -3,7 +3,7 @@
 
 use frontend_api::{get_game_info, play_game, AppState, get_leaderboard_data};
 use game_dev_api::setup_game_dev_api;
-use tauri::Manager;
+use tauri::{api::path::local_data_dir, Manager};
 use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 
 use std::sync::Mutex;

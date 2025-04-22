@@ -304,7 +304,7 @@ fn get_leaderboard_data_helper(
         match sorted_data.get_mut(&entry.value_name) {
             Some(entries) => entries.push(FrontendLeaderboardEntry {
                 value_num: entry.value_num,
-                username: get_username(&entry.user_id, "local")?,
+                username: get_username(&entry.user_id, db_name)?,
                 time_stamp: "placeholder time".to_string(),
             }),
             None => {
@@ -312,14 +312,13 @@ fn get_leaderboard_data_helper(
                     entry.value_name,
                     vec![FrontendLeaderboardEntry {
                         value_num: entry.value_num,
-                        username: get_username(&entry.user_id, "local")?,
-                        time_stamp: "placeholder time".to_string(),
+                        username: get_username(&entry.user_id, db_name)?,
+                        time_stamp: entry.time_stamp,
                     }],
                 );
             }
         }
     }
-    println!("{:?}", sorted_data);
 
     Ok(serde_json::json!({
         "title": game_title,
