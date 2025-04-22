@@ -9,8 +9,8 @@ pub struct LeaderboardEntry {
     pub user_id: String,
     pub game_id: String,
     pub value_name: String,
-    pub time_stamp: String, // add time stamp
     pub value_num: f64,
+    pub time_stamp: String, // add time stamp
 }
 
 #[derive(Queryable, Selectable, Debug)]
