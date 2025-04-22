@@ -267,7 +267,7 @@ fn check_all_games(app_handle: &AppHandle) {
         .expect("Could not find app data directory");
 
     // Getting the list of games within the all-games JSON file
-    let all_games_file_path = app_data_dir.join("games\\all-games.json");
+    let all_games_file_path = app_data_dir.join("games/all-games.json");
     let all_games_file = File::open(&all_games_file_path).expect(
         format!(
             "all-games.json not found at {}",
