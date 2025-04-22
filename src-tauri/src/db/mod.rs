@@ -71,9 +71,6 @@ pub async fn insert_leaderboard_entry(
             value_name.eq(value_name_s),
             value_num.eq(value_num_f),
         ))
-        .on_conflict((user_id, game_id, value_name))
-        .do_update()
-        .set(value_name.eq(excluded(value_name)))
         .execute(&mut connection)
 }
 
