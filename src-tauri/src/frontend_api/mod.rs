@@ -5,7 +5,8 @@ use chrono::{serde::ts_seconds_option, DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
-    env, fs,
+    env,
+    fs::{self, File},
     hash::{DefaultHasher, Hash, Hasher},
     io::BufReader,
     path::PathBuf,
@@ -14,6 +15,8 @@ use std::{
 };
 use tauri::{AppHandle, State};
 use url::Url;
+
+use crate::db;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(try_from = "GameInfoJS")]
@@ -155,9 +158,9 @@ impl<T: ToString> From<T> for ErrorType {
 ///
 /// fetchGameInfo();
 /// ```
-fn get_game_info_files(
-    state: State<'_, Mutex<AppState>>,
-    app_handle: AppHandle,
+fn get_game_info_list(
+    state: &State<'_, Mutex<AppState>>,
+    app_handle: &AppHandle,
 ) -> Result<Vec<GameInfo>, ErrorType> {
     let mut state = state.lock().unwrap();
     let games_list = &mut state.games_list;
@@ -247,11 +250,50 @@ fn get_game_info_files(
     Ok(state.games_list.clone())
 }
 
-fn get_game_info_database(
-    state: State<'_, Mutex<AppState>>,
-    app_handle: AppHandle,
-) -> Result<Vec<GameInfo>, ErrorType> {
-    todo!()
+#[derive(Deserialize)]
+struct GameDataList {
+    games: Vec<GameData>,
+}
+
+#[derive(Deserialize)]
+struct GameData {
+    title: String,
+    id: String,
+}
+
+/// Make sure every game listed in the games\all-games.json file is in the local database
+fn check_all_games(app_handle: &AppHandle) {
+    // getting the app data directory
+    let app_data_dir = app_handle
+        .path_resolver()
+        .app_data_dir()
+        .expect("Could not find app data directory");
+
+    // Getting the list of games within the all-games JSON file
+    let all_games_file_path = app_data_dir.join("games/all-games.json");
+    let all_games_file = File::open(&all_games_file_path).expect(
+        format!(
+            "all-games.json not found at {}",
+            &all_games_file_path.clone().display()
+        )
+        .as_str(),
+    );
+    let reader = BufReader::new(all_games_file);
+    // If this reading is ever too slow, we can switch to reading the file into memory as a string
+    // and then converting that string into a JSON Value
+    let games_list: GameDataList =
+        serde_json::from_reader(reader).expect("Failed to read all-games.json");
+
+    for game in games_list.games {
+        db::make_sure_game_exists(&game.title, &game.id, "local");
+    }
+}
+
+// Given a list of games, set them to be installed in the database
+fn set_games_installed(games: &Vec<GameInfo>) {
+    for game in games {
+        db::insert_game(&game.id.to_string(), &game.title, true, "local");
+    }
 }
 
 #[tauri::command]
@@ -259,15 +301,13 @@ pub fn get_game_info(
     state: State<'_, Mutex<AppState>>,
     app_handle: AppHandle,
 ) -> Result<Vec<GameInfo>, ErrorType> {
+    let games = get_game_info_list(&state, &app_handle)?;
+    set_games_installed(&games);
+    // Only populate the database with all games if code is running on the quackbox
     if cfg!(feature = "quackbox-raspi") {
-        get_game_info_database(state, app_handle)
-    } else {
-        let games = get_game_info_files(state, app_handle)?;
-        for game in games.iter() {
-            insert_game(&game.id.to_string(), &game.title, true, "local");
-        }
-        Ok(games)
+        check_all_games(&app_handle);
     }
+    Ok(games)
 }
 
 #[derive(Serialize, Debug)]
