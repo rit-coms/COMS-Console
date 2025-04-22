@@ -254,7 +254,7 @@ struct GameDataList {
 
 #[derive(Deserialize)]
 struct GameData {
-    name: String,
+    title: String,
     id: String,
 }
 
@@ -282,7 +282,7 @@ fn check_all_games(app_handle: &AppHandle) {
         serde_json::from_reader(reader).expect("Failed to read all-games.json");
 
     for game in games_list.games {
-        db::make_sure_game_exists(&game.name, &game.id, "local");
+        db::make_sure_game_exists(&game.title, &game.id, "local");
     }
 }
 
