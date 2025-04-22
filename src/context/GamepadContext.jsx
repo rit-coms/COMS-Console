@@ -1,4 +1,5 @@
 import React, { createContext, useEffect, useState } from "react";
+import { exit } from "@tauri-apps/api/process";
 
 const BUTTONS = {
     0: "B",
@@ -53,6 +54,10 @@ const KEYMAP = [
     },
 ];
 
+const KILL_TAURI_PROCESS = async () => {
+    await exit(1);
+}
+
 
 export const GamepadContext = createContext();
 
@@ -62,6 +67,7 @@ export const GamepadProvider = ({ children }) => {
     const [players, setPlayers] = useState([]);
     const [pressedButton, setPressedButton] = useState({});
     const [allPlayersConnected, setAllPlayersConnected] = useState(false);
+    const killswitch = new Set();
   
     useEffect(() => {
 
@@ -231,7 +237,13 @@ export const GamepadProvider = ({ children }) => {
 
     useEffect(() => {
         window.addEventListener("keydown", (event) => {
-            
+
+            killswitch.add(event.key)
+            if (killswitch.has("Shift") && killswitch.has("Q") && killswitch.has("P")) {
+                KILL_TAURI_PROCESS()
+                return
+            }
+
             const playerIndex = KEYMAP[0][event.key] !== undefined ? 0 : KEYMAP[1][event.key] !== undefined ? 1 : undefined;
             if (playerIndex === undefined) return;
             
@@ -265,6 +277,8 @@ export const GamepadProvider = ({ children }) => {
         });
 
         window.addEventListener("keyup", (event) => {
+
+            killswitch.delete(event.key)
 
             const playerIndex = KEYMAP[0][event.key] !== undefined ? 0 : KEYMAP[1][event.key] !== undefined ? 1 : undefined;
             if (playerIndex === undefined) return;
