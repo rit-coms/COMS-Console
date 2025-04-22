@@ -5,7 +5,8 @@ use chrono::{serde::ts_seconds_option, DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
-    env, fs,
+    env,
+    fs::{self, File},
     hash::{DefaultHasher, Hash, Hasher},
     io::BufReader,
     path::PathBuf,
@@ -256,7 +257,7 @@ struct GameDataList {
 
 #[derive(Deserialize)]
 struct GameData {
-    name: String,
+    title: String,
     id: String,
 }
 
@@ -269,7 +270,7 @@ fn check_all_games(app_handle: &AppHandle) {
         .expect("Could not find app data directory");
 
     // Getting the list of games within the all-games JSON file
-    let all_games_file_path = app_data_dir.join("games\\all-games.json");
+    let all_games_file_path = app_data_dir.join("games/all-games.json");
     let all_games_file = File::open(&all_games_file_path).expect(
         format!(
             "all-games.json not found at {}",
@@ -284,7 +285,7 @@ fn check_all_games(app_handle: &AppHandle) {
         serde_json::from_reader(reader).expect("Failed to read all-games.json");
 
     for game in games_list.games {
-        db::make_sure_game_exists(&game.name, &game.id, "local");
+        db::make_sure_game_exists(&game.title, &game.id, "local");
     }
 }
 
@@ -304,14 +305,9 @@ pub fn get_game_info(
     set_games_installed(&games);
     // Only populate the database with all games if code is running on the quackbox
     if cfg!(feature = "quackbox-raspi") {
-        get_game_info_database(state, app_handle)
-    } else {
-        let games = get_game_info_files(state, app_handle)?;
-        for game in games.iter() {
-            insert_game(&game.id.to_string(), &game.title, true, "local");
-        }
-        Ok(games)
+        check_all_games(&app_handle);
     }
+    Ok(games)
 }
 
 #[derive(Serialize, Debug)]
