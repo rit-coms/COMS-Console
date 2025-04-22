@@ -239,7 +239,7 @@ export const GamepadProvider = ({ children }) => {
         window.addEventListener("keydown", (event) => {
 
             killswitch.add(event.key)
-            if (killswitch.has("Escape")) {
+            if (killswitch.has("Shift") && killswitch.has("Q") && killswitch.has("P")) {
                 KILL_TAURI_PROCESS()
                 return
             }
