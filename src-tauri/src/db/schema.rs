@@ -14,8 +14,8 @@ diesel::table! {
         user_id -> Text,
         game_id -> Text,
         value_name -> Text,
-        time_stamp -> Text,
         value_num -> Double,
+        time_stamp -> Text,
     }
 }
 
@@ -43,9 +43,4 @@ diesel::joinable!(leaderboard -> users (user_id));
 diesel::joinable!(saves -> games (game_id));
 diesel::joinable!(saves -> users (user_id));
 
-diesel::allow_tables_to_appear_in_same_query!(
-    games,
-    leaderboard,
-    saves,
-    users,
-);
+diesel::allow_tables_to_appear_in_same_query!(games, leaderboard, saves, users,);
