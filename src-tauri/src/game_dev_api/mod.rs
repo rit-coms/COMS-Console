@@ -18,8 +18,9 @@ async fn handle_game_state_updates(game_state_update: GameStateShared, game_chan
         game_id.id = *watch.borrow_and_update();
         drop(game_id);
         if watch.changed().await.is_err() {
-            // if the watch channel has been killed, we're cooked
-            break;
+            // the watch channel transmitter should never
+            // be destroyed before the application closes
+            unreachable!("Watch channel should not be destroyed while still listening.");
         }
         // Not entirely certain why the below fixes everything, but I guess it does?
         let mut game_id = current_game.write().await;
