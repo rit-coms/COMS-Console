@@ -426,7 +426,8 @@ pub fn play_game(
         .iter()
         .find(|g| g.id == id)
         .ok_or("Game ID not found")?;
-    game_sender_state.game_watch_tx.send(Some(game_info.id))?;
+    let tx = game_sender_state.game_watch_tx.clone();
+    tx.send(Some(id))?;
 
     window.minimize()?;
 
@@ -475,6 +476,7 @@ pub fn play_game(
     window.maximize()?;
     window.set_focus()?;
     window.set_fullscreen(true)?;
+    tx.send(None)?;
     Ok(())
 }
 

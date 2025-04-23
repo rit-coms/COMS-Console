@@ -24,7 +24,7 @@ pub struct ApiState {
     pub db_name: String,
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct GameState {
     pub id: Option<u64>
 }

@@ -1,11 +1,33 @@
 use axum::{routing::post, Router};
 use handlers::{get_leaderboard, get_save_data, set_leaderboard, set_save_data, ApiState, AppState, GameStateShared};
-use tokio::sync::watch::{self, Receiver};
-use url::form_urlencoded::Target;
+use tokio::sync::watch::Receiver;
 
 const VERSION: u8 = 1;
 
 pub mod handlers;
+
+// #[tracing::instrument]
+async fn handle_game_state_updates(game_state_update: GameStateShared, game_channel: Receiver<Option<u64>>) {
+    println!("Started listener to watch in the router");
+    let current_game = game_state_update;
+    let mut watch = game_channel;
+    let mut i = 0;
+    loop {
+        let mut game_id = current_game.write().await;
+        println!("game_id {:?}: {:?}", i, game_id.id);
+        game_id.id = *watch.borrow_and_update();
+        drop(game_id);
+        if watch.changed().await.is_err() {
+            // if the watch channel has been killed, we're cooked
+            break;
+        }
+        // Not entirely certain why the below fixes everything, but I guess it does?
+        let mut game_id = current_game.write().await;
+        game_id.id = *watch.borrow();
+        drop(game_id);
+        i += 1;
+    }
+}
 
 /// Creates an Axum router with leaderboard and save-data post and get handlers.
 ///
@@ -40,21 +62,9 @@ pub fn create_router(db_name: &str, game_channel: Receiver<Option<u64>>) -> Rout
         db_name: db_name.to_owned(),
     };
     let game_state = GameStateShared::default();
-    let game_state_update = game_state.clone();
 
     // TODO: turn into another function
-    tokio::spawn(async move {
-        let current_game = game_state_update;
-        let mut watch = game_channel;
-        loop {
-            let mut game_id = current_game.write().await;
-            game_id.id = *watch.borrow_and_update();
-            if watch.changed().await.is_err() {
-                // if the watch channel has been killed, we're cooked
-                break;
-            }
-        }
-    });
+    tokio::spawn(handle_game_state_updates(game_state.clone(), game_channel));
 
     let app_state = AppState {
         api_state,
@@ -84,4 +94,59 @@ pub async fn setup_game_dev_api(db_name: &str, game_channel: Receiver<Option<u64
         .await
         .unwrap(); // TODO make the port configurable
     axum::serve(listener, app).await.unwrap();
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use tokio::{runtime::Runtime, sync::watch::{self, channel}};
+
+    #[tokio::test]
+    async fn game_state_change() {
+        let game_id: u64 = 512039487;
+        let db_name = "test_db";
+
+        let (tx, mut rx) = watch::channel(Some(game_id));
+        let router = create_router(db_name, rx.clone());
+
+        let game_state = GameStateShared::default();
+        let game_state_update = game_state.clone();
+        let rx_copy = rx.clone();
+
+        let handle = tokio::spawn(async move {
+            println!("Started listener to watch in the router");
+            let current_game = game_state_update;
+            let mut watch = rx_copy;
+            let mut game_id = current_game.write().await;
+            // println!("game_id: {:?}", game_id.id);
+            game_id.id = *watch.borrow_and_update();
+            drop(game_id);
+        });
+
+        handle.await.expect("why tho");
+
+        assert_eq!(game_state.read().await.id.unwrap(), 512039487);
+        assert_eq!(rx.borrow_and_update().unwrap(), game_state.read().await.id.unwrap());
+
+
+        tx.send(Some(0)).expect("Was unable to send to watch channel");
+        let game_state_update = game_state.clone();
+        let rx_copy = rx.clone();
+        let handle = tokio::spawn(async move {
+            println!("Started listener to watch in the router");
+            let current_game = game_state_update;
+            let mut watch = rx_copy;
+            let mut game_id = current_game.write().await;
+            // println!("game_id: {:?}", game_id.id);
+            game_id.id = *watch.borrow_and_update();
+            drop(game_id);
+        });
+
+        handle.await.expect("help");
+
+        println!("{:?}", game_state.read().await.id);
+
+        assert_eq!(game_state.read().await.id.unwrap(), 0);
+        assert_eq!(rx.borrow_and_update().unwrap(), game_state.read().await.id.unwrap());
+    }
 }
