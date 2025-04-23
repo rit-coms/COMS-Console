@@ -7,21 +7,15 @@ use regex::Regex;
 use std::env;
 use std::option::Option;
 use std::path::Path;
+use tauri::api::path::{app_data_dir, local_data_dir};
 
 pub mod models;
 pub mod schema;
 pub mod test_context;
 
 /// Finds the filepath of a database using a given name.
-///
-/// This function will use the DATABASE_URL environment variable, but truncates the .db file and attaches the given db_name
-/// to the path. If you want this path to math the DATABASE_URL variable, db_name should just be the name of the db file.
-///
-/// Ex: if DATABASE_URL="C:/Users/username/AppData/Roaming/coms-console/local.db", then db_name should be "local".
 pub fn get_db_path(db_name: &str) -> String {
-    dotenvy::dotenv().expect("Please create a .env file in the root directory of the project");
-    Path::new(&env::var("DATABASE_URL").expect("DATABASE_URL must be set"))
-        .parent()
+    local_data_dir()
         .unwrap()
         .join(db_name)
         .with_extension("db")
