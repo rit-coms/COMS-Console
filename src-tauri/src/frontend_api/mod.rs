@@ -1,7 +1,10 @@
+use crate::db::{get_leaderboard, get_leaderboard_game_data, insert_game};
 use anyhow::Error;
+use app::db::get_username;
 use chrono::{serde::ts_seconds_option, DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::{
+    collections::HashMap,
     env,
     fs::{self, File},
     hash::{DefaultHasher, Hash, Hasher},
@@ -101,7 +104,7 @@ pub struct AppState {
     games_list: Vec<GameInfo>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 #[serde(transparent)]
 pub struct ErrorType(String);
 
@@ -307,6 +310,62 @@ pub fn get_game_info(
     Ok(games)
 }
 
+#[derive(Serialize, Debug)]
+struct FrontendLeaderboardEntry {
+    value_num: f64,
+    username: String,
+    time_stamp: String,
+}
+
+/// Retrieves a json object of all leaderboard data for a given game.
+///
+/// # Arguments
+/// `game_title` - The title of the game to get data for (case sensitive)
+///
+///
+/// # Returns
+/// * `Result<serde_json::Value, ErrorType>` - A JSON object representing the leaderboard data of a
+/// specific game or an `ErrorType` if an error occurs.
+#[tauri::command]
+pub async fn get_leaderboard_data(game_title: String) -> Result<serde_json::Value, ErrorType> {
+    get_leaderboard_data_helper(game_title, "local")
+}
+
+/// This function allows us to mock databases for testing without having a db_name parameter
+/// at the front end
+fn get_leaderboard_data_helper(
+    game_title: String,
+    db_name: &str,
+) -> Result<serde_json::Value, ErrorType> {
+    let data = get_leaderboard_game_data(&game_title, db_name)?;
+
+    let mut sorted_data: HashMap<String, Vec<FrontendLeaderboardEntry>> = HashMap::new();
+    for entry in data {
+        match sorted_data.get_mut(&entry.value_name) {
+            Some(entries) => entries.push(FrontendLeaderboardEntry {
+                value_num: entry.value_num,
+                username: get_username(&entry.user_id, db_name)?,
+                time_stamp: "placeholder time".to_string(),
+            }),
+            None => {
+                sorted_data.insert(
+                    entry.value_name,
+                    vec![FrontendLeaderboardEntry {
+                        value_num: entry.value_num,
+                        username: get_username(&entry.user_id, db_name)?,
+                        time_stamp: entry.time_stamp,
+                    }],
+                );
+            }
+        }
+    }
+
+    Ok(serde_json::json!({
+        "title": game_title,
+        "data": sorted_data
+    }))
+}
+
 /// Runs a game based on its ID.
 ///
 /// This command finds the game with the specified ID in the `games_list`, minimizes the current window,
@@ -409,4 +468,20 @@ pub fn play_game(
     window.set_focus()?;
     window.set_fullscreen(true)?;
     Ok(())
+}
+
+mod tests {
+    use super::*;
+    use crate::db::test_context::{setup_initial_data, TestContext};
+
+    #[tokio::test]
+    async fn test_get_leaderboard_data() {
+        let context = TestContext::new("test_get_leaderboard_data_frontend");
+        setup_initial_data(&context.db_name).await;
+
+        let data = get_leaderboard_data_helper("game0".to_string(), &context.db_name)
+            .expect("Failed to get leaderboard data");
+
+        println!("{:?}", data);
+    }
 }

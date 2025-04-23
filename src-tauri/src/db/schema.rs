@@ -15,6 +15,7 @@ diesel::table! {
         game_id -> Text,
         value_name -> Text,
         value_num -> Double,
+        time_stamp -> Text,
     }
 }
 
@@ -25,6 +26,7 @@ diesel::table! {
         game_id -> Text,
         file_name -> Text,
         data -> Binary,
+        time_stamp -> Text,
     }
 }
 

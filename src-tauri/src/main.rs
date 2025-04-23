@@ -1,9 +1,9 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use frontend_api::{get_game_info, play_game, AppState};
+use frontend_api::{get_game_info, play_game, AppState, get_leaderboard_data};
 use game_dev_api::setup_game_dev_api;
-use tauri::Manager;
+use tauri::{api::path::local_data_dir, Manager};
 use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 
 use std::sync::Mutex;
@@ -28,7 +28,7 @@ fn main() {
             }
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_game_info, play_game])
+        .invoke_handler(tauri::generate_handler![get_game_info, play_game, get_leaderboard_data])
         .on_page_load(|window, _| {
             window.show().expect("Failed to show window");
         })
