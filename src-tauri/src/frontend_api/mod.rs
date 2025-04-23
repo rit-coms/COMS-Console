@@ -3,6 +3,7 @@ use anyhow::Error;
 use app::db::get_username;
 use chrono::{serde::ts_seconds_option, DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use tokio::sync::watch::Sender;
 use std::{
     collections::HashMap,
     env,
@@ -102,6 +103,10 @@ impl TryFrom<GameInfoJS> for GameInfo {
 #[derive(Default)]
 pub struct AppState {
     games_list: Vec<GameInfo>,
+}
+
+pub struct GameSenderState {
+    pub game_watch_tx: Sender<Option<u64>>
 }
 
 #[derive(Serialize, Debug)]
@@ -409,6 +414,7 @@ fn get_leaderboard_data_helper(
 #[tauri::command]
 pub fn play_game(
     state: State<'_, Mutex<AppState>>,
+    game_sender_state: State<'_, GameSenderState>,
     window: tauri::Window,
     app_handle: AppHandle,
     id: String,
@@ -420,6 +426,7 @@ pub fn play_game(
         .iter()
         .find(|g| g.id == id)
         .ok_or("Game ID not found")?;
+    game_sender_state.game_watch_tx.send(Some(game_info.id))?;
 
     window.minimize()?;
 
@@ -463,7 +470,8 @@ pub fn play_game(
             println!("exit code status: {}", game_process.status);
         }
     }
-
+    
+    game_sender_state.game_watch_tx.send(None)?;
     window.maximize()?;
     window.set_focus()?;
     window.set_fullscreen(true)?;

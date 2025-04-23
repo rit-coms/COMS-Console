@@ -34,7 +34,7 @@ pub mod handlers;
 ///     axum::serve(listener, app).await.unwrap();
 /// }
 /// ```
-pub fn create_router(db_name: &str, game_channel: Receiver<Option<String>>) -> Router {
+pub fn create_router(db_name: &str, game_channel: Receiver<Option<u64>>) -> Router {
     let route_prefix: String = format!("/api/v{}", VERSION.to_string());
     let api_state = ApiState {
         db_name: db_name.to_owned(),
@@ -48,7 +48,7 @@ pub fn create_router(db_name: &str, game_channel: Receiver<Option<String>>) -> R
         let mut watch = game_channel;
         loop {
             let mut game_id = current_game.write().await;
-            game_id.id = (*watch.borrow_and_update()).clone();
+            game_id.id = *watch.borrow_and_update();
             if watch.changed().await.is_err() {
                 // if the watch channel has been killed, we're cooked
                 break;
@@ -76,7 +76,7 @@ pub fn create_router(db_name: &str, game_channel: Receiver<Option<String>>) -> R
 
 /// This function should be called in tauri builder to setup the http API for game
 /// developers to read and write game data.
-pub async fn setup_game_dev_api(db_name: &str, game_channel: Receiver<Option<String>>) {
+pub async fn setup_game_dev_api(db_name: &str, game_channel: Receiver<Option<u64>>) {
     let app = create_router(db_name, game_channel);
 
     println!("Server started successfully!!!");

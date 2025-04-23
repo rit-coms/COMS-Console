@@ -26,7 +26,7 @@ pub struct ApiState {
 
 #[derive(Default)]
 pub struct GameState {
-    pub id: Option<String>
+    pub id: Option<u64>
 }
 
 pub type GameStateShared = Arc<RwLock<GameState>>;
