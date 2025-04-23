@@ -14,8 +14,8 @@ diesel::table! {
         user_id -> Text,
         game_id -> Text,
         value_name -> Text,
-        time_stamp -> Text,
         value_num -> Double,
+        time_stamp -> Text,
     }
 }
 
