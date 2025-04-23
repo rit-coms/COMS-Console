@@ -13,6 +13,8 @@ use axum_test::TestServer;
 
 extern crate diesel_migrations;
 
+const SAVE_DATA_PATH: &str = "/api/v1/save-data";
+
 async fn setup_initial_user_data(db_name: &str) {
     let users = vec![
         User {
@@ -127,7 +129,6 @@ async fn read_and_write_leaderboard_data() {
 #[tokio::test]
 async fn read_and_write_save_data() {
     let test_context = TestContext::new("read_and_write_save_data");
-    let save_data_path = "/api/v1/save-data";
 
     setup_initial_data(&test_context.db_name).await;
 
@@ -147,7 +148,7 @@ async fn read_and_write_save_data() {
     });
 
     let post_response: axum_test::TestResponse = server
-        .post(save_data_path)
+        .post(SAVE_DATA_PATH)
         .json(&SaveDataPost {
             file_name: file_name.clone(),
             data: data.clone(),
@@ -162,11 +163,11 @@ async fn read_and_write_save_data() {
     assert_eq!(post_response_entry.data, data);
 
     let get_filename_response: axum_test::TestResponse = server
-        .get(save_data_path)
+        .get(SAVE_DATA_PATH)
         .add_query_params(SaveDataGetParams {
             file_name: Some(file_name.clone()),
             regex: None,
-            player_slot: Some(1)
+            player_slot: Some(1),
         })
         .await;
 
@@ -223,7 +224,7 @@ async fn get_save_data_error() {
         .add_query_params(SaveDataGetParams {
             file_name: None,
             regex: Some(String::from(r"\")),
-            player_slot: Some(player_slot)
+            player_slot: Some(player_slot),
         })
         .await;
 
@@ -234,7 +235,7 @@ async fn get_save_data_error() {
         .add_query_params(SaveDataGetParams {
             file_name: Some(String::from("test")),
             regex: Some(String::from("test")),
-            player_slot: Some(player_slot)
+            player_slot: Some(player_slot),
         })
         .await;
 
@@ -284,4 +285,77 @@ async fn get_leaderboard_data_error() {
         .await;
 
     get_response.assert_status_payload_too_large();
+}
+
+#[tokio::test]
+async fn upsert_save_data() {
+    let test_context = TestContext::new("upsert_save_data");
+
+    setup_initial_data(&test_context.db_name).await;
+
+    let app: axum::Router = create_router(&test_context.db_name);
+
+    let server: TestServer = TestServer::new(app).expect("Failed to set up test server");
+
+    let file_name: String = String::from("test data");
+    let data: serde_json::Value = serde_json::json!({
+        "level":12,
+        "money":1515,
+        "BAC":0.31,
+        "items": [
+            {"name": "Excalibur", "damage": 43},
+            {"name": "healing potion", "damage": 0}
+        ]
+    });
+
+    let post_response: axum_test::TestResponse = server
+        .post(SAVE_DATA_PATH)
+        .json(&SaveDataPost {
+            file_name: file_name.clone(),
+            data: data.clone(),
+            player_slot: 1,
+        })
+        .await;
+
+    post_response.assert_status_ok();
+
+    let updated_data: serde_json::Value = serde_json::json!({
+        "level":15,
+        "money":1546,
+        "BAC":0.5,
+        "items": [
+            {"name": "Excalibur", "damage": 43},
+            {"name": "healing potion", "damage": 0},
+            {"name": "water bottle", "damage": 0}
+        ]
+    });
+
+    let post_response: axum_test::TestResponse = server
+        .post(SAVE_DATA_PATH)
+        .json(&SaveDataPost {
+            file_name: file_name.clone(),
+            data: updated_data.clone(),
+            player_slot: 1,
+        })
+        .await;
+
+    post_response.assert_status_ok();
+
+    let get_updated_data_response: axum_test::TestResponse = server
+        .get(SAVE_DATA_PATH)
+        .add_query_params(SaveDataGetParams {
+            file_name: Some(file_name.clone()),
+            regex: None,
+            player_slot: Some(1),
+        })
+        .await;
+
+    get_updated_data_response.assert_status_ok();
+    let get_response_entries = get_updated_data_response.json::<Vec<SaveDataPost>>();
+    let updated_entry = get_response_entries
+        .get(0)
+        .expect("No entries in leaderboard get response");
+
+    assert_eq!(updated_entry.data, updated_data);
+    assert_ne!(updated_entry.data, data)
 }
