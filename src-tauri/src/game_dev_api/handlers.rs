@@ -49,18 +49,21 @@ pub struct SaveDataPost {
 /// SQLite database.
 pub async fn set_leaderboard(
     State(state): State<ApiState>,
+    State(game_state): State<GameStateShared>,
     Json(payload): Json<LeaderboardPost>,
 ) -> impl IntoResponse {
     // TODO: Get game_id and user_id
     println!("Setting Laaderboard data");
-    let game_id = "1";
+    // let game_id = "1";
+    let game_id = game_state.read().await.id.unwrap().to_string();
+    drop(game_state);
     let user_id = payload.player_slot.to_string();
 
     // Save entry to database
     // TODO: Can I return the query response from this function?
     db::insert_leaderboard_entry(
         &user_id,
-        game_id,
+        &game_id,
         payload.value_name.as_str(),
         payload.value_num,
         &state.db_name,
@@ -86,9 +89,12 @@ pub struct LeaderboardGetParams {
 /// Handles HTTP leaderboard get requests for the axum webserver
 pub async fn get_leaderboard(
     State(state): State<ApiState>,
+    State(game_state): State<GameStateShared>,
     params: Query<LeaderboardGetParams>,
 ) -> impl IntoResponse {
-    let game_id: String = String::from("1"); // Example for now
+    // let game_id: String = String::from("1"); // Example for now
+    let game_id = game_state.read().await.id.unwrap().to_string();
+    drop(game_state);
     let user_id_s: Option<String>;
     // TODO: get associated player id and error check for invalid slots (negative or greater than the max)
     match params.player_slot {
@@ -136,16 +142,19 @@ pub async fn get_leaderboard(
 // Handles save-data HTTP post requests for the axum webserver
 pub async fn set_save_data(
     State(state): State<ApiState>,
+    State(game_state): State<GameStateShared>,
     Json(payload): Json<SaveDataPost>,
 ) -> impl IntoResponse {
-    let game_id = "0";
+    // let game_id = "0";
+    let game_id = game_state.read().await.id.unwrap().to_string();
+    drop(game_state);
     let user_id = payload.player_slot.to_string();
 
     // Save entry to database;
     // TODO: more elegant error handling for converting json data to vec of bytes
     db::set_save(
         &user_id,
-        game_id,
+        &game_id,
         payload.file_name.as_str(),
         &serde_json::to_vec(&payload.data).unwrap(),
         &state.db_name,
@@ -171,10 +180,13 @@ pub struct SaveDataGetParams {
 /// get a specific file by user and name.
 pub async fn get_save_data(
     State(state): State<ApiState>,
+    State(game_state): State<GameStateShared>,
     params: Query<SaveDataGetParams>,
 ) -> impl IntoResponse {
     println!("Getting save data!");
-    let game_id: String = String::from("0"); // Example for now
+    // let game_id: String = String::from("0"); // Example for now
+    let game_id = game_state.read().await.id.unwrap().to_string();
+    drop(game_state);
     let user_id_s: Option<String> = match params.player_slot {
         Some(slot) => Some(slot.to_string()),
         None => None,
