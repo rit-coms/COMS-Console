@@ -9,6 +9,7 @@ use app::{
     },
 };
 use axum_test::TestServer;
+use tokio::sync::watch;
 
 extern crate diesel_migrations;
 
@@ -35,7 +36,11 @@ async fn read_and_write_leaderboard_data() {
 
     setup_initial_data(&test_context.db_name).await;
 
-    let app: axum::Router = create_router(&test_context.db_name);
+    let (current_game_tx, current_game_rx) = watch::channel(None);
+    let app: axum::Router = create_router(&test_context.db_name, current_game_rx);
+
+    // set current game to id 1
+    current_game_tx.send(Some(1)).expect("No subscriber to the current game sender");
 
     let server: TestServer = TestServer::new(app).expect("Failed to set up test server");
 
@@ -86,7 +91,11 @@ async fn read_and_write_save_data() {
 
     setup_initial_data(&test_context.db_name).await;
 
-    let app: axum::Router = create_router(&test_context.db_name);
+    let (current_game_tx, current_game_rx) = watch::channel(None);
+    let app: axum::Router = create_router(&test_context.db_name, current_game_rx);
+
+    // set current game to id 1
+    current_game_tx.send(Some(1)).expect("No subscriber to the current game sender");
 
     let server: TestServer = TestServer::new(app).expect("Failed to set up test server");
 
@@ -142,7 +151,11 @@ async fn get_save_data_error() {
 
     setup_initial_data(&test_context.db_name).await;
 
-    let app: axum::Router = create_router(&test_context.db_name);
+    let (current_game_tx, current_game_rx) = watch::channel(None);
+    let app: axum::Router = create_router(&test_context.db_name, current_game_rx);
+
+    // set current game to id 1
+    current_game_tx.send(Some(1)).expect("No subscriber to the current game sender");
 
     let server: TestServer = TestServer::new(app).expect("Failed to set up test server");
 
@@ -203,7 +216,11 @@ async fn get_leaderboard_data_error() {
 
     setup_initial_data(&test_context.db_name).await;
 
-    let app: axum::Router = create_router(&test_context.db_name);
+    let (current_game_tx, current_game_rx) = watch::channel(None);
+    let app: axum::Router = create_router(&test_context.db_name, current_game_rx);
+
+    // set current game to id 0
+    current_game_tx.send(Some(0)).expect("No subscriber to the current game sender");
 
     let server: TestServer = TestServer::new(app).expect("Failed to set up test server");
 
