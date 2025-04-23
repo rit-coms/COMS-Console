@@ -224,6 +224,9 @@ pub async fn set_save(
             file_name.eq(file_name_s),
             data.eq(data_b),
         ))
+        .on_conflict((user_id, file_name))
+        .do_update()
+        .set(data.eq(data_b))
         .execute(connection)
         .expect("Error inserting save");
 
@@ -233,7 +236,7 @@ pub async fn set_save(
         .filter(game_id.eq(game_id_s))
         .filter(file_name.eq(file_name_s))
         .first(connection)
-        .expect("Could not set save")
+        .expect("Could not return inserted save")
 }
 
 pub async fn get_save(user_id_s: &str, game_id_s: &str, file_name_s: &str, db_name: &str) -> Save {
