@@ -4,6 +4,7 @@ use diesel::{insert_into, prelude::*, upsert::excluded};
 use dotenvy::dotenv;
 use models::*;
 use regex::Regex;
+use schema::games;
 use std::env;
 use std::option::Option;
 use std::path::Path;
@@ -48,7 +49,19 @@ pub fn insert_game(id_s: &str, name_s: &str, is_installed: bool, db_name: &str) 
         .expect("Failed to insert game")
 }
 
-pub async fn insert_leaderboard_entry(
+/// Ensures a game exists in the data base by inserting the given game into the database
+/// and doing nothing if there is a conflict.
+pub fn make_sure_game_exists(name_s: &str, id_s: &str, db_name: &str) {
+    use self::schema::games::dsl::*;
+    let connection = &mut establish_connection(db_name);
+    insert_into(games)
+        .values((id.eq(id_s), name.eq(name_s), installed.eq(false)))
+        .on_conflict_do_nothing()
+        .execute(connection)
+        .expect("Failed to insert game entry");
+}
+
+pub fn insert_leaderboard_entry(
     user_id_s: &str,
     game_id_s: &str,
     value_name_s: &str,
@@ -187,7 +200,7 @@ pub async fn get_save_data(
     }
 }
 
-pub async fn create_user(id_s: &str, name_s: &str, db_name: &str) -> User {
+pub fn create_user(id_s: &str, name_s: &str, db_name: &str) -> User {
     use self::schema::users::dsl::*;
     let connection = &mut establish_connection(db_name);
     insert_into(users)
@@ -251,9 +264,42 @@ pub async fn get_save(user_id_s: &str, game_id_s: &str, file_name_s: &str, db_na
         .expect("Could not get save")
 }
 
+/// Returns all leadboard data for a given game title.
+/// In cases other than testing, db_name should be "local"
+pub fn get_leaderboard_game_data(
+    game_title: &str,
+    db_name: &str,
+) -> Result<Vec<LeaderboardEntry>, Error> {
+    use self::schema::games::dsl::{games, name};
+    use self::schema::leaderboard::dsl::{game_id, leaderboard};
+    let connection = &mut establish_connection(db_name);
+
+    let game = games
+        .select(Game::as_select())
+        .filter(name.eq(game_title))
+        .first(connection)?;
+    println!("Found game with title: {}", game.name);
+
+    let data = leaderboard
+        .select(LeaderboardEntry::as_select())
+        .filter(game_id.eq(game.id))
+        .get_results(connection)?;
+    println!("Found {} entries for {}", data.len(), game.name);
+
+    Ok(data)
+}
+
+/// Given an id, return the corresponding username
+pub fn get_username(id_s: &str, db_name: &str) -> Result<String, Error> {
+    use self::schema::users::dsl::*;
+    let connection = &mut establish_connection(db_name);
+
+    Ok(users.select(name).filter(id.eq(id_s)).first(connection)?)
+}
+
 mod tests {
     use super::*;
-    use crate::db::test_context::TestContext;
+    use crate::db::test_context::{setup_initial_data, TestContext};
 
     #[tokio::test]
     pub async fn test_db() {
@@ -266,7 +312,7 @@ mod tests {
         let name_s = "A random user";
 
         let mut buffer = Uuid::encode_buffer();
-        let user = create_user(user_id_s, name_s, &test_context.db_name).await;
+        let user = create_user(user_id_s, name_s, &test_context.db_name);
         let game_id_s = Uuid::new_v4().as_simple().encode_lower(&mut buffer);
         let example_game_name = "Example Game";
 
@@ -279,7 +325,7 @@ mod tests {
             10.0,
             &test_context.db_name,
         )
-        .await;
+        .expect("Failed to insert entry");
 
         let file_name_s = "testpath";
         let data_b = "random_data".as_bytes().to_owned();
@@ -292,5 +338,32 @@ mod tests {
             &test_context.db_name,
         )
         .await;
+    }
+
+    #[tokio::test]
+    pub async fn test_get_username() {
+        let context = TestContext::new("get_username");
+        setup_initial_data(&context.db_name).await;
+
+        let username = get_username("1", &context.db_name).expect("Failed to retrieve username");
+        assert_eq!(username, "user1".to_string())
+    }
+
+    #[tokio::test]
+    pub async fn test_get_leaderboard_game_data() {
+        let context = TestContext::new("get_leaderboard_game_data");
+        setup_initial_data(&context.db_name).await;
+
+        let data = get_leaderboard_game_data("game0", &context.db_name)
+            .expect("Failed to get leaderboard game data");
+        assert!(data.len() == 3);
+        println!("{:?}", data);
+        data.iter()
+            .find(|&entry| {
+                entry.game_id == "0"
+                    && entry.user_id == "1".to_string()
+                    && entry.value_name == "Score".to_string()
+            })
+            .expect("Failed to find expected data!");
     }
 }

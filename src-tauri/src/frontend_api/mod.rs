@@ -1,9 +1,12 @@
-use crate::db::insert_game;
+use crate::db::{get_leaderboard, get_leaderboard_game_data, insert_game};
 use anyhow::Error;
+use app::db::get_username;
 use chrono::{serde::ts_seconds_option, DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::{
-    env, fs,
+    collections::HashMap,
+    env,
+    fs::{self, File},
     hash::{DefaultHasher, Hash, Hasher},
     io::BufReader,
     path::PathBuf,
@@ -12,6 +15,8 @@ use std::{
 };
 use tauri::{AppHandle, State};
 use url::Url;
+
+use crate::db;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(try_from = "GameInfoJS")]
@@ -99,7 +104,7 @@ pub struct AppState {
     games_list: Vec<GameInfo>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 #[serde(transparent)]
 pub struct ErrorType(String);
 
@@ -153,9 +158,9 @@ impl<T: ToString> From<T> for ErrorType {
 ///
 /// fetchGameInfo();
 /// ```
-fn get_game_info_files(
-    state: State<'_, Mutex<AppState>>,
-    app_handle: AppHandle,
+fn get_game_info_list(
+    state: &State<'_, Mutex<AppState>>,
+    app_handle: &AppHandle,
 ) -> Result<Vec<GameInfo>, ErrorType> {
     let mut state = state.lock().unwrap();
     let games_list = &mut state.games_list;
@@ -245,11 +250,50 @@ fn get_game_info_files(
     Ok(state.games_list.clone())
 }
 
-fn get_game_info_database(
-    state: State<'_, Mutex<AppState>>,
-    app_handle: AppHandle,
-) -> Result<Vec<GameInfo>, ErrorType> {
-    todo!()
+#[derive(Deserialize)]
+struct GameDataList {
+    games: Vec<GameData>,
+}
+
+#[derive(Deserialize)]
+struct GameData {
+    title: String,
+    id: String,
+}
+
+/// Make sure every game listed in the games\all-games.json file is in the local database
+fn check_all_games(app_handle: &AppHandle) {
+    // getting the app data directory
+    let app_data_dir = app_handle
+        .path_resolver()
+        .app_data_dir()
+        .expect("Could not find app data directory");
+
+    // Getting the list of games within the all-games JSON file
+    let all_games_file_path = app_data_dir.join("games/all-games.json");
+    let all_games_file = File::open(&all_games_file_path).expect(
+        format!(
+            "all-games.json not found at {}",
+            &all_games_file_path.clone().display()
+        )
+        .as_str(),
+    );
+    let reader = BufReader::new(all_games_file);
+    // If this reading is ever too slow, we can switch to reading the file into memory as a string
+    // and then converting that string into a JSON Value
+    let games_list: GameDataList =
+        serde_json::from_reader(reader).expect("Failed to read all-games.json");
+
+    for game in games_list.games {
+        db::make_sure_game_exists(&game.title, &game.id, "local");
+    }
+}
+
+// Given a list of games, set them to be installed in the database
+fn set_games_installed(games: &Vec<GameInfo>) {
+    for game in games {
+        db::insert_game(&game.id.to_string(), &game.title, true, "local");
+    }
 }
 
 #[tauri::command]
@@ -257,15 +301,69 @@ pub fn get_game_info(
     state: State<'_, Mutex<AppState>>,
     app_handle: AppHandle,
 ) -> Result<Vec<GameInfo>, ErrorType> {
+    let games = get_game_info_list(&state, &app_handle)?;
+    set_games_installed(&games);
+    // Only populate the database with all games if code is running on the quackbox
     if cfg!(feature = "quackbox-raspi") {
-        get_game_info_database(state, app_handle)
-    } else {
-        let games = get_game_info_files(state, app_handle)?;
-        for game in games.iter() {
-            insert_game(&game.id.to_string(), &game.title, true, "local");
-        }
-        Ok(games)
+        check_all_games(&app_handle);
     }
+    Ok(games)
+}
+
+#[derive(Serialize, Debug)]
+struct FrontendLeaderboardEntry {
+    value_num: f64,
+    username: String,
+    time_stamp: String,
+}
+
+/// Retrieves a json object of all leaderboard data for a given game.
+///
+/// # Arguments
+/// `game_title` - The title of the game to get data for (case sensitive)
+///
+///
+/// # Returns
+/// * `Result<serde_json::Value, ErrorType>` - A JSON object representing the leaderboard data of a
+/// specific game or an `ErrorType` if an error occurs.
+#[tauri::command]
+pub async fn get_leaderboard_data(game_title: String) -> Result<serde_json::Value, ErrorType> {
+    get_leaderboard_data_helper(game_title, "local")
+}
+
+/// This function allows us to mock databases for testing without having a db_name parameter
+/// at the front end
+fn get_leaderboard_data_helper(
+    game_title: String,
+    db_name: &str,
+) -> Result<serde_json::Value, ErrorType> {
+    let data = get_leaderboard_game_data(&game_title, db_name)?;
+
+    let mut sorted_data: HashMap<String, Vec<FrontendLeaderboardEntry>> = HashMap::new();
+    for entry in data {
+        match sorted_data.get_mut(&entry.value_name) {
+            Some(entries) => entries.push(FrontendLeaderboardEntry {
+                value_num: entry.value_num,
+                username: get_username(&entry.user_id, db_name)?,
+                time_stamp: "placeholder time".to_string(),
+            }),
+            None => {
+                sorted_data.insert(
+                    entry.value_name,
+                    vec![FrontendLeaderboardEntry {
+                        value_num: entry.value_num,
+                        username: get_username(&entry.user_id, db_name)?,
+                        time_stamp: entry.time_stamp,
+                    }],
+                );
+            }
+        }
+    }
+
+    Ok(serde_json::json!({
+        "title": game_title,
+        "data": sorted_data
+    }))
 }
 
 /// Runs a game based on its ID.
@@ -370,4 +468,20 @@ pub fn play_game(
     window.set_focus()?;
     window.set_fullscreen(true)?;
     Ok(())
+}
+
+mod tests {
+    use super::*;
+    use crate::db::test_context::{setup_initial_data, TestContext};
+
+    #[tokio::test]
+    async fn test_get_leaderboard_data() {
+        let context = TestContext::new("test_get_leaderboard_data_frontend");
+        setup_initial_data(&context.db_name).await;
+
+        let data = get_leaderboard_data_helper("game0".to_string(), &context.db_name)
+            .expect("Failed to get leaderboard data");
+
+        println!("{:?}", data);
+    }
 }

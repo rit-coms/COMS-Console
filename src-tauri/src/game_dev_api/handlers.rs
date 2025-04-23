@@ -48,8 +48,7 @@ pub async fn set_leaderboard(
         payload.value_num,
         &state.db_name,
     )
-    .await
-    .expect("Falied to enter leaderboard entry");
+    .expect("Faied to enter leaderboard entry");
 
     Json(serde_json::json!({
         "value_name":payload.value_name,
