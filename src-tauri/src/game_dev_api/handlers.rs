@@ -5,14 +5,29 @@ use axum::{
     response::IntoResponse,
     Json,
 };
+use axum_macros::FromRef;
 use serde::{Deserialize, Serialize};
 use serde_json::{from_str, Value};
-use std::option::Option;
+use std::{option::Option, sync::RwLock};
+use std::sync::Arc;
+
+#[derive(Clone, FromRef)]
+pub struct AppState {
+    pub api_state: ApiState,
+    pub game_state: GameStateShared
+}
 
 #[derive(Clone)]
 pub struct ApiState {
     pub db_name: String,
 }
+
+#[derive(Default)]
+pub struct GameState {
+    pub id: Option<String>
+}
+
+type GameStateShared = Arc<RwLock<GameState>>;
 
 #[derive(Deserialize, Serialize)]
 pub struct LeaderboardPost {
