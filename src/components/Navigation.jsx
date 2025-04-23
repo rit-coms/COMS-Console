@@ -5,6 +5,8 @@ import SearchModal from "./SearchModal";
 import { IconButton, Logo, Search } from "quackbox-design-system";
 import "../styles/Navigation.css";
 
+import duck from '../assets/duck.png'
+
 export default function Navigation() {
 
     const [showSearchModal, openSearchModal, closeSearchModal] = useModal();
@@ -40,7 +42,7 @@ export default function Navigation() {
             <SearchModal showModal={showSearchModal} closeModal={handleCloseSearchModal}/>
             <div className="navigation-container">
                 <div className="navigation-logo">
-                    <Logo src={"src/assets/duck.png"}/>
+                    <Logo src={ duck }/>
                 </div>
 
                 <div className="navigation-search">

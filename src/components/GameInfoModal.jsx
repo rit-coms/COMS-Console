@@ -4,6 +4,8 @@ import "../styles/GameInfoModal.css";
 import { invoke } from "@tauri-apps/api/tauri";
 import { usePageContext } from "../context/contexts";
 
+import placeholder from "../assets/placeholder.png"
+
 export default function GameInfoModal({ showModal, closeModal, game}) {
 
 	if (!showModal)
@@ -72,7 +74,7 @@ export default function GameInfoModal({ showModal, closeModal, game}) {
 			confirmLabel={!isPlaceholder ? "Play" : "Close"}
 			confirmLabelColorPrimary
 			title={game.title}
-			gameImageSrc={hasCoverImage ? game.coverImage : "src/assets/placeholder.png"}
+			gameImageSrc={hasCoverImage ? game.coverImage : placeholder}
 			onConfirmation={handlePlayGame}
 			dataId="game-info"
 		>

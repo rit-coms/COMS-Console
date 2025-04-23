@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useGamepadContext, usePageContext, useToastContext } from "../context/contexts";
 import { Modal, PlayerContainer, PlayerTile } from "quackbox-design-system";
+import duck_connected from '../assets/duck_connected.png'
 
 export default function ControllerConnectPage() {
 
@@ -102,7 +103,7 @@ export default function ControllerConnectPage() {
                             dataId={"player-tile"}
                             playerNumber={index + 1}
                             isConnected={player.isConnected}
-                            src={"src/assets/duck_connected.png"}
+                            src={ duck_connected }
                         />
                     );
                 })}

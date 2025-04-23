@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Toast } from 'quackbox-design-system';
 import { useToastContext } from './contexts';
 
+import duck from '../assets/duck.png'
+
 export const ToastContext = createContext();
 
 export const ToastProvider = ({ children }) => {
@@ -73,7 +75,7 @@ export const ToastManager = () => {
                         message={toast.message}
                         variant={toast.variant}
                         duration={toast.duration}
-                        iconSrc={'src/assets/duck.png'}
+                        iconSrc={ duck }
                         position={toast.position}
                         yOffset={`calc(${index*9}vh + var(--edge-offset))`}
                     />
