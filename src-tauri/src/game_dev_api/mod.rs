@@ -1,5 +1,7 @@
 use axum::{routing::post, Router};
-use handlers::{get_leaderboard, get_save_data, set_leaderboard, set_save_data, ApiState};
+use handlers::{get_leaderboard, get_save_data, set_leaderboard, set_save_data, ApiState, AppState, GameStateShared};
+use tokio::sync::watch::{self, Receiver};
+use url::form_urlencoded::Target;
 
 const VERSION: u8 = 1;
 
@@ -32,10 +34,31 @@ pub mod handlers;
 ///     axum::serve(listener, app).await.unwrap();
 /// }
 /// ```
-pub fn create_router(db_name: &str) -> Router {
+pub fn create_router(db_name: &str, game_channel: Receiver<Option<String>>) -> Router {
     let route_prefix: String = format!("/api/v{}", VERSION.to_string());
     let api_state = ApiState {
         db_name: db_name.to_owned(),
+    };
+    let game_state = GameStateShared::default();
+    let game_state_update = game_state.clone();
+
+    // TODO: turn into another function
+    tokio::spawn(async move {
+        let current_game = game_state_update;
+        let mut watch = game_channel;
+        loop {
+            let mut game_id = current_game.write().await;
+            game_id.id = (*watch.borrow_and_update()).clone();
+            if watch.changed().await.is_err() {
+                // if the watch channel has been killed, we're cooked
+                break;
+            }
+        }
+    });
+
+    let app_state = AppState {
+        api_state,
+        game_state
     };
 
     Router::new()
@@ -43,18 +66,18 @@ pub fn create_router(db_name: &str) -> Router {
             &format!("{}/leaderboard", route_prefix),
             post(set_leaderboard).get(get_leaderboard),
         )
-        .with_state(api_state.clone()) // TODO: wrap the state in an ARC to avoid cloning???
+        // .with_state(app_state.clone()) // TODO: wrap the state in an ARC to avoid cloning???
         .route(
             &format!("{}/save-data", route_prefix),
             post(set_save_data).get(get_save_data),
         )
-        .with_state(api_state)
+        .with_state(app_state)
 }
 
 /// This function should be called in tauri builder to setup the http API for game
 /// developers to read and write game data.
-pub async fn setup_game_dev_api(db_name: &str) {
-    let app = create_router(db_name);
+pub async fn setup_game_dev_api(db_name: &str, game_channel: Receiver<Option<String>>) {
+    let app = create_router(db_name, game_channel);
 
     println!("Server started successfully!!!");
     let listener = tokio::net::TcpListener::bind("127.0.0.1:8000")

@@ -8,9 +8,11 @@ use axum::{
 use axum_macros::FromRef;
 use serde::{Deserialize, Serialize};
 use serde_json::{from_str, Value};
-use std::{option::Option, sync::RwLock};
+use std::option::Option;
 use std::sync::Arc;
+use tokio::sync::RwLock;
 
+// TODO: rename to not be confused with the managed tauri app state
 #[derive(Clone, FromRef)]
 pub struct AppState {
     pub api_state: ApiState,
@@ -27,7 +29,7 @@ pub struct GameState {
     pub id: Option<String>
 }
 
-type GameStateShared = Arc<RwLock<GameState>>;
+pub type GameStateShared = Arc<RwLock<GameState>>;
 
 #[derive(Deserialize, Serialize)]
 pub struct LeaderboardPost {
