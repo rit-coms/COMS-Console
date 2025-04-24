@@ -177,6 +177,18 @@ pub async fn get_save_data(
     }
 }
 
+pub fn create_default_guest(db_path: &str) -> usize {
+    use self::schema::users::dsl::*;
+    const ID_S: &str = "1";
+    const NAME_S: &str = "Guest";
+    let connection = &mut establish_connection(db_path);
+    insert_into(users)
+        .values((id.eq(ID_S), name.eq(NAME_S)))
+        .on_conflict_do_nothing()
+        .execute(connection)
+        .expect("Could not make sure Guest user exists")
+}
+
 pub fn create_user(id_s: &str, name_s: &str, db_path: &str) -> User {
     use self::schema::users::dsl::*;
     let connection = &mut establish_connection(db_path);
@@ -343,4 +355,19 @@ mod tests {
             })
             .expect("Failed to find expected data!");
     }
+
+    #[tokio::test]
+    pub async fn test_create_default_guest() {
+        let context = TestContext::new("create_default_guest");
+        setup_initial_data(&context.db_path).await;
+
+        // creates default guest
+        let created_size = create_default_guest(&context.db_path);
+
+        assert!(created_size == 0); // test context already has a user with id 1
+
+        // shouldn't error out if the default guest already exists
+        create_default_guest(&context.db_path);
+    }
+
 }
