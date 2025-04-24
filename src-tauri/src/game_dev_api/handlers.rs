@@ -7,11 +7,11 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{from_str, Value};
-use std::option::Option;
+use std::{option::Option, path::PathBuf};
 
 #[derive(Clone)]
 pub struct ApiState {
-    pub db_name: String,
+    pub database_path: String,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -46,7 +46,7 @@ pub async fn set_leaderboard(
         game_id,
         payload.value_name.as_str(),
         payload.value_num,
-        &state.db_name,
+        &state.database_path,
     )
     .expect("Faied to enter leaderboard entry");
 
@@ -98,18 +98,18 @@ pub async fn get_leaderboard(
         params.ascending,
         params.value_name.clone(),
         params.offset,
-        &state.db_name,
+        &state.database_path,
     )
     .await;
 
     let mut json_response: Vec<serde_json::Value> = Vec::new();
 
-    // TODO: add time_stamp
     for entry in leaderboard_entries {
         json_response.push(serde_json::json!({
             "value_name": entry.value_name,
             "value_num": entry.value_num,
             "player_slot": str::parse::<i16>(&entry.user_id).unwrap(),
+            "time_stamp": entry.time_stamp
         }));
     }
 
@@ -131,7 +131,7 @@ pub async fn set_save_data(
         game_id,
         payload.file_name.as_str(),
         &serde_json::to_vec(&payload.data).unwrap(),
-        &state.db_name,
+        &state.database_path,
     )
     .await;
 
@@ -168,7 +168,7 @@ pub async fn get_save_data(
         &user_id_s,
         &params.file_name,
         &params.regex,
-        &state.db_name,
+        &state.database_path,
     )
     .await;
 
@@ -183,6 +183,7 @@ pub async fn get_save_data(
                             "data":serde_json::from_slice::<Value>(&entry.data).expect("Failed to deserialize BSON data"),
                             "file_name": entry.file_name,
                             "player_slot": str::parse::<i16>(&entry.user_id).unwrap(),
+                            "time_stamp": entry.time_stamp
                         }));
             }
             return Json(json_response).into_response();
