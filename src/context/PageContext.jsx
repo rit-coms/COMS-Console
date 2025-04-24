@@ -188,7 +188,7 @@ export const PageProvider = ({ children }) => {
                     case "DOWN": updateFocus(playerIndex, "DOWN"); break;
                     case "LEFT": updateFocus(playerIndex, "LEFT"); break;
                     case "RIGHT": updateFocus(playerIndex, "RIGHT"); break;
-                    case "A": clickElement(playerIndex); break;
+                    case "A": playerIndex == 0 && clickElement(playerIndex); break;
                 };
 
             });
