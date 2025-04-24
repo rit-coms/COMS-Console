@@ -8,7 +8,7 @@ use axum::{
 use axum_macros::FromRef;
 use serde::{Deserialize, Serialize};
 use serde_json::{from_str, Value};
-use std::option::Option;
+use std::{option::Option, path::PathBuf};
 use std::sync::Arc;
 use tokio::{sync::{Notify, RwLock}, sync::watch::Receiver};
 
@@ -21,7 +21,7 @@ pub struct AppState {
 
 #[derive(Clone)]
 pub struct ApiState {
-    pub db_name: String,
+    pub database_path: String,
 }
 
 #[derive(Debug, Clone)]
@@ -68,7 +68,7 @@ pub async fn set_leaderboard(
         &game_id,
         payload.value_name.as_str(),
         payload.value_num,
-        &state.db_name,
+        &state.database_path,
     )
     .expect("Faied to enter leaderboard entry");
 
@@ -123,18 +123,18 @@ pub async fn get_leaderboard(
         params.ascending,
         params.value_name.clone(),
         params.offset,
-        &state.db_name,
+        &state.database_path,
     )
     .await;
 
     let mut json_response: Vec<serde_json::Value> = Vec::new();
 
-    // TODO: add time_stamp
     for entry in leaderboard_entries {
         json_response.push(serde_json::json!({
             "value_name": entry.value_name,
             "value_num": entry.value_num,
             "player_slot": str::parse::<i16>(&entry.user_id).unwrap(),
+            "time_stamp": entry.time_stamp
         }));
     }
 
@@ -147,7 +147,7 @@ pub async fn set_save_data(
     State(game_state): State<GameStateShared>,
     Json(payload): Json<SaveDataPost>,
 ) -> impl IntoResponse {
-    // let game_id = "0";
+    // let game_id = "0";x
     let game_id = game_state.id.read().await.unwrap().to_string();
     drop(game_state);
     let user_id = payload.player_slot.to_string();
@@ -159,7 +159,7 @@ pub async fn set_save_data(
         &game_id,
         payload.file_name.as_str(),
         &serde_json::to_vec(&payload.data).unwrap(),
-        &state.db_name,
+        &state.database_path,
     )
     .await;
 
@@ -199,7 +199,7 @@ pub async fn get_save_data(
         &user_id_s,
         &params.file_name,
         &params.regex,
-        &state.db_name,
+        &state.database_path,
     )
     .await;
 
@@ -214,6 +214,7 @@ pub async fn get_save_data(
                             "data":serde_json::from_slice::<Value>(&entry.data).expect("Failed to deserialize BSON data"),
                             "file_name": entry.file_name,
                             "player_slot": str::parse::<i16>(&entry.user_id).unwrap(),
+                            "time_stamp": entry.time_stamp
                         }));
             }
             return Json(json_response).into_response();

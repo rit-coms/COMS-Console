@@ -1,10 +1,13 @@
 use std::sync::Arc;
 
+use std::path::PathBuf;
+
 use axum::{routing::post, Router};
 use handlers::{get_leaderboard, get_save_data, set_leaderboard, set_save_data, ApiState, AppState, GameStateShared};
 use tokio::sync::{watch::Receiver, Notify};
 
 const VERSION: u8 = 1;
+const DB_NAME: &str = "local";
 
 pub mod handlers;
 
@@ -59,7 +62,7 @@ async fn handle_game_state_updates(game_state: GameStateShared) {
 /// async fn setup_api() {
 ///     let game_id = Some(0);
 ///     let (tx, rx) = watch::channel(game_id);
-///     let app = create_router("local", Arc::new(GameState { 
+///     let app = create_router("local".to_owned(), Arc::new(GameState { 
 ///         id: Arc::new(RwLock::new(game_id)),
 ///         notifier: Arc::new(Notify::new()),
 ///         channel: rx
@@ -72,10 +75,10 @@ async fn handle_game_state_updates(game_state: GameStateShared) {
 ///     axum::serve(listener, app).await.unwrap();
 /// }
 /// ```
-pub fn create_router(db_name: &str, game_state: GameStateShared) -> Router {
+pub fn create_router(db_path: &str, game_state: GameStateShared) -> Router {
     let route_prefix: String = format!("/api/v{}", VERSION.to_string());
     let api_state = ApiState {
-        db_name: db_name.to_owned(),
+        database_path: db_path.to_owned()
     };
     let game_state = game_state;
 
@@ -102,11 +105,11 @@ pub fn create_router(db_name: &str, game_state: GameStateShared) -> Router {
 
 /// This function should be called in tauri builder to setup the http API for game
 /// developers to read and write game data.
-pub async fn setup_game_dev_api(db_name: &str, game_state: GameStateShared) {
-    let app = create_router(db_name, game_state);
+pub async fn setup_game_dev_api(db_path: String, game_state: GameStateShared) {
+    let app = create_router(&db_path, game_state);
 
     println!("Server started successfully!!!");
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:8000")
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:6174")
         .await
         .unwrap(); // TODO make the port configurable
     axum::serve(listener, app).await.unwrap();

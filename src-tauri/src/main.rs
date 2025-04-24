@@ -14,9 +14,9 @@ use tokio::sync::Mutex;
 
 use std::sync::Arc;
 
+mod db;
 mod frontend_api;
 mod game_dev_api;
-mod db;
 
 fn main() {
     tauri::Builder::default()
@@ -37,14 +37,29 @@ fn main() {
                 notifier: notify,
                 channel: current_game_rx.clone()
             });
-            tauri::async_runtime::spawn(setup_game_dev_api("local", game_state_shared));
+            tauri::async_runtime::spawn({
+                let db_path = app
+                    .path_resolver()
+                    .app_data_dir()
+                    .unwrap()
+                    .join("local")
+                    .with_extension("db")
+                    .into_os_string()
+                    .into_string()
+                    .unwrap();
+                setup_game_dev_api(db_path, game_state_shared)
+            });
             if cfg!(feature = "autostart") {
                 // Only enable autolaunch on raspberry pi
                 app.autolaunch().enable()?;
             }
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_game_info, play_game, get_leaderboard_data])
+        .invoke_handler(tauri::generate_handler![
+            get_game_info,
+            play_game,
+            get_leaderboard_data
+        ])
         .on_page_load(|window, _| {
             window.show().expect("Failed to show window");
         })

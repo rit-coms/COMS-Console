@@ -1,51 +1,22 @@
 use anyhow::{Error, Ok};
-use axum::http::StatusCode;
-use diesel::{insert_into, prelude::*, upsert::excluded};
-use dotenvy::dotenv;
+use diesel::{insert_into, prelude::*};
 use models::*;
 use regex::Regex;
-use schema::games;
-use std::env;
 use std::option::Option;
-use std::path::Path;
 
 pub mod models;
 pub mod schema;
 pub mod test_context;
 
-/// Finds the filepath of a database using a given name.
-///
-/// This function will use the DATABASE_URL environment variable, but truncates the .db file and attaches the given db_name
-/// to the path. If you want this path to math the DATABASE_URL variable, db_name should just be the name of the db file.
-///
-/// Ex: if DATABASE_URL="C:/Users/username/AppData/Roaming/coms-console/local.db", then db_name should be "local".
-pub fn get_db_path(db_name: &str) -> String {
-    dotenvy::dotenv().expect("Please create a .env file in the root directory of the project");
-    Path::new(&env::var("DATABASE_URL").expect("DATABASE_URL must be set"))
-        .parent()
-        .unwrap()
-        .join(db_name)
-        .with_extension("db")
-        .into_os_string()
-        .into_string()
-        .unwrap()
-}
-
-pub fn establish_connection(db_name: &str) -> SqliteConnection {
-    dotenv().ok();
-
-    // Here, just DATABASE_URL isn't used because we want to be able to specify different names for test databases.
-    // If you want to use the real database, make sure db_name matches the name of the .db file in your .env file.
-    let test_db_url = get_db_path(db_name);
-
-    SqliteConnection::establish(test_db_url.as_str())
-        .unwrap_or_else(|_| panic!("Error connecting to {}", test_db_url))
+pub fn establish_connection(db_path: &str) -> SqliteConnection {
+    SqliteConnection::establish(db_path)
+        .expect(format!("Failed to connect to database at {}", db_path).as_str())
     // TODO handle database connection error
 }
 
-pub fn insert_game(id_s: &str, name_s: &str, is_installed: bool, db_name: &str) -> usize {
+pub fn insert_game(id_s: &str, name_s: &str, is_installed: bool, db_path: &str) -> usize {
     use self::schema::games::dsl::*;
-    let connection = &mut establish_connection(db_name);
+    let connection = &mut establish_connection(db_path);
     insert_into(games)
         .values((id.eq(id_s), name.eq(name_s), installed.eq(is_installed)))
         .on_conflict(name)
@@ -57,9 +28,9 @@ pub fn insert_game(id_s: &str, name_s: &str, is_installed: bool, db_name: &str) 
 
 /// Ensures a game exists in the data base by inserting the given game into the database
 /// and doing nothing if there is a conflict.
-pub fn make_sure_game_exists(name_s: &str, id_s: &str, db_name: &str) {
+pub fn make_sure_game_exists(name_s: &str, id_s: &str, db_path: &str) {
     use self::schema::games::dsl::*;
-    let connection = &mut establish_connection(db_name);
+    let connection = &mut establish_connection(db_path);
     insert_into(games)
         .values((id.eq(id_s), name.eq(name_s), installed.eq(false)))
         .on_conflict_do_nothing()
@@ -72,10 +43,10 @@ pub fn insert_leaderboard_entry(
     game_id_s: &str,
     value_name_s: &str,
     value_num_f: f64,
-    db_name: &str,
+    db_path: &str,
 ) -> QueryResult<usize> {
     use self::schema::leaderboard::dsl::*;
-    let mut connection = establish_connection(db_name);
+    let mut connection = establish_connection(db_path);
 
     insert_into(leaderboard)
         .values((
@@ -84,9 +55,6 @@ pub fn insert_leaderboard_entry(
             value_name.eq(value_name_s),
             value_num.eq(value_num_f),
         ))
-        .on_conflict((user_id, game_id, value_name))
-        .do_update()
-        .set(value_name.eq(excluded(value_name)))
         .execute(&mut connection)
 }
 
@@ -97,10 +65,10 @@ pub async fn get_leaderboard(
     ascending: Option<bool>,
     value_name_s: Option<String>,
     offset: Option<i64>,
-    db_name: &str,
+    db_path: &str,
 ) -> Vec<LeaderboardEntry> {
     use self::schema::leaderboard::dsl::*;
-    let mut connection = establish_connection(db_name);
+    let mut connection = establish_connection(db_path);
 
     let mut query = leaderboard.into_boxed(); // Selects all by default
 
@@ -159,12 +127,12 @@ pub async fn get_save_data(
     user_id_s: &Option<String>,
     file_name_s: &Option<String>,
     regx: &Option<String>,
-    db_name: &str,
+    db_path: &str,
 ) -> Result<Vec<Save>, Error> {
     use self::schema::saves::dsl::*;
     validate_save_data_params(file_name_s, regx)?;
 
-    let mut connection = establish_connection(db_name);
+    let mut connection = establish_connection(db_path);
 
     let mut query = saves.into_boxed();
 
@@ -209,18 +177,18 @@ pub async fn get_save_data(
     }
 }
 
-pub fn create_user(id_s: &str, name_s: &str, db_name: &str) -> User {
+pub fn create_user(id_s: &str, name_s: &str, db_path: &str) -> User {
     use self::schema::users::dsl::*;
-    let connection = &mut establish_connection(db_name);
+    let connection = &mut establish_connection(db_path);
     insert_into(users)
         .values((id.eq(id_s), name.eq(name_s)))
         .get_result::<User>(connection)
         .expect("Could not create User")
 }
 
-pub async fn get_user(name_s: &str, user_id_s: &str, db_name: &str) -> User {
+pub async fn get_user(name_s: &str, user_id_s: &str, db_path: &str) -> User {
     use self::schema::users::dsl::*;
-    let connection = &mut establish_connection(db_name);
+    let connection = &mut establish_connection(db_path);
 
     users
         .select(User::as_select())
@@ -235,10 +203,10 @@ pub async fn set_save(
     game_id_s: &str,
     file_name_s: &str,
     data_b: &Vec<u8>,
-    db_name: &str,
+    db_path: &str,
 ) -> Save {
     use self::schema::saves::dsl::*;
-    let connection = &mut establish_connection(db_name);
+    let connection = &mut establish_connection(db_path);
     insert_into(saves)
         .values((
             user_id.eq(user_id_s),
@@ -246,6 +214,9 @@ pub async fn set_save(
             file_name.eq(file_name_s),
             data.eq(data_b),
         ))
+        .on_conflict((user_id, file_name))
+        .do_update()
+        .set(data.eq(data_b))
         .execute(connection)
         .expect("Error inserting save");
 
@@ -255,12 +226,12 @@ pub async fn set_save(
         .filter(game_id.eq(game_id_s))
         .filter(file_name.eq(file_name_s))
         .first(connection)
-        .expect("Could not set save")
+        .expect("Could not return inserted save")
 }
 
-pub async fn get_save(user_id_s: &str, game_id_s: &str, file_name_s: &str, db_name: &str) -> Save {
+pub async fn get_save(user_id_s: &str, game_id_s: &str, file_name_s: &str, db_path: &str) -> Save {
     use self::schema::saves::dsl::*;
-    let connection = &mut establish_connection(db_name);
+    let connection = &mut establish_connection(db_path);
     saves
         .select(Save::as_select())
         .filter(user_id.eq(user_id_s))
@@ -271,14 +242,14 @@ pub async fn get_save(user_id_s: &str, game_id_s: &str, file_name_s: &str, db_na
 }
 
 /// Returns all leadboard data for a given game title.
-/// In cases other than testing, db_name should be "local"
+/// In cases other than testing, db_path should be "local"
 pub fn get_leaderboard_game_data(
     game_title: &str,
-    db_name: &str,
+    db_path: &str,
 ) -> Result<Vec<LeaderboardEntry>, Error> {
     use self::schema::games::dsl::{games, name};
     use self::schema::leaderboard::dsl::{game_id, leaderboard};
-    let connection = &mut establish_connection(db_name);
+    let connection = &mut establish_connection(db_path);
 
     let game = games
         .select(Game::as_select())
@@ -296,9 +267,9 @@ pub fn get_leaderboard_game_data(
 }
 
 /// Given an id, return the corresponding username
-pub fn get_username(id_s: &str, db_name: &str) -> Result<String, Error> {
+pub fn get_username(id_s: &str, db_path: &str) -> Result<String, Error> {
     use self::schema::users::dsl::*;
-    let connection = &mut establish_connection(db_name);
+    let connection = &mut establish_connection(db_path);
 
     Ok(users.select(name).filter(id.eq(id_s)).first(connection)?)
 }
@@ -318,18 +289,18 @@ mod tests {
         let name_s = "A random user";
 
         let mut buffer = Uuid::encode_buffer();
-        let user = create_user(user_id_s, name_s, &test_context.db_name);
+        let user = create_user(user_id_s, name_s, &test_context.db_path);
         let game_id_s = Uuid::new_v4().as_simple().encode_lower(&mut buffer);
         let example_game_name = "Example Game";
 
-        insert_game(game_id_s, example_game_name, true, &test_context.db_name);
+        insert_game(game_id_s, example_game_name, true, &test_context.db_path);
 
         insert_leaderboard_entry(
             user_id_s,
             game_id_s,
             "spaghetti",
             10.0,
-            &test_context.db_name,
+            &test_context.db_path,
         )
         .expect("Failed to insert entry");
 
@@ -341,7 +312,7 @@ mod tests {
             game_id_s,
             file_name_s,
             &data_b,
-            &test_context.db_name,
+            &test_context.db_path,
         )
         .await;
     }
@@ -349,18 +320,18 @@ mod tests {
     #[tokio::test]
     pub async fn test_get_username() {
         let context = TestContext::new("get_username");
-        setup_initial_data(&context.db_name).await;
+        setup_initial_data(&context.db_path).await;
 
-        let username = get_username("1", &context.db_name).expect("Failed to retrieve username");
+        let username = get_username("1", &context.db_path).expect("Failed to retrieve username");
         assert_eq!(username, "user1".to_string())
     }
 
     #[tokio::test]
     pub async fn test_get_leaderboard_game_data() {
         let context = TestContext::new("get_leaderboard_game_data");
-        setup_initial_data(&context.db_name).await;
+        setup_initial_data(&context.db_path).await;
 
-        let data = get_leaderboard_game_data("game0", &context.db_name)
+        let data = get_leaderboard_game_data("game0", &context.db_path)
             .expect("Failed to get leaderboard game data");
         assert!(data.len() == 3);
         println!("{:?}", data);

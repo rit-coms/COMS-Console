@@ -5,5 +5,6 @@ CREATE TABLE saves (
   game_id CHAR(32) NOT NULL REFERENCES games(id),
   file_name VARCHAR(255) NOT NULL,
   data BLOB NOT NULL,
-  time_stamp TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL-- added time_stamp
+  time_stamp TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  UNIQUE(user_id, file_name)
 )
