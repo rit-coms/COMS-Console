@@ -3,11 +3,16 @@
 
 use frontend_api::{get_game_info, get_leaderboard_data, play_game, AppState, GameSenderState};
 use game_dev_api::setup_game_dev_api;
+use game_dev_api::handlers::GameState;
+use game_dev_api::handlers::GameStateShared;
 use tauri::{api::path::local_data_dir, Manager};
 use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 use tokio::sync::watch;
+use tokio::sync::Notify;
+use tokio::sync::RwLock;
+use tokio::sync::Mutex;
 
-use std::sync::Mutex;
+use std::sync::Arc;
 
 mod frontend_api;
 mod game_dev_api;
@@ -24,9 +29,15 @@ fn main() {
             // tauri::async_runtime::spawn(db::test_db());
             
             let (current_game_tx, current_game_rx) = watch::channel(None);
-            app.manage(GameSenderState { game_watch_tx: current_game_tx });
+            let notify = Arc::new(Notify::new());
+            app.manage(GameSenderState { game_watch_tx: current_game_tx, notifier: Arc::clone(&notify) });
 
-            tauri::async_runtime::spawn(setup_game_dev_api("local", current_game_rx));
+            let game_state_shared: GameStateShared = Arc::new(GameState {
+                id: Arc::new(RwLock::new(None)),
+                notifier: notify,
+                channel: current_game_rx.clone()
+            });
+            tauri::async_runtime::spawn(setup_game_dev_api("local", game_state_shared));
             if cfg!(feature = "autostart") {
                 // Only enable autolaunch on raspberry pi
                 app.autolaunch().enable()?;

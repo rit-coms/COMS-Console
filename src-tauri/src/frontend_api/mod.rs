@@ -3,7 +3,7 @@ use anyhow::Error;
 use app::db::get_username;
 use chrono::{serde::ts_seconds_option, DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use tokio::sync::watch::Sender;
+use tokio::sync::{watch::Sender, Notify, Mutex};
 use std::{
     collections::HashMap,
     env,
@@ -12,7 +12,7 @@ use std::{
     io::BufReader,
     path::PathBuf,
     process::Command,
-    sync::Mutex,
+    sync::Arc,
 };
 use tauri::{AppHandle, State};
 use url::Url;
@@ -106,6 +106,7 @@ pub struct AppState {
 }
 
 pub struct GameSenderState {
+    pub notifier: Arc<Notify>,
     pub game_watch_tx: Sender<Option<u64>>
 }
 
@@ -163,11 +164,11 @@ impl<T: ToString> From<T> for ErrorType {
 ///
 /// fetchGameInfo();
 /// ```
-fn get_game_info_list(
+async fn get_game_info_list(
     state: &State<'_, Mutex<AppState>>,
     app_handle: &AppHandle,
 ) -> Result<Vec<GameInfo>, ErrorType> {
-    let mut state = state.lock().unwrap();
+    let mut state = state.lock().await;
     let games_list = &mut state.games_list;
     games_list.clear();
 
@@ -302,11 +303,11 @@ fn set_games_installed(games: &Vec<GameInfo>) {
 }
 
 #[tauri::command]
-pub fn get_game_info(
+pub async fn get_game_info(
     state: State<'_, Mutex<AppState>>,
     app_handle: AppHandle,
 ) -> Result<Vec<GameInfo>, ErrorType> {
-    let games = get_game_info_list(&state, &app_handle)?;
+    let games = get_game_info_list(&state, &app_handle).await?;
     set_games_installed(&games);
     // Only populate the database with all games if code is running on the quackbox
     if cfg!(feature = "quackbox-raspi") {
@@ -412,14 +413,14 @@ fn get_leaderboard_data_helper(
 /// startGame('12345');
 /// ```
 #[tauri::command]
-pub fn play_game(
+pub async fn play_game(
     state: State<'_, Mutex<AppState>>,
     game_sender_state: State<'_, GameSenderState>,
     window: tauri::Window,
     app_handle: AppHandle,
     id: String,
 ) -> Result<(), ErrorType> {
-    let games_list = &state.lock()?.games_list;
+    let games_list = &state.lock().await.games_list;
     let path = env::current_dir()?;
     let id = id.parse::<u64>()?;
     let game_info = games_list
@@ -428,6 +429,7 @@ pub fn play_game(
         .ok_or("Game ID not found")?;
     let tx = game_sender_state.game_watch_tx.clone();
     tx.send(Some(id))?;
+    game_sender_state.notifier.clone().notified().await;
 
     window.minimize()?;
 
@@ -476,7 +478,7 @@ pub fn play_game(
     window.maximize()?;
     window.set_focus()?;
     window.set_fullscreen(true)?;
-    tx.send(None)?;
+    game_sender_state.notifier.clone().notified().await;
     Ok(())
 }
 

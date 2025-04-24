@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{from_str, Value};
 use std::option::Option;
 use std::sync::Arc;
-use tokio::sync::RwLock;
+use tokio::{sync::{Notify, RwLock}, sync::watch::Receiver};
 
 // TODO: rename to not be confused with the managed tauri app state
 #[derive(Clone, FromRef)]
@@ -24,12 +24,14 @@ pub struct ApiState {
     pub db_name: String,
 }
 
-#[derive(Default, Debug)]
+#[derive(Debug, Clone)]
 pub struct GameState {
-    pub id: Option<u64>
+    pub id: Arc<RwLock<Option<u64>>>,
+    pub notifier: Arc<Notify>,
+    pub channel: Receiver<Option<u64>>
 }
 
-pub type GameStateShared = Arc<RwLock<GameState>>;
+pub type GameStateShared = Arc<GameState>;
 
 #[derive(Deserialize, Serialize)]
 pub struct LeaderboardPost {
@@ -55,7 +57,7 @@ pub async fn set_leaderboard(
     // TODO: Get game_id and user_id
     println!("Setting Laaderboard data");
     // let game_id = "1";
-    let game_id = game_state.read().await.id.unwrap().to_string();
+    let game_id = game_state.id.read().await.unwrap().to_string();
     drop(game_state);
     let user_id = payload.player_slot.to_string();
 
@@ -93,7 +95,7 @@ pub async fn get_leaderboard(
     params: Query<LeaderboardGetParams>,
 ) -> impl IntoResponse {
     // let game_id: String = String::from("1"); // Example for now
-    let game_id = game_state.read().await.id.unwrap().to_string();
+    let game_id = game_state.id.read().await.unwrap().to_string();
     drop(game_state);
     let user_id_s: Option<String>;
     // TODO: get associated player id and error check for invalid slots (negative or greater than the max)
@@ -146,7 +148,7 @@ pub async fn set_save_data(
     Json(payload): Json<SaveDataPost>,
 ) -> impl IntoResponse {
     // let game_id = "0";
-    let game_id = game_state.read().await.id.unwrap().to_string();
+    let game_id = game_state.id.read().await.unwrap().to_string();
     drop(game_state);
     let user_id = payload.player_slot.to_string();
 
@@ -185,7 +187,7 @@ pub async fn get_save_data(
 ) -> impl IntoResponse {
     println!("Getting save data!");
     // let game_id: String = String::from("0"); // Example for now
-    let game_id = game_state.read().await.id.unwrap().to_string();
+    let game_id = game_state.id.read().await.unwrap().to_string();
     drop(game_state);
     let user_id_s: Option<String> = match params.player_slot {
         Some(slot) => Some(slot.to_string()),

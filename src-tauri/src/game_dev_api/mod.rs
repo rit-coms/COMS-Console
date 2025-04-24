@@ -1,22 +1,25 @@
+use std::sync::Arc;
+
 use axum::{routing::post, Router};
 use handlers::{get_leaderboard, get_save_data, set_leaderboard, set_save_data, ApiState, AppState, GameStateShared};
-use tokio::sync::watch::Receiver;
+use tokio::sync::{watch::Receiver, Notify};
 
 const VERSION: u8 = 1;
 
 pub mod handlers;
 
 // #[tracing::instrument]
-async fn handle_game_state_updates(game_state_update: GameStateShared, game_channel: Receiver<Option<u64>>) {
+async fn handle_game_state_updates(game_state: GameStateShared) {
     println!("Started listener to watch in the router");
-    let current_game = game_state_update;
-    let mut watch = game_channel;
+    let current_game = game_state.id.clone();
+    let mut watch = game_state.channel.clone();
     let mut i = 0;
     loop {
         let mut game_id = current_game.write().await;
-        println!("game_id {:?}: {:?}", i, game_id.id);
-        game_id.id = *watch.borrow_and_update();
+        println!("game_id {:?}: {:?}", i, game_id);
+        *game_id = *watch.borrow_and_update();
         drop(game_id);
+        game_state.notifier.notify_one();
         if watch.changed().await.is_err() {
             // the watch channel transmitter should never
             // be destroyed before the application closes
@@ -24,7 +27,7 @@ async fn handle_game_state_updates(game_state_update: GameStateShared, game_chan
         }
         // Not entirely certain why the below fixes everything, but I guess it does?
         let mut game_id = current_game.write().await;
-        game_id.id = *watch.borrow();
+        *game_id = *watch.borrow();
         drop(game_id);
         i += 1;
     }
@@ -57,15 +60,15 @@ async fn handle_game_state_updates(game_state_update: GameStateShared, game_chan
 ///     axum::serve(listener, app).await.unwrap();
 /// }
 /// ```
-pub fn create_router(db_name: &str, game_channel: Receiver<Option<u64>>) -> Router {
+pub fn create_router(db_name: &str, game_state: GameStateShared) -> Router {
     let route_prefix: String = format!("/api/v{}", VERSION.to_string());
     let api_state = ApiState {
         db_name: db_name.to_owned(),
     };
-    let game_state = GameStateShared::default();
+    let game_state = game_state;
 
     // TODO: turn into another function
-    tokio::spawn(handle_game_state_updates(game_state.clone(), game_channel));
+    tokio::spawn(handle_game_state_updates(game_state.clone()));
 
     let app_state = AppState {
         api_state,
@@ -87,8 +90,8 @@ pub fn create_router(db_name: &str, game_channel: Receiver<Option<u64>>) -> Rout
 
 /// This function should be called in tauri builder to setup the http API for game
 /// developers to read and write game data.
-pub async fn setup_game_dev_api(db_name: &str, game_channel: Receiver<Option<u64>>) {
-    let app = create_router(db_name, game_channel);
+pub async fn setup_game_dev_api(db_name: &str, game_state: GameStateShared) {
+    let app = create_router(db_name, game_state);
 
     println!("Server started successfully!!!");
     let listener = tokio::net::TcpListener::bind("127.0.0.1:8000")
@@ -99,55 +102,38 @@ pub async fn setup_game_dev_api(db_name: &str, game_channel: Receiver<Option<u64
 
 #[cfg(test)]
 mod test {
+    use crate::game_dev_api::handlers::GameState;
+
     use super::*;
-    use tokio::{runtime::Runtime, sync::watch::{self, channel}};
+    use tokio::{runtime::Runtime, sync::{watch::{self, channel}, RwLock}};
 
     #[tokio::test]
     async fn game_state_change() {
-        let game_id: u64 = 512039487;
+        let game_id: Option<u64> = Some(512039487);
         let db_name = "test_db";
 
-        let (tx, mut rx) = watch::channel(Some(game_id));
-        let router = create_router(db_name, rx.clone());
-
-        let game_state = GameStateShared::default();
-        let game_state_update = game_state.clone();
-        let rx_copy = rx.clone();
-
-        let handle = tokio::spawn(async move {
-            println!("Started listener to watch in the router");
-            let current_game = game_state_update;
-            let mut watch = rx_copy;
-            let mut game_id = current_game.write().await;
-            // println!("game_id: {:?}", game_id.id);
-            game_id.id = *watch.borrow_and_update();
-            drop(game_id);
+        let (tx, mut rx) = watch::channel(game_id);
+        let notify = Arc::new(Notify::new());
+        let game_state_shared: GameStateShared = Arc::new(GameState {
+            id: Arc::new(RwLock::new(None)),
+            notifier: Arc::clone(&notify),
+            channel: rx.clone()
         });
+        let router = create_router(db_name, Arc::clone(&game_state_shared));
 
-        handle.await.expect("why tho");
+        tokio::spawn(handle_game_state_updates(Arc::clone(&game_state_shared)));
 
-        assert_eq!(game_state.read().await.id.unwrap(), 512039487);
-        assert_eq!(rx.borrow_and_update().unwrap(), game_state.read().await.id.unwrap());
+        Arc::clone(&notify).notified().await;
+        assert_eq!(*game_state_shared.id.read().await, game_id);
+        assert_eq!(*rx.borrow_and_update(), *game_state_shared.id.read().await);
 
+        let game_id: Option<u64> = Some(0);
 
-        tx.send(Some(0)).expect("Was unable to send to watch channel");
-        let game_state_update = game_state.clone();
-        let rx_copy = rx.clone();
-        let handle = tokio::spawn(async move {
-            println!("Started listener to watch in the router");
-            let current_game = game_state_update;
-            let mut watch = rx_copy;
-            let mut game_id = current_game.write().await;
-            // println!("game_id: {:?}", game_id.id);
-            game_id.id = *watch.borrow_and_update();
-            drop(game_id);
-        });
+        tx.send(game_id).expect("Was unable to send to watch channel");
+        Arc::clone(&notify).notified().await;
+        println!("{:?}", game_state_shared.id.read().await);
 
-        handle.await.expect("help");
-
-        println!("{:?}", game_state.read().await.id);
-
-        assert_eq!(game_state.read().await.id.unwrap(), 0);
-        assert_eq!(rx.borrow_and_update().unwrap(), game_state.read().await.id.unwrap());
+        assert_eq!(*game_state_shared.id.read().await, game_id);
+        assert_eq!(*rx.borrow_and_update(), game_id);
     }
 }
