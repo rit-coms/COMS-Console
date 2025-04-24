@@ -251,7 +251,7 @@ async fn get_game_info_list(
         games_list.push(game_metadata);
     }
 
-    println!("{}", serde_json::to_string_pretty(games_list).unwrap());
+    // println!("{}", serde_json::to_string_pretty(games_list).unwrap());
 
     Ok(state.games_list.clone())
 }
@@ -447,8 +447,9 @@ pub async fn play_game(
         .iter()
         .find(|g| g.id == id)
         .ok_or("Game ID not found")?;
-    let tx = game_sender_state.game_watch_tx.clone();
-    tx.send(Some(id))?;
+    // let tx = game_sender_state.game_watch_tx.clone();
+    game_sender_state.game_watch_tx.send(Some(id))?;
+    println!("sending id: {:?}", id);
     let notifier = game_sender_state.notifier.clone();
     notifier.notified().await;
 

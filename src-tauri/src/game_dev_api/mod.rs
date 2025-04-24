@@ -33,6 +33,7 @@ async fn handle_game_state_updates(game_state: GameStateShared) {
         }
         // // Not entirely certain why the below fixes everything, but I guess it does?
         let mut game_id = current_game.write().await;
+        println!("game_id {:?} after await: {:?}", i, game_id);
         *game_id = *watch.borrow();
         drop(game_id);
         i += 1;
