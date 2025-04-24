@@ -285,14 +285,34 @@ fn check_all_games(app_handle: &AppHandle) {
         serde_json::from_reader(reader).expect("Failed to read all-games.json");
 
     for game in games_list.games {
-        db::make_sure_game_exists(&game.title, &game.id, "local");
+        db::make_sure_game_exists(
+            &game.title,
+            &game.id,
+            app_handle
+                .path_resolver()
+                .app_data_dir()
+                .unwrap()
+                .join("local")
+                .with_extension("db")
+                .into_os_string()
+                .to_str()
+                .unwrap(),
+        );
     }
 }
 
 // Given a list of games, set them to be installed in the database
-fn set_games_installed(games: &Vec<GameInfo>) {
+fn set_games_installed(games: &Vec<GameInfo>, app_handle: &AppHandle) {
     for game in games {
-        db::insert_game(&game.id.to_string(), &game.title, true, "local");
+        db::insert_game(&game.id.to_string(), &game.title, true, app_handle
+        .path_resolver()
+        .app_data_dir()
+        .unwrap()
+        .join("local")
+        .with_extension("db")
+        .into_os_string()
+        .to_str()
+        .unwrap(),);
     }
 }
 
@@ -302,7 +322,7 @@ pub fn get_game_info(
     app_handle: AppHandle,
 ) -> Result<Vec<GameInfo>, ErrorType> {
     let games = get_game_info_list(&state, &app_handle)?;
-    set_games_installed(&games);
+    set_games_installed(&games, &app_handle);
     // Only populate the database with all games if code is running on the quackbox
     if cfg!(feature = "quackbox-raspi") {
         check_all_games(&app_handle);
