@@ -1,5 +1,5 @@
 use anyhow::{Error, Ok};
-use diesel::{insert_into, prelude::*};
+use diesel::{expression::is_aggregate::No, insert_into, prelude::*, sql_types::Nullable};
 use models::*;
 use regex::Regex;
 use std::option::Option;
@@ -189,6 +189,20 @@ pub async fn get_save_data(
     }
 }
 
+pub fn create_default_guest(db_path: &str) -> Vec<User> {
+    use self::schema::users::dsl::*;
+    const ID_S: &str = "1";
+    const NAME_S: &str = "Guest";
+    let connection = &mut establish_connection(db_path);
+    insert_into(users)
+        .values((id.eq(ID_S), name.eq(NAME_S)))
+        .on_conflict(id)
+        .do_update()
+        .set((name.eq(NAME_S), rit_id.eq::<Option<&str>>(None)))
+        .load::<User>(connection)
+        .expect("Could not make sure Guest user exists")
+}
+
 pub fn create_user(id_s: &str, name_s: &str, db_path: &str) -> User {
     use self::schema::users::dsl::*;
     let connection = &mut establish_connection(db_path);
@@ -355,4 +369,23 @@ mod tests {
             })
             .expect("Failed to find expected data!");
     }
+
+    #[tokio::test]
+    pub async fn test_create_default_guest() {
+        let context = TestContext::new("create_default_guest");
+        setup_initial_data(&context.db_path).await;
+
+        // creates default guest
+        let updated_users = create_default_guest(&context.db_path);
+
+        assert!(updated_users.len() == 1); // test context already has a user with id 1
+        let guest_user = updated_users.first().unwrap();
+        assert_eq!(guest_user.id, "1");
+        assert_eq!(guest_user.name, "Guest");
+        assert_eq!(guest_user.rit_id, None);
+
+        // shouldn't error out if the default guest already exists
+        create_default_guest(&context.db_path);
+    }
+
 }

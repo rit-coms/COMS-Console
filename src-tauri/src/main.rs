@@ -4,6 +4,7 @@
 use db::setup_db;
 use frontend_api::{get_game_info, get_leaderboard_data, play_game, AppState};
 use game_dev_api::setup_game_dev_api;
+use quackbox_backend::db::create_default_guest;
 use tauri::{api::path::local_data_dir, Manager};
 use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 
@@ -33,6 +34,7 @@ fn main() {
                     .into_string()
                     .unwrap();
                 setup_db(db_path.as_str());
+                create_default_guest(db_path.as_str());
                 setup_game_dev_api(db_path)
             });
             if cfg!(feature = "autostart") {
