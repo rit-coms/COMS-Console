@@ -3,7 +3,10 @@ use std::sync::Arc;
 use std::path::PathBuf;
 
 use axum::{routing::post, Router};
-use handlers::{get_leaderboard, get_save_data, set_leaderboard, set_save_data, ApiState, AppState, GameStateShared};
+use handlers::{
+    get_leaderboard, get_save_data, set_leaderboard, set_save_data, ApiState, AppState,
+    GameStateShared,
+};
 use tokio::sync::{watch::Receiver, Notify};
 
 const VERSION: u8 = 1;
@@ -11,7 +14,7 @@ const DB_NAME: &str = "local";
 
 pub mod handlers;
 
-/// Listens to and updates the current shared game state 
+/// Listens to and updates the current shared game state
 /// by synchronizing the current game ID with the latest from a watch channel
 async fn handle_game_state_updates(game_state: GameStateShared) {
     println!("Started listener to watch in the router");
@@ -64,7 +67,7 @@ async fn handle_game_state_updates(game_state: GameStateShared) {
 /// async fn setup_api() {
 ///     let game_id = Some(0);
 ///     let (tx, rx) = watch::channel(game_id);
-///     let app = create_router("local".to_owned(), Arc::new(GameState { 
+///     let app = create_router("local", Arc::new(GameState {
 ///         id: Arc::new(RwLock::new(game_id)),
 ///         notifier: Arc::new(Notify::new()),
 ///         channel: rx
@@ -80,7 +83,7 @@ async fn handle_game_state_updates(game_state: GameStateShared) {
 pub fn create_router(db_path: &str, game_state: GameStateShared) -> Router {
     let route_prefix: String = format!("/api/v{}", VERSION.to_string());
     let api_state = ApiState {
-        database_path: db_path.to_owned()
+        database_path: db_path.to_owned(),
     };
     let game_state = game_state;
 
@@ -88,7 +91,7 @@ pub fn create_router(db_path: &str, game_state: GameStateShared) -> Router {
 
     let app_state = AppState {
         api_state,
-        game_state
+        game_state,
     };
 
     Router::new()
@@ -121,7 +124,13 @@ mod test {
     use crate::game_dev_api::handlers::GameState;
 
     use super::*;
-    use tokio::{runtime::Runtime, sync::{watch::{self, channel}, RwLock}};
+    use tokio::{
+        runtime::Runtime,
+        sync::{
+            watch::{self, channel},
+            RwLock,
+        },
+    };
 
     #[tokio::test]
     async fn game_state_change() {
@@ -133,7 +142,7 @@ mod test {
         let game_state_shared: GameStateShared = Arc::new(GameState {
             id: Arc::new(RwLock::new(None)),
             notifier: Arc::clone(&notify),
-            channel: rx.clone()
+            channel: rx.clone(),
         });
         let router = create_router(db_name, Arc::clone(&game_state_shared));
 
@@ -143,7 +152,8 @@ mod test {
 
         let game_id: Option<u64> = Some(0);
 
-        tx.send(game_id).expect("Was unable to send to watch channel");
+        tx.send(game_id)
+            .expect("Was unable to send to watch channel");
         notify.notified().await;
         println!("{:?}", game_state_shared.id.read().await);
 
