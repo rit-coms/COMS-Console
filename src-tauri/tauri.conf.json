@@ -56,7 +56,7 @@
       }
     },
     "security": {
-      "csp": "default-src 'self'; img-src 'self' https://i.iheart.com/v3/catalog/artist/61088 asset: https://asset.localhost; style-src 'unsafe-inline' tauri://localhost/assets/index-CJfhqJru.css https://fonts.googleapis.com/css2; font-src: https://fonts.gstatic.com/s/poppins/v22"
+      "csp": "default-src 'self'; img-src 'self' https://i.iheart.com/v3/catalog/artist/61088 asset: https://asset.localhost; style-src 'unsafe-inline' tauri://localhost/assets/index-BZf4yVik.css tauri://localhost/assets https://fonts.googleapis.com/css2; font-src: https://fonts.gstatic.com/s/poppins/v22"
     },
     "updater": {
       "active": false
