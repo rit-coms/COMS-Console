@@ -1,10 +1,8 @@
-use std::fs::{create_dir, remove_file};
+use std::fs::remove_file;
 
 use crate::db::establish_connection;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
-use dotenvy::dotenv;
 use tauri::api::path::local_data_dir;
-use temp_dir::TempDir;
 
 use super::{
     create_user, insert_game, insert_leaderboard_entry,
