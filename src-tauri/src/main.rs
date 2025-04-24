@@ -1,6 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use app::db::create_default_guest;
 use frontend_api::{get_game_info, get_leaderboard_data, play_game, AppState};
 use game_dev_api::setup_game_dev_api;
 use tauri::{api::path::local_data_dir, Manager};
@@ -31,6 +32,7 @@ fn main() {
                     .into_os_string()
                     .into_string()
                     .unwrap();
+                create_default_guest(db_path.as_str());
                 setup_game_dev_api(db_path)
             });
             if cfg!(feature = "autostart") {
