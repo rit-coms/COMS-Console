@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useRef, useState } from "react";
 import { useGamepadContext } from "./contexts";
 
 const getPageHierarchy = (page) => {
@@ -65,6 +65,7 @@ export const PageProvider = ({ children }) => {
     const { gamepads, players, pressedButton } = useGamepadContext();
     const [playerFocus, setPlayerFocus] = useState({});
     const [page, setPage] = useState(undefined);
+    const playersLengthRef = useRef(players.length);
 
     const [pageElements, setPageElements] = useState({
         0: document.body.querySelectorAll("button[data-id='player-tile-label']"),
@@ -80,12 +81,12 @@ export const PageProvider = ({ children }) => {
         
     };
 
-    const resetPlayerFocus = () => {
+    const resetPlayerFocus = (flag = false) => {
         clearFocus();
         setPlayerFocus((prevFocus) => {
             const updatedFocus = { ...prevFocus };
             players.forEach((player) => {
-                updatedFocus[player.playerIndex] = { x: 1, y: 0 };
+                updatedFocus[player.playerIndex] = { x: !flag ? 1 : 0, y: 0 };
             }); 
             return updatedFocus;
         });
@@ -175,20 +176,18 @@ export const PageProvider = ({ children }) => {
     };
 
     useEffect(() => {
-        if (Object.keys(pressedButton).length > 0) {
-            // Handle pressedButton inputs for each player
-            Object.keys(pressedButton).forEach((playerIndex) => {
+        if (Object.keys(players).length > 0) {
+            // Handle pressedButton inputs for connected player
+            players.forEach((player) => {
 
-                if (!(players[playerIndex] && players[playerIndex].isConnected))
-                    return;
-
-                const pressed = pressedButton[playerIndex];
+                const pressed = pressedButton[player.playerIndex];
                 switch (pressed) {
-                    case "UP": updateFocus(playerIndex, "UP"); break;
-                    case "DOWN": updateFocus(playerIndex, "DOWN"); break;
-                    case "LEFT": updateFocus(playerIndex, "LEFT"); break;
-                    case "RIGHT": updateFocus(playerIndex, "RIGHT"); break;
-                    case "A": playerIndex == 0 && clickElement(playerIndex); break;
+                    case "UP": updateFocus(player.playerIndex, "UP"); break;
+                    case "DOWN": updateFocus(player.playerIndex, "DOWN"); break;
+                    case "LEFT": updateFocus(player.playerIndex, "LEFT"); break;
+                    case "RIGHT": updateFocus(player.playerIndex, "RIGHT"); break;
+                    // first (or only) player connected can click elements
+                    case "A": players[0].isConnected && clickElement(players[0].playerIndex); break;
                 };
 
             });
@@ -213,21 +212,24 @@ export const PageProvider = ({ children }) => {
     }, [gamepads]);
 
     useEffect(() => {
-        clearFocus();
+        if (players.length < playersLengthRef.current)
+            resetPlayerFocus(true);
+        playersLengthRef.current = players.length;
+
     }, [players.length]);
 
     useEffect(() => {
 
-        players.forEach((_, index) => {
+        players.forEach((player, index) => {
 
-            if (!players[index].isConnected || !playerFocus[index])
+            if (!player.isConnected || !playerFocus[player.playerIndex])
                 return;
 
-            const x = playerFocus[index].x;
-            const y = playerFocus[index].y;
+            const x = playerFocus[player.playerIndex].x;
+            const y = playerFocus[player.playerIndex].y;
             if (pageElements) {
                 const currentElement = pageElements[x][y];
-                focusElement(currentElement, index);
+                focusElement(currentElement, player.playerIndex);
             }
         });
 
