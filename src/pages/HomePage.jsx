@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useGamepadContext, usePageContext } from "../context/contexts";
+import { useGamepadContext, usePageContext, useToastContext } from "../context/contexts";
 import { NavigationProvider } from "../context/NavigationContext";
 import Navigation from "../components/Navigation";
 import GameGallery from "../components/GameGallery";
@@ -9,8 +9,9 @@ import "../styles/HomePage.css";
 
 export default function HomePage() {
 
-	const { allPlayersConnected } = useGamepadContext();
+	const { players, allPlayersConnected, setAllPlayersConnected } = useGamepadContext();
 	const { updatePage } = usePageContext();
+	const { showToast } = useToastContext();
 
 	useEffect(() => {
 
@@ -21,6 +22,21 @@ export default function HomePage() {
 		);
         
     }, [allPlayersConnected]);
+
+	useEffect(() => {
+
+		if (allPlayersConnected && players.length == 0) {
+			console.log(players)
+			showToast("All Players disconnected, rerouting...", "danger")
+			setTimeout(() => {
+				updatePage("controller connect");
+			}, 0)
+			setTimeout(() => {
+				setAllPlayersConnected(false);
+			}, 1500)
+		}
+
+	}, [players.length])
 
 	return (
 		allPlayersConnected || (import.meta.env.DEV) ? // disables controller connect when running in dev mode
