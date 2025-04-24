@@ -1,7 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use app::db::create_default_guest;
+use quackbox_backend::db::create_default_guest;
 use frontend_api::{get_game_info, get_leaderboard_data, play_game, AppState, GameSenderState};
 use game_dev_api::setup_game_dev_api;
 use game_dev_api::handlers::GameState;

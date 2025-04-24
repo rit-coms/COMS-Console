@@ -1,4 +1,4 @@
-use app::{
+use quackbox_backend::{
     db::{
         create_user, get_user,
         test_context::{setup_initial_data, TestContext},
@@ -8,8 +8,6 @@ use app::{
         handlers::{GameStateShared, LeaderboardGetParams, LeaderboardPost, SaveDataGetParams, SaveDataPost},
     },
 };
-use axum_test::TestServer;
-use tokio::sync::watch;
 
 extern crate diesel_migrations;
 

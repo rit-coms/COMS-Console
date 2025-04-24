@@ -1,6 +1,6 @@
 use crate::db::{get_leaderboard, get_leaderboard_game_data, insert_game};
 use anyhow::Error;
-use app::db::get_username;
+use crate::db::get_username;
 use chrono::{serde::ts_seconds_option, DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::{
