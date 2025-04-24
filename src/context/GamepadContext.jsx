@@ -145,6 +145,7 @@ export const GamepadProvider = ({ children }) => {
     });
 
     const disconnectGamepad = (index) => {
+
         if (!recentlyDisconnected.current.has(index)) {
             recentlyDisconnected.current.add(index);
             
@@ -165,15 +166,14 @@ export const GamepadProvider = ({ children }) => {
         setPlayers((prevPlayers) => {
             if (prevPlayers.length > 0) {
                 const updatedPlayers = [...prevPlayers];
-                gamepads.forEach((_, index) => {
+                gamepads.forEach((gamepad, index) => {
                     // If player already exists, update index
                     if (updatedPlayers[index]) {
-                        // TODO: Reassign player index if player 1 disconnected
                         updatedPlayers[index] = { ...updatedPlayers[index], playerIndex: updatedPlayers[index].playerIndex };
                     } else {
                         // If player does not exists, add player
                         updatedPlayers.push({
-                            playerIndex: index,
+                            playerIndex: gamepad.index,
                             isConnected: false
                         });
                     }
@@ -183,8 +183,8 @@ export const GamepadProvider = ({ children }) => {
 
             } else {
                 // No players connected, init player objects for all gamepads
-                return gamepads.map((_, index) => ({
-                    playerIndex: index,
+                return gamepads.map((gamepad, index) => ({
+                    playerIndex: gamepad.index,
                     isConnected: false
                 }));
             }
