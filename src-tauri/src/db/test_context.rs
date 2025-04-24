@@ -1,8 +1,11 @@
-use std::fs::remove_file;
+use std::{fs::remove_file, sync::Arc};
 
-use crate::db::{establish_connection, get_db_path};
+use crate::{db::{establish_connection, get_db_path}, game_dev_api::{create_router, handlers::{GameState, GameStateShared}}};
+use axum::Router;
+use axum_test::TestServer;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use dotenvy::dotenv;
+use tokio::sync::{watch::{self, Receiver, Sender}, Notify, RwLock};
 
 use super::{
     create_user, insert_game, insert_leaderboard_entry,
@@ -35,6 +38,9 @@ const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
 /// ```
 pub struct TestContext {
     pub db_name: String,
+    pub current_game_tx: Sender<Option<u64>>,
+    pub notifier: Arc<Notify>,
+    pub server: TestServer
 }
 
 impl TestContext {
@@ -46,8 +52,16 @@ impl TestContext {
             .run_pending_migrations(MIGRATIONS)
             .expect("Failed to run migrations");
 
+        let (current_game_tx, current_game_rx) = watch::channel(None);
+        let notifier = Arc::new(Notify::new());
+
+        let app = setup_test_server(db_name, current_game_rx, Arc::clone(&notifier));
+
         Self {
             db_name: db_name.to_owned(),
+            current_game_tx,
+            notifier,
+            server: TestServer::new(app).expect("Failed to set up test server")
         }
     }
 }
@@ -140,4 +154,14 @@ pub async fn setup_initial_data(db_name: &str) {
     setup_initial_user_data(db_name).await;
     setup_initial_leaderboard_data(db_name);
     println!("Setup initial data!")
+}
+
+fn setup_test_server(db_name: &str, current_game_rx: Receiver<Option<u64>>, notifier: Arc<Notify>) -> Router {
+    let game_state_shared: GameStateShared = Arc::new(GameState {
+        id: Arc::new(RwLock::new(None)),
+        notifier,
+        channel: current_game_rx,
+    });
+
+    return create_router(db_name, game_state_shared)
 }

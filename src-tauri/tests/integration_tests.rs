@@ -5,7 +5,7 @@ use app::{
     },
     game_dev_api::{
         create_router,
-        handlers::{LeaderboardGetParams, LeaderboardPost, SaveDataGetParams, SaveDataPost},
+        handlers::{GameStateShared, LeaderboardGetParams, LeaderboardPost, SaveDataGetParams, SaveDataPost},
     },
 };
 use axum_test::TestServer;
@@ -36,19 +36,15 @@ async fn read_and_write_leaderboard_data() {
 
     setup_initial_data(&test_context.db_name).await;
 
-    let (current_game_tx, current_game_rx) = watch::channel(None);
-    let app: axum::Router = create_router(&test_context.db_name, current_game_rx);
-
-    // set current game to id 1
-    current_game_tx.send(Some(1)).expect("No subscriber to the current game sender");
-
-    let server: TestServer = TestServer::new(app).expect("Failed to set up test server");
+    // set game id to 1
+    test_context.current_game_tx.send(Some(1)).expect("No subscriber to the current game sender");
+    test_context.notifier.notified().await;
 
     let value_name: String = String::from("score");
     let value_num: f64 = 100.0;
     let player: i16 = 1;
 
-    let post_response: axum_test::TestResponse = server
+    let post_response: axum_test::TestResponse = test_context.server
         .post(leaderboard_path)
         .json(&LeaderboardPost {
             value_name: value_name.clone(),
@@ -63,7 +59,7 @@ async fn read_and_write_leaderboard_data() {
     assert_eq!(post_response_entry.value_name, value_name);
     assert_eq!(post_response_entry.value_num, value_num);
 
-    let get_response: axum_test::TestResponse = server
+    let get_response: axum_test::TestResponse = test_context.server
         .get(leaderboard_path)
         .add_query_params(LeaderboardGetParams {
             player_slot: None,
@@ -91,13 +87,9 @@ async fn read_and_write_save_data() {
 
     setup_initial_data(&test_context.db_name).await;
 
-    let (current_game_tx, current_game_rx) = watch::channel(None);
-    let app: axum::Router = create_router(&test_context.db_name, current_game_rx);
-
-    // set current game to id 1
-    current_game_tx.send(Some(1)).expect("No subscriber to the current game sender");
-
-    let server: TestServer = TestServer::new(app).expect("Failed to set up test server");
+    // set game id to 0
+    test_context.current_game_tx.send(Some(0)).expect("No subscriber to the current game sender");
+    test_context.notifier.notified().await;
 
     let file_name: String = String::from("test data");
     let data: serde_json::Value = serde_json::json!({
@@ -110,7 +102,7 @@ async fn read_and_write_save_data() {
         ]
     });
 
-    let post_response: axum_test::TestResponse = server
+    let post_response: axum_test::TestResponse = test_context.server
         .post(save_data_path)
         .json(&SaveDataPost {
             file_name: file_name.clone(),
@@ -125,7 +117,7 @@ async fn read_and_write_save_data() {
     assert_eq!(post_response_entry.file_name, file_name);
     assert_eq!(post_response_entry.data, data);
 
-    let get_filename_response: axum_test::TestResponse = server
+    let get_filename_response: axum_test::TestResponse = test_context.server
         .get(save_data_path)
         .add_query_params(SaveDataGetParams {
             file_name: Some(file_name.clone()),
@@ -150,14 +142,11 @@ async fn get_save_data_error() {
     let save_data_path = "/api/v1/save-data";
 
     setup_initial_data(&test_context.db_name).await;
-
-    let (current_game_tx, current_game_rx) = watch::channel(None);
-    let app: axum::Router = create_router(&test_context.db_name, current_game_rx);
+    test_context.notifier.notified().await;
 
     // set current game to id 1
-    current_game_tx.send(Some(1)).expect("No subscriber to the current game sender");
-
-    let server: TestServer = TestServer::new(app).expect("Failed to set up test server");
+    test_context.current_game_tx.send(Some(1)).expect("No subscriber to the current game sender");
+    test_context.notifier.notified().await;
 
     let file_name: String = String::from("test data");
     let data: serde_json::Value = serde_json::json!({
@@ -171,7 +160,7 @@ async fn get_save_data_error() {
     });
     let player_slot = 1;
 
-    let post_response: axum_test::TestResponse = server
+    let post_response: axum_test::TestResponse = test_context.server
         .post(save_data_path)
         .json(&SaveDataPost {
             file_name: file_name.clone(),
@@ -186,7 +175,7 @@ async fn get_save_data_error() {
     assert_eq!(post_response_entry.file_name, file_name);
     assert_eq!(post_response_entry.data, data);
 
-    let get_invalid_regex_error_response: axum_test::TestResponse = server
+    let get_invalid_regex_error_response: axum_test::TestResponse = test_context.server
         .get(save_data_path)
         .add_query_params(SaveDataGetParams {
             file_name: None,
@@ -197,7 +186,7 @@ async fn get_save_data_error() {
 
     get_invalid_regex_error_response.assert_status_bad_request();
 
-    let get_invalid_params_error_response: axum_test::TestResponse = server
+    let get_invalid_params_error_response: axum_test::TestResponse = test_context.server
         .get(save_data_path)
         .add_query_params(SaveDataGetParams {
             file_name: Some(String::from("test")),
@@ -216,19 +205,15 @@ async fn get_leaderboard_data_error() {
 
     setup_initial_data(&test_context.db_name).await;
 
-    let (current_game_tx, current_game_rx) = watch::channel(None);
-    let app: axum::Router = create_router(&test_context.db_name, current_game_rx);
-
     // set current game to id 0
-    current_game_tx.send(Some(0)).expect("No subscriber to the current game sender");
-
-    let server: TestServer = TestServer::new(app).expect("Failed to set up test server");
+    test_context.current_game_tx.send(Some(0)).expect("No subscriber to the current game sender");
+    test_context.notifier.notified().await;
 
     let value_name: String = String::from("score");
     let value_num: f64 = 100.0;
     let player: i16 = 1;
 
-    let post_response: axum_test::TestResponse = server
+    let post_response: axum_test::TestResponse = test_context.server
         .post(leaderboard_path)
         .json(&LeaderboardPost {
             value_name: value_name.clone(),
@@ -244,7 +229,7 @@ async fn get_leaderboard_data_error() {
     assert_eq!(post_response_entry.value_name, value_name);
     assert_eq!(post_response_entry.value_num, value_num);
 
-    let get_response: axum_test::TestResponse = server
+    let get_response: axum_test::TestResponse = test_context.server
         .get(leaderboard_path)
         .add_query_params(LeaderboardGetParams {
             player_slot: Some(1),

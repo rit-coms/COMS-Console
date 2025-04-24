@@ -14,6 +14,9 @@ async fn handle_game_state_updates(game_state: GameStateShared) {
     let current_game = game_state.id.clone();
     let mut watch = game_state.channel.clone();
     let mut i = 0;
+    let mut game_id = current_game.write().await;
+    *game_id = *watch.borrow();
+    drop(game_id);
     loop {
         let mut game_id = current_game.write().await;
         println!("game_id {:?}: {:?}", i, game_id);
@@ -25,7 +28,7 @@ async fn handle_game_state_updates(game_state: GameStateShared) {
             // be destroyed before the application closes
             unreachable!("Watch channel should not be destroyed while still listening.");
         }
-        // Not entirely certain why the below fixes everything, but I guess it does?
+        // // Not entirely certain why the below fixes everything, but I guess it does?
         let mut game_id = current_game.write().await;
         *game_id = *watch.borrow();
         drop(game_id);
@@ -121,19 +124,17 @@ mod test {
         });
         let router = create_router(db_name, Arc::clone(&game_state_shared));
 
-        tokio::spawn(handle_game_state_updates(Arc::clone(&game_state_shared)));
-
-        Arc::clone(&notify).notified().await;
+        notify.notified().await;
         assert_eq!(*game_state_shared.id.read().await, game_id);
-        assert_eq!(*rx.borrow_and_update(), *game_state_shared.id.read().await);
+        assert_eq!(*rx.borrow(), *game_state_shared.id.read().await);
 
         let game_id: Option<u64> = Some(0);
 
         tx.send(game_id).expect("Was unable to send to watch channel");
-        Arc::clone(&notify).notified().await;
+        notify.notified().await;
         println!("{:?}", game_state_shared.id.read().await);
 
         assert_eq!(*game_state_shared.id.read().await, game_id);
-        assert_eq!(*rx.borrow_and_update(), game_id);
+        assert_eq!(*rx.borrow(), game_id);
     }
 }

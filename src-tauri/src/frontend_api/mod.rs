@@ -333,7 +333,7 @@ struct FrontendLeaderboardEntry {
 /// * `Result<serde_json::Value, ErrorType>` - A JSON object representing the leaderboard data of a
 /// specific game or an `ErrorType` if an error occurs.
 #[tauri::command]
-pub async fn get_leaderboard_data(game_title: String) -> Result<serde_json::Value, ErrorType> {
+pub fn get_leaderboard_data(game_title: String) -> Result<serde_json::Value, ErrorType> {
     get_leaderboard_data_helper(game_title, "local")
 }
 
@@ -429,7 +429,8 @@ pub async fn play_game(
         .ok_or("Game ID not found")?;
     let tx = game_sender_state.game_watch_tx.clone();
     tx.send(Some(id))?;
-    game_sender_state.notifier.clone().notified().await;
+    let notifier = game_sender_state.notifier.clone();
+    notifier.notified().await;
 
     window.minimize()?;
 
@@ -478,7 +479,7 @@ pub async fn play_game(
     window.maximize()?;
     window.set_focus()?;
     window.set_fullscreen(true)?;
-    game_sender_state.notifier.clone().notified().await;
+    notifier.notified().await;
     Ok(())
 }
 
