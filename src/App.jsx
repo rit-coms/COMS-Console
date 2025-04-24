@@ -9,16 +9,16 @@ export default function App() {
 	return (
 		<div>
 			<BrowserRouter>
-				<GamepadProvider>
-					<PageProvider>
-						<ToastProvider>
-							<Routes>
-								<Route path="/" element={<HomePage />} />
-							</Routes>
-							<ToastManager />
-						</ToastProvider>
-					</PageProvider>
-				</GamepadProvider>
+				<ToastProvider>
+					<GamepadProvider>
+						<PageProvider>
+								<Routes>
+									<Route path="/" element={<HomePage />} />
+								</Routes>
+								<ToastManager />
+						</PageProvider>
+					</GamepadProvider>
+				</ToastProvider>
 			</BrowserRouter>
 		</div>
 

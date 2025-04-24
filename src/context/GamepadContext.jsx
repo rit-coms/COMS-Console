@@ -1,5 +1,6 @@
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useRef, useState } from "react";
 import { exit } from "@tauri-apps/api/process";
+import { useToastContext } from "./contexts";
 
 const BUTTONS = {
     0: "B",
@@ -37,7 +38,6 @@ const KEYMAP = [
         "ArrowRight": 15,   // MOCK DPAD RIGHT
     },
     { // MOCK PLAYER TWO BUTTONS
-
         "g": 0,             // MOCK B
         "h": 1,             // MOCK A
         "f": 2,             // MOCK Y
@@ -58,7 +58,6 @@ const KILL_TAURI_PROCESS = async () => {
     await exit(1);
 }
 
-
 export const GamepadContext = createContext();
 
 export const GamepadProvider = ({ children }) => {
@@ -67,7 +66,9 @@ export const GamepadProvider = ({ children }) => {
     const [players, setPlayers] = useState([]);
     const [pressedButton, setPressedButton] = useState({});
     const [allPlayersConnected, setAllPlayersConnected] = useState(false);
+    const {showToast} = useToastContext();
     const killswitch = new Set();
+    const recentlyDisconnected = useRef(new Set());
   
     useEffect(() => {
 
@@ -89,9 +90,7 @@ export const GamepadProvider = ({ children }) => {
         };
 
         const handleGamepadDisconnected = (e) => {
-            setGamepads((prevGamepads) =>
-                prevGamepads.filter((gamepad) => gamepad.index !== e.gamepad.index)
-            );
+            disconnectGamepad(e.gamepad.index);
         };
 
         window.addEventListener("gamepadconnected", handleGamepadConnected);
@@ -146,9 +145,20 @@ export const GamepadProvider = ({ children }) => {
     });
 
     const disconnectGamepad = (index) => {
-        setGamepads((prevGamepads) => {
-            return prevGamepads.filter((gamepad) => gamepad.index !== index);
-        });
+        if (!recentlyDisconnected.current.has(index)) {
+            recentlyDisconnected.current.add(index);
+            
+            showToast(`Removing Player ${index + 1}`, "warning");
+            setTimeout(() => {
+                setGamepads((prevGamepads) => {
+                    return prevGamepads.filter((gamepad) => gamepad.index !== index);
+                });
+                setPlayers((prevPlayers) => {
+                    return prevPlayers.filter((player) => player.playerIndex !== index);
+                });
+            }, 1000);
+
+        }
     };
 
     useEffect(() => {
@@ -156,37 +166,43 @@ export const GamepadProvider = ({ children }) => {
             if (prevPlayers.length > 0) {
                 const updatedPlayers = [...prevPlayers];
                 gamepads.forEach((_, index) => {
+                    // If player already exists, update index
                     if (updatedPlayers[index]) {
-                        updatedPlayers[index] = { ...updatedPlayers[index], playerIndex: index };
+                        // TODO: Reassign player index if player 1 disconnected
+                        updatedPlayers[index] = { ...updatedPlayers[index], playerIndex: updatedPlayers[index].playerIndex };
                     } else {
+                        // If player does not exists, add player
                         updatedPlayers.push({
                             playerIndex: index,
                             isConnected: false
                         });
                     }
                 });
-                return updatedPlayers;
-            } else {
 
+                return updatedPlayers;
+
+            } else {
+                // No players connected, init player objects for all gamepads
                 return gamepads.map((_, index) => ({
                     playerIndex: index,
                     isConnected: false
                 }));
             }
         });
+
     }, [gamepads]);
 
 
     useEffect(() => {
 
         window.addEventListener("keydown", (event) => {
-            if (event.key === "C") {
+            if (event.key === "C" || event.key === "D") {
                 event.preventDefault();
-            
+                
                 // Create a new gamepadconnected event
                 const gamepadEvent = new Event("simulatedGamepadConnected");
                 gamepadEvent.gamepad = {
-                    index: 0,
+                    index: event.key === "C" ? 0 : 1,
                     connected: true,
                     buttons: Array(16).fill().map(() => ({
                         pressed: false,
@@ -194,22 +210,19 @@ export const GamepadProvider = ({ children }) => {
                     }))
                 };
                 window.dispatchEvent(gamepadEvent);
-            }
-    
-            if (event.key === "D") {
-                event.preventDefault();
-            
-                // Create a new gamepadconnected event
-                const gamepadEvent = new Event("simulatedGamepadConnected");
+                recentlyDisconnected.current.delete(gamepadEvent.gamepad.index);
+                
+            } else if (event.key === "N" || event.key === "J") {
+                const gamepadEvent = new Event("simulatedGamepadDisconnected");
                 gamepadEvent.gamepad = {
-                    index: 1,
-                    connected: true,
+                    index: event.key === "N" ? 0 : 1,
+                    connected: false,
                     buttons: Array(16).fill().map(() => ({
                         pressed: false,
                         value: 0
                     }))
                 };
-                window.dispatchEvent(gamepadEvent);
+                window.dispatchEvent(gamepadEvent)
             }
 
           });
@@ -229,7 +242,10 @@ export const GamepadProvider = ({ children }) => {
                     }
                 ];
             });
-            
+          });
+
+          window.addEventListener("simulatedGamepadDisconnected", (e) => {
+            disconnectGamepad(e.gamepad.index);
           });
 
     });
@@ -239,7 +255,7 @@ export const GamepadProvider = ({ children }) => {
         window.addEventListener("keydown", (event) => {
 
             killswitch.add(event.key)
-            if (killswitch.has("Shift") && killswitch.has("Q") && killswitch.has("P")) {
+            if (killswitch.has("Escape")) {
                 KILL_TAURI_PROCESS()
                 return
             }

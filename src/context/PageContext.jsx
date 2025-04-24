@@ -84,8 +84,8 @@ export const PageProvider = ({ children }) => {
         clearFocus();
         setPlayerFocus((prevFocus) => {
             const updatedFocus = { ...prevFocus };
-            players.forEach((_, index) => {
-                updatedFocus[index] = { x: 1, y: 0 };
+            players.forEach((player) => {
+                updatedFocus[player.playerIndex] = { x: 1, y: 0 };
             }); 
             return updatedFocus;
         });
@@ -200,17 +200,21 @@ export const PageProvider = ({ children }) => {
         setPlayerFocus((prevFocus) => {
             // set the initial player focus
             const updatedFocus = { ...prevFocus };
-            players.forEach((_, index) => {
+            players.forEach((player) => {
                 
-                if (!updatedFocus[index]) {
-                    // Focus indexes only relevant to the Controller Connect Page
-                    updatedFocus[index] = {x: 0, y: index};
+                if (!updatedFocus[player.playerIndex]) {
+                    // Initial focus indexes only relevant to the Controller Connect Page
+                    updatedFocus[player.playerIndex] = {x: 0, y: player.playerIndex};
                 }
             });
             return updatedFocus;
         });
 
     }, [gamepads]);
+
+    useEffect(() => {
+        clearFocus();
+    }, [players.length]);
 
     useEffect(() => {
 

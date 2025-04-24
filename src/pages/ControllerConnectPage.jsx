@@ -30,12 +30,12 @@ export default function ControllerConnectPage() {
     
     useEffect(() => {
         setPlayers((prevPlayers) => {
-            return prevPlayers.map((player, index) => {
+            return prevPlayers.map((player) => {
                 // Check when the RIGHT TRIGGER is clicked to connect player
-                if (pressedButton[index] === "RIGHT TRIGGER" && !player.isConnected) {
+                if (pressedButton[player.playerIndex] === "RIGHT TRIGGER" && !player.isConnected) {
                     updatePageElements("controller connect");
                     setTimeout(() => {
-                        setConnected(index+1);
+                        setConnected(player.playerIndex + 1);
                     }, 0);
                     return { ...player, isConnected: true };
                 }
@@ -59,14 +59,8 @@ export default function ControllerConnectPage() {
         } else {
             // Disconnect unconnected players
             disconnectedPlayersIndex.forEach((index) => {
-                showToast(`Disconnecting player ${index + 1}`, "warning")
-                setTimeout(() => {
-                    setPlayers((prevPlayers) => {
-                        return prevPlayers.filter((player) => player.playerIndex !== index);
-                    });
-                    disconnectGamepad(index);
-                }, 2000);
-
+                disconnectGamepad(index);
+                
                 setTimeout(() => {
                     setAllPlayersConnected(true);
                 }, 4000);
@@ -101,7 +95,7 @@ export default function ControllerConnectPage() {
                         <PlayerTile
                             key={index}
                             dataId={"player-tile"}
-                            playerNumber={index + 1}
+                            playerNumber={player.playerIndex + 1}
                             isConnected={player.isConnected}
                             src={ duck_connected }
                         />
