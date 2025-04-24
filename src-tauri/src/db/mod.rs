@@ -8,6 +8,18 @@ pub mod models;
 pub mod schema;
 pub mod test_context;
 
+use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
+pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
+
+pub fn setup_db(db_path: &str) {
+    let mut connection = &mut establish_connection(db_path);
+    
+    connection
+    .run_pending_migrations(MIGRATIONS)
+    .expect("Failed to run migrations");
+    println!("Pending migrations ran successfully");
+}
+
 pub fn establish_connection(db_path: &str) -> SqliteConnection {
     SqliteConnection::establish(db_path)
         .expect(format!("Failed to connect to database at {}", db_path).as_str())
