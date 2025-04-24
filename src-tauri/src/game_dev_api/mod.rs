@@ -52,9 +52,18 @@ async fn handle_game_state_updates(game_state: GameStateShared) {
 ///
 /// ```rust
 /// use app::game_dev_api::create_router;
+/// use app::game_dev_api::handlers::GameState;
+/// use std::sync::Arc;
+/// use tokio::sync::{Mutex, RwLock, watch, Notify};
 ///
 /// async fn setup_api() {
-///     let app = create_router("local");
+///     let game_id = Some(0);
+///     let (tx, rx) = watch::channel(game_id);
+///     let app = create_router("local", Arc::new(GameState { 
+///         id: Arc::new(RwLock::new(game_id)),
+///         notifier: Arc::new(Notify::new()),
+///         channel: rx
+///     }));
 ///
 ///     let listener = tokio::net::TcpListener::bind("127.0.0.1:8000")
 ///         .await
