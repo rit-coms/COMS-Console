@@ -3,7 +3,6 @@ use anyhow::Error;
 use app::db::get_username;
 use chrono::{serde::ts_seconds_option, DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use tokio::sync::{watch::Sender, Notify, Mutex};
 use std::{
     collections::HashMap,
     env,
@@ -15,6 +14,7 @@ use std::{
     sync::Arc,
 };
 use tauri::{AppHandle, State};
+use tokio::sync::{oneshot, watch::Sender, Mutex, Notify};
 use url::Url;
 
 use crate::db;
@@ -107,7 +107,7 @@ pub struct AppState {
 
 pub struct GameSenderState {
     pub notifier: Arc<Notify>,
-    pub game_watch_tx: Sender<Option<u64>>
+    pub game_watch_tx: Sender<Option<u64>>,
 }
 
 #[derive(Serialize, Debug)]
@@ -455,6 +455,7 @@ pub async fn play_game(
             game_window.maximize()?;
             game_window.set_focus()?;
             game_window.set_fullscreen(true)?;
+            wait_for_window_close(game_window).await;
         }
         None => {
             let path = path.join(&game_info.file_path).join(&game_info.exec);
@@ -474,13 +475,25 @@ pub async fn play_game(
             println!("exit code status: {}", game_process.status);
         }
     }
-    
+
     game_sender_state.game_watch_tx.send(None)?;
     window.maximize()?;
     window.set_focus()?;
     window.set_fullscreen(true)?;
     notifier.notified().await;
     Ok(())
+}
+
+async fn wait_for_window_close(window: tauri::Window) {
+    let (tx, rx) = oneshot::channel();
+
+    // Listen for the window close event
+    window.once("tauri://close-requested", move |_| {
+        let _ = tx.send(());
+    });
+
+    // Wait for the close event
+    let _ = rx.await;
 }
 
 mod tests {
