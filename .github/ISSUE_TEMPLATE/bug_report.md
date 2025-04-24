@@ -12,7 +12,7 @@ A short 1-2 sentences describing briefly what the bug is.
 
 ### Bug Description
 #### To Reproduce
-- List the steps you took to find the issue (preferably from fresh install, but also just from application startup is fine
+- List the steps you took to find the issue (preferably from fresh install, but also just from application startup is fine)
 #### Expected behavior
 - List what the expected behavior is
 ### Screenshots
