@@ -1,11 +1,10 @@
 [package]
-name = "app"
-version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
-license = ""
-repository = ""
-default-run = "app"
+name = "quackbox-backend"
+version = "1.0.0"
+description = "A quacking awesome backend for the QuackBox"
+authors = ["Sean O'Donnell<sao3216@rit.edu>", "Matt Chen<mlc7959@rit.edu>"]
+license = "MIT"
+repository = "https://github.com/rit-coms/COMS-Console"
 edition = "2021"
 rust-version = "1.60"
 

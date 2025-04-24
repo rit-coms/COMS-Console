@@ -1,4 +1,5 @@
-use app::{
+use axum_test::TestServer;
+use quackbox_backend::{
     db::{
         create_user, get_user,
         test_context::{setup_initial_data, TestContext},
@@ -8,7 +9,6 @@ use app::{
         handlers::{LeaderboardGetParams, LeaderboardPost, SaveDataGetParams, SaveDataPost},
     },
 };
-use axum_test::TestServer;
 
 extern crate diesel_migrations;
 
