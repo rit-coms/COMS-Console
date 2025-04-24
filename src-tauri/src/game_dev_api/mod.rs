@@ -1,7 +1,10 @@
+use std::path::PathBuf;
+
 use axum::{routing::post, Router};
 use handlers::{get_leaderboard, get_save_data, set_leaderboard, set_save_data, ApiState};
 
 const VERSION: u8 = 1;
+const DB_NAME: &str = "local";
 
 pub mod handlers;
 
@@ -32,10 +35,10 @@ pub mod handlers;
 ///     axum::serve(listener, app).await.unwrap();
 /// }
 /// ```
-pub fn create_router(db_name: &str) -> Router {
+pub fn create_router(db_path: &str) -> Router {
     let route_prefix: String = format!("/api/v{}", VERSION.to_string());
     let api_state = ApiState {
-        db_name: db_name.to_owned(),
+        database_path: db_path.to_owned(),
     };
 
     Router::new()
@@ -53,8 +56,8 @@ pub fn create_router(db_name: &str) -> Router {
 
 /// This function should be called in tauri builder to setup the http API for game
 /// developers to read and write game data.
-pub async fn setup_game_dev_api(db_name: &str) {
-    let app = create_router(db_name);
+pub async fn setup_game_dev_api(db_path: String) {
+    let app = create_router(&db_path);
 
     println!("Server started successfully!!!");
     let listener = tokio::net::TcpListener::bind("127.0.0.1:6174")

@@ -7,11 +7,11 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{from_str, Value};
-use std::option::Option;
+use std::{option::Option, path::PathBuf};
 
 #[derive(Clone)]
 pub struct ApiState {
-    pub db_name: String,
+    pub database_path: String,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -46,7 +46,7 @@ pub async fn set_leaderboard(
         game_id,
         payload.value_name.as_str(),
         payload.value_num,
-        &state.db_name,
+        &state.database_path,
     )
     .expect("Faied to enter leaderboard entry");
 
@@ -98,7 +98,7 @@ pub async fn get_leaderboard(
         params.ascending,
         params.value_name.clone(),
         params.offset,
-        &state.db_name,
+        &state.database_path,
     )
     .await;
 
@@ -131,7 +131,7 @@ pub async fn set_save_data(
         game_id,
         payload.file_name.as_str(),
         &serde_json::to_vec(&payload.data).unwrap(),
-        &state.db_name,
+        &state.database_path,
     )
     .await;
 
@@ -168,7 +168,7 @@ pub async fn get_save_data(
         &user_id_s,
         &params.file_name,
         &params.regex,
-        &state.db_name,
+        &state.database_path,
     )
     .await;
 
