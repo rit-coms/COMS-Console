@@ -23,7 +23,7 @@ pub mod handlers;
 /// # Example
 ///
 /// ```rust
-/// use app::game_dev_api::create_router;
+/// use quackbox_backend::game_dev_api::create_router;
 ///
 /// async fn setup_api() {
 ///     let app = create_router("local");

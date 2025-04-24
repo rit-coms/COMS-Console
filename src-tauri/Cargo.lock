@@ -63,33 +63,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dcfed56ad506cb2c684a14971b8861fdc3baaaae314b9e5f9bb532cbe3ba7a4f"
 
 [[package]]
-name = "app"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "axum",
- "axum-macros",
- "axum-test",
- "chrono",
- "diesel",
- "diesel_migrations",
- "dotenvy",
- "http-body-util",
- "libsqlite3-sys",
- "regex",
- "serde",
- "serde_json",
- "serde_with",
- "tauri",
- "tauri-build",
- "tauri-plugin-autostart",
- "tokio",
- "tower",
- "url",
- "uuid",
-]
-
-[[package]]
 name = "assert-json-diff"
 version = "2.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2559,6 +2532,33 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a31971752e70b8b2686d7e46ec17fb38dad4051d94024c88df49b667caea9c84"
 dependencies = [
  "unicode-ident",
+]
+
+[[package]]
+name = "quackbox-backend"
+version = "1.0.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "axum-macros",
+ "axum-test",
+ "chrono",
+ "diesel",
+ "diesel_migrations",
+ "dotenvy",
+ "http-body-util",
+ "libsqlite3-sys",
+ "regex",
+ "serde",
+ "serde_json",
+ "serde_with",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-autostart",
+ "tokio",
+ "tower",
+ "url",
+ "uuid",
 ]
 
 [[package]]
