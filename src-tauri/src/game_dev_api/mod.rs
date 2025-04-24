@@ -11,7 +11,8 @@ const DB_NAME: &str = "local";
 
 pub mod handlers;
 
-// #[tracing::instrument]
+/// Listens to and updates the current shared game state 
+/// by synchronizing the current game ID with the latest from a watch channel
 async fn handle_game_state_updates(game_state: GameStateShared) {
     println!("Started listener to watch in the router");
     let current_game = game_state.id.clone();
@@ -83,7 +84,6 @@ pub fn create_router(db_path: &str, game_state: GameStateShared) -> Router {
     };
     let game_state = game_state;
 
-    // TODO: turn into another function
     tokio::spawn(handle_game_state_updates(game_state.clone()));
 
     let app_state = AppState {
