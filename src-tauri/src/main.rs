@@ -50,6 +50,7 @@ fn main() {
                     .into_string()
                     .unwrap();
                 setup_db(db_path.as_str());
+                setup_db(db_path.as_str());
                 create_default_guest(db_path.as_str());
                 setup_game_dev_api(db_path, game_state_shared)
             });
