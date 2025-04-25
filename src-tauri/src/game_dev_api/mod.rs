@@ -125,23 +125,22 @@ mod test {
 
     use super::*;
     use tokio::sync::{
-        watch::channel,
+        watch,
         RwLock,
     };
 
     #[tokio::test]
     async fn game_state_change() {
-        let game_id: Option<u64> = Some(512039487);
         let db_name = "game_state_change";
 
-        let (tx, mut rx) = channel(None);
+        let (tx, rx) = watch::channel(None);
         let notify = Arc::new(Notify::new());
         let game_state_shared: GameStateShared = Arc::new(GameState {
             id: Arc::new(RwLock::new(None)),
             notifier: Arc::clone(&notify),
             channel: rx.clone(),
         });
-        let router = create_router(db_name, Arc::clone(&game_state_shared)).await;
+        let _router = create_router(db_name, Arc::clone(&game_state_shared)).await;
 
         let game_id: Option<u64> = Some(512039487);
 
