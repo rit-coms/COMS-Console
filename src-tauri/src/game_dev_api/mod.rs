@@ -134,7 +134,7 @@ mod test {
         let game_id: Option<u64> = Some(512039487);
         let db_name = "game_state_change";
 
-        let (tx, mut rx) = watch::channel(None);
+        let (tx, mut rx) = channel(None);
         let notify = Arc::new(Notify::new());
         let game_state_shared: GameStateShared = Arc::new(GameState {
             id: Arc::new(RwLock::new(None)),
