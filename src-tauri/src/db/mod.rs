@@ -13,10 +13,10 @@ pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
 
 pub fn setup_db(db_path: &str) {
     let mut connection = &mut establish_connection(db_path);
-    
+
     connection
-    .run_pending_migrations(MIGRATIONS)
-    .expect("Failed to run migrations");
+        .run_pending_migrations(MIGRATIONS)
+        .expect("Failed to run migrations");
     println!("Pending migrations ran successfully");
 }
 
@@ -67,6 +67,7 @@ pub fn insert_leaderboard_entry(
             value_name.eq(value_name_s),
             value_num.eq(value_num_f),
         ))
+        .on_conflict_do_nothing()
         .execute(&mut connection)
 }
 
@@ -307,7 +308,7 @@ mod tests {
     #[tokio::test]
     pub async fn test_db() {
         use uuid::Uuid;
-        let test_context = TestContext::new("test_db");
+        let test_context = TestContext::new("test_db").await;
 
         let mut buffer = Uuid::encode_buffer();
         // create test user
@@ -345,7 +346,7 @@ mod tests {
 
     #[tokio::test]
     pub async fn test_get_username() {
-        let context = TestContext::new("get_username");
+        let context = TestContext::new("get_username").await;
         setup_initial_data(&context.db_path).await;
 
         let username = get_username("1", &context.db_path).expect("Failed to retrieve username");
@@ -354,7 +355,7 @@ mod tests {
 
     #[tokio::test]
     pub async fn test_get_leaderboard_game_data() {
-        let context = TestContext::new("get_leaderboard_game_data");
+        let context = TestContext::new("get_leaderboard_game_data").await;
         setup_initial_data(&context.db_path).await;
 
         let data = get_leaderboard_game_data("game0", &context.db_path)
@@ -372,7 +373,7 @@ mod tests {
 
     #[tokio::test]
     pub async fn test_create_default_guest() {
-        let context = TestContext::new("create_default_guest");
+        let context = TestContext::new("create_default_guest").await;
         setup_initial_data(&context.db_path).await;
 
         // creates default guest
@@ -387,5 +388,4 @@ mod tests {
         // shouldn't error out if the default guest already exists
         create_default_guest(&context.db_path);
     }
-
 }
