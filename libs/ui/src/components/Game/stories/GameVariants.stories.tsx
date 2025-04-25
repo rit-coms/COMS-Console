@@ -17,7 +17,7 @@ export const GameVariants_PlaceholderImage: Story = {
             gameId={"Horizon"}
             author={"Author"}
             title={"Horizon"}
-            coverImage={"https://i.iheart.com/v3/catalog/artist/61088?ops=fit(720%2C720)"}
+            coverImage={"src/assets/coming_soon.png"}
             placeholder={true}
             onClick={()=>{}}
         />
