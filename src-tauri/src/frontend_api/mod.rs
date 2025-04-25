@@ -1,6 +1,6 @@
+use crate::db::get_username;
 use crate::db::{get_leaderboard, get_leaderboard_game_data, insert_game};
 use anyhow::Error;
-use crate::db::get_username;
 use chrono::{serde::ts_seconds_option, DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::{
@@ -310,15 +310,20 @@ fn check_all_games(app_handle: &AppHandle) {
 // Given a list of games, set them to be installed in the database
 fn set_games_installed(games: &Vec<GameInfo>, app_handle: &AppHandle) {
     for game in games {
-        db::insert_game(&game.id.to_string(), &game.title, true, app_handle
-        .path_resolver()
-        .app_data_dir()
-        .unwrap()
-        .join("local")
-        .with_extension("db")
-        .into_os_string()
-        .to_str()
-        .unwrap(),);
+        db::insert_game(
+            &game.id.to_string(),
+            &game.title,
+            true,
+            app_handle
+                .path_resolver()
+                .app_data_dir()
+                .unwrap()
+                .join("local")
+                .with_extension("db")
+                .into_os_string()
+                .to_str()
+                .unwrap(),
+        );
     }
 }
 
@@ -448,9 +453,9 @@ pub async fn play_game(
         .find(|g| g.id == id)
         .ok_or("Game ID not found")?;
     game_sender_state.game_watch_tx.send(Some(id))?;
-    println!("sending id: {:?}", id);
-    let notifier = &game_sender_state.notifier;
-    notifier.notified().await;
+    println!("sending id: {}", id);
+    game_sender_state.notifier.notified().await;
+    println!("Recieved notification, starting game");
 
     window.minimize()?;
 
@@ -500,7 +505,8 @@ pub async fn play_game(
     window.maximize()?;
     window.set_focus()?;
     window.set_fullscreen(true)?;
-    notifier.notified().await;
+    game_sender_state.notifier.notified().await;
+    println!("Recieved notification, game closed");
     Ok(())
 }
 
@@ -522,7 +528,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_leaderboard_data() {
-        let context = TestContext::new("test_get_leaderboard_data_frontend");
+        let context = TestContext::new("test_get_leaderboard_data_frontend").await;
         setup_initial_data(&context.db_path).await;
 
         let data = get_leaderboard_data_helper("game0".to_string(), &context.db_path)

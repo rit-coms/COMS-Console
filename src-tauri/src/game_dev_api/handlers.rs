@@ -8,15 +8,18 @@ use axum::{
 use axum_macros::FromRef;
 use serde::{Deserialize, Serialize};
 use serde_json::{from_str, Value};
-use std::{option::Option, path::PathBuf};
 use std::sync::Arc;
-use tokio::{sync::{Notify, RwLock}, sync::watch::Receiver};
+use std::{option::Option, path::PathBuf};
+use tokio::{
+    sync::watch::Receiver,
+    sync::{Notify, RwLock},
+};
 
 // TODO: rename to not be confused with the managed tauri app state
 #[derive(Clone, FromRef)]
 pub struct AppState {
     pub api_state: ApiState,
-    pub game_state: GameStateShared
+    pub game_state: GameStateShared,
 }
 
 #[derive(Clone)]
@@ -28,7 +31,7 @@ pub struct ApiState {
 pub struct GameState {
     pub id: Arc<RwLock<Option<u64>>>,
     pub notifier: Arc<Notify>,
-    pub channel: Receiver<Option<u64>>
+    pub channel: Receiver<Option<u64>>,
 }
 
 pub type GameStateShared = Arc<GameState>;
