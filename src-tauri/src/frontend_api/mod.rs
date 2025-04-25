@@ -530,7 +530,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_leaderboard_data() {
-        let context = TestContext::new("test_get_leaderboard_data_frontend");
+        let context = TestContext::new("test_get_leaderboard_data_frontend").await;
         setup_initial_data(&context.db_path).await;
 
         let data = get_leaderboard_data_helper("game0".to_string(), &context.db_path)

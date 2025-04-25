@@ -308,7 +308,7 @@ mod tests {
     #[tokio::test]
     pub async fn test_db() {
         use uuid::Uuid;
-        let test_context = TestContext::new("test_db");
+        let test_context = TestContext::new("test_db").await;
 
         let mut buffer = Uuid::encode_buffer();
         // create test user
@@ -346,7 +346,7 @@ mod tests {
 
     #[tokio::test]
     pub async fn test_get_username() {
-        let context = TestContext::new("get_username");
+        let context = TestContext::new("get_username").await;
         setup_initial_data(&context.db_path).await;
 
         let username = get_username("1", &context.db_path).expect("Failed to retrieve username");
@@ -355,7 +355,7 @@ mod tests {
 
     #[tokio::test]
     pub async fn test_get_leaderboard_game_data() {
-        let context = TestContext::new("get_leaderboard_game_data");
+        let context = TestContext::new("get_leaderboard_game_data").await;
         setup_initial_data(&context.db_path).await;
 
         let data = get_leaderboard_game_data("game0", &context.db_path)
@@ -373,7 +373,7 @@ mod tests {
 
     #[tokio::test]
     pub async fn test_create_default_guest() {
-        let context = TestContext::new("create_default_guest");
+        let context = TestContext::new("create_default_guest").await;
         setup_initial_data(&context.db_path).await;
 
         // creates default guest

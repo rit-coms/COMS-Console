@@ -53,7 +53,7 @@ pub struct TestContext {
 }
 
 impl TestContext {
-    pub fn new(db_name: &str) -> Self {
+    pub async fn new(db_name: &str) -> Self {
         let dir = local_data_dir().unwrap();
         let db_path = dir
             .join(db_name)
@@ -61,7 +61,6 @@ impl TestContext {
             .into_os_string()
             .into_string()
             .unwrap();
-        dbg!("{}", &db_path);
         let mut connection = establish_connection(&db_path);
 
         connection
@@ -71,7 +70,7 @@ impl TestContext {
         let (current_game_tx, current_game_rx) = watch::channel(None);
         let notifier = Arc::new(Notify::new());
 
-        let app = setup_test_server(&db_path, current_game_rx, Arc::clone(&notifier));
+        let app = setup_test_server(&db_path, current_game_rx, Arc::clone(&notifier)).await;
 
         Self {
             db_path: db_path,
@@ -173,7 +172,7 @@ pub async fn setup_initial_data(db_path: &str) {
     println!("Setup initial data!")
 }
 
-fn setup_test_server(
+async fn setup_test_server(
     db_path: &str,
     current_game_rx: Receiver<Option<u64>>,
     notifier: Arc<Notify>,
@@ -184,5 +183,5 @@ fn setup_test_server(
         channel: current_game_rx,
     });
 
-    return create_router(db_path, game_state_shared);
+    return create_router(db_path, game_state_shared).await;
 }

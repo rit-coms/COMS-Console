@@ -31,10 +31,6 @@ async fn handle_game_state_updates(game_state: GameStateShared) {
         drop(game_id);
         game_state.notifier.notify_one();
         println!("Sent notification");
-        if i == 0 {
-            game_state.notifier.notified().await;
-            println!("Consumed initial notification");
-        }
         if watch.changed().await.is_err() {
             // the watch channel transmitter should never
             // be destroyed before the application closes
@@ -76,7 +72,7 @@ async fn handle_game_state_updates(game_state: GameStateShared) {
 ///         id: Arc::new(RwLock::new(game_id)),
 ///         notifier: Arc::new(Notify::new()),
 ///         channel: rx
-///     }));
+///     })).await;
 ///
 ///     let listener = tokio::net::TcpListener::bind("127.0.0.1:8000")
 ///         .await
@@ -85,7 +81,7 @@ async fn handle_game_state_updates(game_state: GameStateShared) {
 ///     axum::serve(listener, app).await.unwrap();
 /// }
 /// ```
-pub fn create_router(db_path: &str, game_state: GameStateShared) -> Router {
+pub async fn create_router(db_path: &str, game_state: GameStateShared) -> Router {
     let route_prefix: String = format!("/api/v{}", VERSION.to_string());
     let api_state = ApiState {
         database_path: db_path.to_owned(),
@@ -93,6 +89,8 @@ pub fn create_router(db_path: &str, game_state: GameStateShared) -> Router {
     let game_state = game_state;
 
     tokio::spawn(handle_game_state_updates(game_state.clone()));
+    game_state.notifier.notified().await; // wait for the first notification
+    println!("Received first notification");
 
     let app_state = AppState {
         api_state,
@@ -115,7 +113,7 @@ pub fn create_router(db_path: &str, game_state: GameStateShared) -> Router {
 /// This function should be called in tauri builder to setup the http API for game
 /// developers to read and write game data.
 pub async fn setup_game_dev_api(db_path: String, game_state: GameStateShared) {
-    let app = create_router(&db_path, game_state);
+    let app = create_router(&db_path, game_state).await;
 
     println!("Server started successfully!!!");
     let listener = tokio::net::TcpListener::bind("127.0.0.1:6174")
@@ -139,19 +137,26 @@ mod test {
 
     #[tokio::test]
     async fn game_state_change() {
-        let game_id: Option<u64> = Some(512039487);
         let db_name = "test_db";
 
-        let (tx, mut rx) = watch::channel(game_id);
+        let (tx, mut rx) = watch::channel(None);
         let notify = Arc::new(Notify::new());
         let game_state_shared: GameStateShared = Arc::new(GameState {
             id: Arc::new(RwLock::new(None)),
             notifier: Arc::clone(&notify),
             channel: rx.clone(),
         });
-        let router = create_router(db_name, Arc::clone(&game_state_shared));
+        let router = create_router(db_name, Arc::clone(&game_state_shared)).await;
+
+        let game_id: Option<u64> = Some(512039487);
+
+        tx.send(game_id)
+            .expect("Was unable to send to watch channel");
+        println!("Sent game_id: {:?}", game_id);
 
         notify.notified().await;
+        println!("Received notification: {:?}", game_id);
+
         assert_eq!(*game_state_shared.id.read().await, game_id);
         assert_eq!(*rx.borrow(), *game_state_shared.id.read().await);
 
@@ -159,8 +164,10 @@ mod test {
 
         tx.send(game_id)
             .expect("Was unable to send to watch channel");
+        println!("Sent game_id: {:?}", game_id);
+
         notify.notified().await;
-        println!("{:?}", game_state_shared.id.read().await);
+        println!("Received notification: {:?}", game_id);
 
         assert_eq!(*game_state_shared.id.read().await, game_id);
         assert_eq!(*rx.borrow(), game_id);
