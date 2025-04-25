@@ -2,13 +2,19 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use db::setup_db;
-use frontend_api::{get_game_info, get_leaderboard_data, play_game, AppState};
+use frontend_api::{get_game_info, get_leaderboard_data, play_game, AppState, GameSenderState};
+use game_dev_api::handlers::GameState;
+use game_dev_api::handlers::GameStateShared;
 use game_dev_api::setup_game_dev_api;
 use quackbox_backend::db::create_default_guest;
 use tauri::{api::path::local_data_dir, Manager};
 use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
+use tokio::sync::watch;
+use tokio::sync::Mutex;
+use tokio::sync::Notify;
+use tokio::sync::RwLock;
 
-use std::sync::Mutex;
+use std::sync::Arc;
 
 mod db;
 mod frontend_api;
@@ -23,6 +29,19 @@ fn main() {
         .setup(|app| {
             app.manage(Mutex::new(AppState::default()));
             // tauri::async_runtime::spawn(db::test_db());
+
+            let (current_game_tx, current_game_rx) = watch::channel(None);
+            let notify = Arc::new(Notify::new());
+            app.manage(GameSenderState {
+                game_watch_tx: current_game_tx,
+                notifier: Arc::clone(&notify),
+            });
+
+            let game_state_shared: GameStateShared = Arc::new(GameState {
+                id: Arc::new(RwLock::new(None)),
+                notifier: Arc::clone(&notify),
+                channel: current_game_rx.clone(),
+            });
             tauri::async_runtime::spawn({
                 let db_path = app
                     .path_resolver()
@@ -35,7 +54,7 @@ fn main() {
                     .unwrap();
                 setup_db(db_path.as_str());
                 create_default_guest(db_path.as_str());
-                setup_game_dev_api(db_path)
+                setup_game_dev_api(db_path, game_state_shared)
             });
             if cfg!(feature = "autostart") {
                 // Only enable autolaunch on raspberry pi

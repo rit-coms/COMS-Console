@@ -1,8 +1,20 @@
-use std::fs::remove_file;
+use std::{fs::remove_file, sync::Arc};
 
-use crate::db::establish_connection;
+use crate::{
+    db::establish_connection,
+    game_dev_api::{
+        create_router,
+        handlers::{GameState, GameStateShared},
+    },
+};
+use axum::Router;
+use axum_test::TestServer;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use tauri::api::path::local_data_dir;
+use tokio::sync::{
+    watch::{self, Receiver, Sender},
+    Notify, RwLock,
+};
 
 use super::{
     create_user, insert_game, insert_leaderboard_entry,
@@ -35,10 +47,13 @@ const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
 /// ```
 pub struct TestContext {
     pub db_path: String,
+    pub current_game_tx: Sender<Option<u64>>,
+    pub notifier: Arc<Notify>,
+    pub server: TestServer,
 }
 
 impl TestContext {
-    pub fn new(db_name: &str) -> Self {
+    pub async fn new(db_name: &str) -> Self {
         let dir = local_data_dir().unwrap();
         let db_path = dir
             .join(db_name)
@@ -52,7 +67,17 @@ impl TestContext {
             .run_pending_migrations(MIGRATIONS)
             .expect("Failed to run migrations");
 
-        Self { db_path: db_path }
+        let (current_game_tx, current_game_rx) = watch::channel(None);
+        let notifier = Arc::new(Notify::new());
+
+        let app = setup_test_server(&db_path, current_game_rx, Arc::clone(&notifier)).await;
+
+        Self {
+            db_path: db_path,
+            current_game_tx,
+            notifier,
+            server: TestServer::new(app).expect("Failed to set up test server"),
+        }
     }
 }
 
@@ -145,4 +170,18 @@ pub async fn setup_initial_data(db_path: &str) {
     setup_initial_user_data(db_path).await;
     setup_initial_leaderboard_data(db_path);
     println!("Setup initial data!")
+}
+
+async fn setup_test_server(
+    db_path: &str,
+    current_game_rx: Receiver<Option<u64>>,
+    notifier: Arc<Notify>,
+) -> Router {
+    let game_state_shared: GameStateShared = Arc::new(GameState {
+        id: Arc::new(RwLock::new(None)),
+        notifier,
+        channel: current_game_rx,
+    });
+
+    return create_router(db_path, game_state_shared).await;
 }

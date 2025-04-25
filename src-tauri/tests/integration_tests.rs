@@ -1,4 +1,3 @@
-use axum_test::TestServer;
 use quackbox_backend::{
     db::{
         create_user, get_user,
@@ -6,7 +5,9 @@ use quackbox_backend::{
     },
     game_dev_api::{
         create_router,
-        handlers::{LeaderboardGetParams, LeaderboardPost, SaveDataGetParams, SaveDataPost},
+        handlers::{
+            GameStateShared, LeaderboardGetParams, LeaderboardPost, SaveDataGetParams, SaveDataPost,
+        },
     },
 };
 
@@ -16,7 +17,7 @@ const SAVE_DATA_PATH: &str = "/api/v1/save-data";
 
 #[tokio::test]
 async fn read_and_write_user_table_db() {
-    let test_context = TestContext::new("read_and_write_user_table_db");
+    let test_context = TestContext::new("read_and_write_user_table_db").await;
 
     // create test user
     let user_id_s = "1141245215512";
@@ -32,20 +33,24 @@ async fn read_and_write_user_table_db() {
 
 #[tokio::test]
 async fn read_and_write_leaderboard_data() {
-    let test_context = TestContext::new("read_and_write_leaderboard_data");
+    let test_context = TestContext::new("read_and_write_leaderboard_data").await;
     let leaderboard_path = "/api/v1/leaderboard";
 
     setup_initial_data(&test_context.db_path).await;
 
-    let app: axum::Router = create_router(&test_context.db_path);
-
-    let server: TestServer = TestServer::new(app).expect("Failed to set up test server");
+    // set game id to 1
+    test_context
+        .current_game_tx
+        .send(Some(1))
+        .expect("No subscriber to the current game sender");
+    test_context.notifier.notified().await;
 
     let value_name: String = String::from("score");
     let value_num: f64 = 100.0;
     let player: i16 = 1;
 
-    let post_response: axum_test::TestResponse = server
+    let post_response: axum_test::TestResponse = test_context
+        .server
         .post(leaderboard_path)
         .json(&LeaderboardPost {
             value_name: value_name.clone(),
@@ -60,7 +65,8 @@ async fn read_and_write_leaderboard_data() {
     assert_eq!(post_response_entry.value_name, value_name);
     assert_eq!(post_response_entry.value_num, value_num);
 
-    let get_response: axum_test::TestResponse = server
+    let get_response: axum_test::TestResponse = test_context
+        .server
         .get(leaderboard_path)
         .add_query_params(LeaderboardGetParams {
             player_slot: None,
@@ -83,13 +89,16 @@ async fn read_and_write_leaderboard_data() {
 
 #[tokio::test]
 async fn read_and_write_save_data() {
-    let test_context = TestContext::new("read_and_write_save_data");
+    let test_context = TestContext::new("read_and_write_save_data").await;
 
     setup_initial_data(&test_context.db_path).await;
 
-    let app: axum::Router = create_router(&test_context.db_path);
-
-    let server: TestServer = TestServer::new(app).expect("Failed to set up test server");
+    // set game id to 0
+    test_context
+        .current_game_tx
+        .send(Some(0))
+        .expect("No subscriber to the current game sender");
+    test_context.notifier.notified().await;
 
     let file_name: String = String::from("test data");
     let data: serde_json::Value = serde_json::json!({
@@ -102,7 +111,8 @@ async fn read_and_write_save_data() {
         ]
     });
 
-    let post_response: axum_test::TestResponse = server
+    let post_response: axum_test::TestResponse = test_context
+        .server
         .post(SAVE_DATA_PATH)
         .json(&SaveDataPost {
             file_name: file_name.clone(),
@@ -117,7 +127,8 @@ async fn read_and_write_save_data() {
     assert_eq!(post_response_entry.file_name, file_name);
     assert_eq!(post_response_entry.data, data);
 
-    let get_filename_response: axum_test::TestResponse = server
+    let get_filename_response: axum_test::TestResponse = test_context
+        .server
         .get(SAVE_DATA_PATH)
         .add_query_params(SaveDataGetParams {
             file_name: Some(file_name.clone()),
@@ -138,14 +149,17 @@ async fn read_and_write_save_data() {
 
 #[tokio::test]
 async fn get_save_data_error() {
-    let test_context = TestContext::new("get_save_data_error");
+    let test_context = TestContext::new("get_save_data_error").await;
     let save_data_path = "/api/v1/save-data";
 
     setup_initial_data(&test_context.db_path).await;
 
-    let app: axum::Router = create_router(&test_context.db_path);
-
-    let server: TestServer = TestServer::new(app).expect("Failed to set up test server");
+    // set current game to id 1
+    test_context
+        .current_game_tx
+        .send(Some(1))
+        .expect("No subscriber to the current game sender");
+    test_context.notifier.notified().await;
 
     let file_name: String = String::from("test data");
     let data: serde_json::Value = serde_json::json!({
@@ -159,7 +173,8 @@ async fn get_save_data_error() {
     });
     let player_slot = 1;
 
-    let post_response: axum_test::TestResponse = server
+    let post_response: axum_test::TestResponse = test_context
+        .server
         .post(save_data_path)
         .json(&SaveDataPost {
             file_name: file_name.clone(),
@@ -174,7 +189,8 @@ async fn get_save_data_error() {
     assert_eq!(post_response_entry.file_name, file_name);
     assert_eq!(post_response_entry.data, data);
 
-    let get_invalid_regex_error_response: axum_test::TestResponse = server
+    let get_invalid_regex_error_response: axum_test::TestResponse = test_context
+        .server
         .get(save_data_path)
         .add_query_params(SaveDataGetParams {
             file_name: None,
@@ -185,7 +201,8 @@ async fn get_save_data_error() {
 
     get_invalid_regex_error_response.assert_status_bad_request();
 
-    let get_invalid_params_error_response: axum_test::TestResponse = server
+    let get_invalid_params_error_response: axum_test::TestResponse = test_context
+        .server
         .get(save_data_path)
         .add_query_params(SaveDataGetParams {
             file_name: Some(String::from("test")),
@@ -199,20 +216,24 @@ async fn get_save_data_error() {
 
 #[tokio::test]
 async fn get_leaderboard_data_error() {
-    let test_context = TestContext::new("get_leaderboard_data_error");
+    let test_context = TestContext::new("get_leaderboard_data_error").await;
     let leaderboard_path = "/api/v1/leaderboard";
 
     setup_initial_data(&test_context.db_path).await;
 
-    let app: axum::Router = create_router(&test_context.db_path);
-
-    let server: TestServer = TestServer::new(app).expect("Failed to set up test server");
+    // set current game to id 0
+    test_context
+        .current_game_tx
+        .send(Some(0))
+        .expect("No subscriber to the current game sender");
+    test_context.notifier.notified().await;
 
     let value_name: String = String::from("score");
     let value_num: f64 = 100.0;
     let player: i16 = 1;
 
-    let post_response: axum_test::TestResponse = server
+    let post_response: axum_test::TestResponse = test_context
+        .server
         .post(leaderboard_path)
         .json(&LeaderboardPost {
             value_name: value_name.clone(),
@@ -228,7 +249,8 @@ async fn get_leaderboard_data_error() {
     assert_eq!(post_response_entry.value_name, value_name);
     assert_eq!(post_response_entry.value_num, value_num);
 
-    let get_response: axum_test::TestResponse = server
+    let get_response: axum_test::TestResponse = test_context
+        .server
         .get(leaderboard_path)
         .add_query_params(LeaderboardGetParams {
             player_slot: Some(1),
@@ -244,13 +266,12 @@ async fn get_leaderboard_data_error() {
 
 #[tokio::test]
 async fn upsert_save_data() {
-    let test_context = TestContext::new("upsert_save_data");
+    let test_context = TestContext::new("upsert_save_data").await;
 
     setup_initial_data(&test_context.db_path).await;
 
-    let app: axum::Router = create_router(&test_context.db_path);
-
-    let server: TestServer = TestServer::new(app).expect("Failed to set up test server");
+    test_context.current_game_tx.send(Some(0));
+    test_context.notifier.notified().await;
 
     let file_name: String = String::from("test data");
     let data: serde_json::Value = serde_json::json!({
@@ -263,7 +284,8 @@ async fn upsert_save_data() {
         ]
     });
 
-    let post_response: axum_test::TestResponse = server
+    let post_response: axum_test::TestResponse = test_context
+        .server
         .post(SAVE_DATA_PATH)
         .json(&SaveDataPost {
             file_name: file_name.clone(),
@@ -285,7 +307,8 @@ async fn upsert_save_data() {
         ]
     });
 
-    let post_response: axum_test::TestResponse = server
+    let post_response: axum_test::TestResponse = test_context
+        .server
         .post(SAVE_DATA_PATH)
         .json(&SaveDataPost {
             file_name: file_name.clone(),
@@ -296,7 +319,8 @@ async fn upsert_save_data() {
 
     post_response.assert_status_ok();
 
-    let get_updated_data_response: axum_test::TestResponse = server
+    let get_updated_data_response: axum_test::TestResponse = test_context
+        .server
         .get(SAVE_DATA_PATH)
         .add_query_params(SaveDataGetParams {
             file_name: Some(file_name.clone()),
