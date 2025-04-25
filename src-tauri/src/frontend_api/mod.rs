@@ -1,6 +1,6 @@
+use crate::db::get_username;
 use crate::db::{get_leaderboard, get_leaderboard_game_data, insert_game};
 use anyhow::Error;
-use crate::db::get_username;
 use chrono::{serde::ts_seconds_option, DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::{
@@ -310,15 +310,20 @@ fn check_all_games(app_handle: &AppHandle) {
 // Given a list of games, set them to be installed in the database
 fn set_games_installed(games: &Vec<GameInfo>, app_handle: &AppHandle) {
     for game in games {
-        db::insert_game(&game.id.to_string(), &game.title, true, app_handle
-        .path_resolver()
-        .app_data_dir()
-        .unwrap()
-        .join("local")
-        .with_extension("db")
-        .into_os_string()
-        .to_str()
-        .unwrap(),);
+        db::insert_game(
+            &game.id.to_string(),
+            &game.title,
+            true,
+            app_handle
+                .path_resolver()
+                .app_data_dir()
+                .unwrap()
+                .join("local")
+                .with_extension("db")
+                .into_os_string()
+                .to_str()
+                .unwrap(),
+        );
     }
 }
 
@@ -449,9 +454,10 @@ pub async fn play_game(
         .ok_or("Game ID not found")?;
     // let tx = game_sender_state.game_watch_tx.clone();
     game_sender_state.game_watch_tx.send(Some(id))?;
-    println!("sending id: {:?}", id);
+    println!("sending id: {}", id);
     let notifier = game_sender_state.notifier.clone();
     notifier.notified().await;
+    println!("Recieved notification, starting game");
 
     window.minimize()?;
 
@@ -502,6 +508,7 @@ pub async fn play_game(
     window.set_focus()?;
     window.set_fullscreen(true)?;
     notifier.notified().await;
+    println!("Recieved notification, game closed");
     Ok(())
 }
 

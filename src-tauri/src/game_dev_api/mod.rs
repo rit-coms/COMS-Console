@@ -10,7 +10,6 @@ use handlers::{
 use tokio::sync::{watch::Receiver, Notify};
 
 const VERSION: u8 = 1;
-const DB_NAME: &str = "local";
 
 pub mod handlers;
 
@@ -21,25 +20,31 @@ async fn handle_game_state_updates(game_state: GameStateShared) {
     let current_game = game_state.id.clone();
     let mut watch = game_state.channel.clone();
     let mut i = 0;
-    let mut game_id = current_game.write().await;
-    *game_id = *watch.borrow();
-    drop(game_id);
+    // let mut game_id = current_game.write().await;
+    // *game_id = None;
+    // println!("Set inital game_id to None");
+    // drop(game_id);
     loop {
         let mut game_id = current_game.write().await;
-        println!("game_id {:?}: {:?}", i, game_id);
         *game_id = *watch.borrow_and_update();
+        println!("set game_id {:?}: {:?}", i, game_id);
         drop(game_id);
         game_state.notifier.notify_one();
+        println!("Sent notification");
+        if i == 0 {
+            game_state.notifier.notified().await;
+            println!("Consumed initial notification");
+        }
         if watch.changed().await.is_err() {
             // the watch channel transmitter should never
             // be destroyed before the application closes
             unreachable!("Watch channel should not be destroyed while still listening.");
         }
         // // Not entirely certain why the below fixes everything, but I guess it does?
-        let mut game_id = current_game.write().await;
-        println!("game_id {:?} after await: {:?}", i, game_id);
-        *game_id = *watch.borrow();
-        drop(game_id);
+        // let mut game_id = current_game.write().await;
+        // println!("game_id {:?} after await: {:?}", i, game_id);
+        // *game_id = *watch.borrow();
+        // drop(game_id);
         i += 1;
     }
 }

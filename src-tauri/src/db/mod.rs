@@ -13,10 +13,10 @@ pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
 
 pub fn setup_db(db_path: &str) {
     let mut connection = &mut establish_connection(db_path);
-    
+
     connection
-    .run_pending_migrations(MIGRATIONS)
-    .expect("Failed to run migrations");
+        .run_pending_migrations(MIGRATIONS)
+        .expect("Failed to run migrations");
     println!("Pending migrations ran successfully");
 }
 
@@ -67,6 +67,7 @@ pub fn insert_leaderboard_entry(
             value_name.eq(value_name_s),
             value_num.eq(value_num_f),
         ))
+        .on_conflict_do_nothing()
         .execute(&mut connection)
 }
 
@@ -387,5 +388,4 @@ mod tests {
         // shouldn't error out if the default guest already exists
         create_default_guest(&context.db_path);
     }
-
 }
