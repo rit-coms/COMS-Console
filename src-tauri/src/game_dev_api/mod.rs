@@ -1,16 +1,12 @@
-use std::sync::Arc;
-
-use std::path::PathBuf;
-
 use axum::{routing::post, Router};
 use handlers::{
     get_leaderboard, get_save_data, set_leaderboard, set_save_data, ApiState, AppState,
     GameStateShared,
 };
-use tokio::sync::{watch::Receiver, Notify};
+use std::sync::Arc;
+use tokio::sync::{Notify};
 
 const VERSION: u8 = 1;
-const DB_NAME: &str = "local";
 
 pub mod handlers;
 
@@ -124,27 +120,24 @@ mod test {
     use crate::game_dev_api::handlers::GameState;
 
     use super::*;
-    use tokio::{
-        runtime::Runtime,
-        sync::{
-            watch::{self, channel},
-            RwLock,
-        },
+    use tokio::sync::{
+        watch::channel,
+        RwLock,
     };
 
     #[tokio::test]
     async fn game_state_change() {
         let game_id: Option<u64> = Some(512039487);
-        let db_name = "test_db";
+        let db_name = "game_state_change";
 
-        let (tx, mut rx) = watch::channel(game_id);
+        let (tx, rx) = channel(game_id);
         let notify = Arc::new(Notify::new());
         let game_state_shared: GameStateShared = Arc::new(GameState {
             id: Arc::new(RwLock::new(None)),
             notifier: Arc::clone(&notify),
             channel: rx.clone(),
         });
-        let router = create_router(db_name, Arc::clone(&game_state_shared));
+        let _router = create_router(db_name, Arc::clone(&game_state_shared));
 
         notify.notified().await;
         assert_eq!(*game_state_shared.id.read().await, game_id);

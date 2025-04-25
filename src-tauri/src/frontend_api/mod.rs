@@ -447,10 +447,9 @@ pub async fn play_game(
         .iter()
         .find(|g| g.id == id)
         .ok_or("Game ID not found")?;
-    // let tx = game_sender_state.game_watch_tx.clone();
     game_sender_state.game_watch_tx.send(Some(id))?;
     println!("sending id: {:?}", id);
-    let notifier = game_sender_state.notifier.clone();
+    let notifier = &game_sender_state.notifier;
     notifier.notified().await;
 
     window.minimize()?;

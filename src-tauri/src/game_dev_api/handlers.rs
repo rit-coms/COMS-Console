@@ -186,9 +186,9 @@ pub async fn get_save_data(
     params: Query<SaveDataGetParams>,
 ) -> impl IntoResponse {
     println!("Getting save data!");
-    // let game_id: String = String::from("0"); // Example for now
     let game_id = game_state.id.read().await.unwrap().to_string();
     drop(game_state);
+    
     let user_id_s: Option<String> = match params.player_slot {
         Some(slot) => Some(slot.to_string()),
         None => None,
@@ -221,6 +221,4 @@ pub async fn get_save_data(
         }
         Err(e) => (StatusCode::BAD_REQUEST, e.to_string()).into_response(),
     }
-
-    // println!("{}", serde_json::to_string_pretty(&json_response).unwrap());
 }
