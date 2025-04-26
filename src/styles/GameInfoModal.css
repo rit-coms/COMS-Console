@@ -35,6 +35,7 @@
         }
     }
 
+<<<<<<< HEAD
     .leaderboard-flex-parent {
         display: flex;
 
@@ -48,6 +49,8 @@
         }
     }
 
+=======
+>>>>>>> parent of 9afd1cf (Add checkbox)
     .game-leaderboard {
         display: flex;
     }
