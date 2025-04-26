@@ -9,6 +9,7 @@ import {
   TableRow,
   Tabs,
   Text,
+  Checkbox,
 } from "quackbox-design-system";
 import "../styles/GameInfoModal.css";
 import { invoke } from "@tauri-apps/api/tauri";
@@ -21,6 +22,7 @@ export default function GameInfoModal({ showModal, closeModal, game }) {
 
   const { updatePage } = usePageContext();
   const [leaderboard, setLeaderboard] = useState([]);
+  const [isAscending, setIsAscending] = useState(false);
   const isPlaceholder = game.title.toLowerCase().includes("coming soon");
   const hasCoverImage = !game.coverImage?.includes("null");
 
@@ -54,7 +56,11 @@ export default function GameInfoModal({ showModal, closeModal, game }) {
   }, []);
 
   const getTopFiveLeaderboardEntries = (entries) => {
-    return [...entries].sort((a, b) => b.value_num - a.value_num).slice(0, 5);
+    return [...entries]
+      .sort((a, b) =>
+        isAscending ? a.value_num - b.value_num : b.value_num - a.value_num
+      )
+      .slice(0, 5);
   };
 
   const startGame = async (gameId) => {
@@ -74,6 +80,11 @@ export default function GameInfoModal({ showModal, closeModal, game }) {
       updatePage("home page");
     }, 0);
   };
+
+  const handleAscendingChange = () => {
+    setIsAscending(!isAscending);
+  };
+
   let leaderboardData;
 
   return (
@@ -147,21 +158,36 @@ export default function GameInfoModal({ showModal, closeModal, game }) {
                       .join(" ");
                     return (
                       <Tab label={leaderboardTitle}>
-                        <Table headers={["Username", leaderboardTitle, "Date"]}>
-                          {getTopFiveLeaderboardEntries(
-                            leaderboard.data[value_name]
-                          ).map(
-                            ({ username, value_num, time_stamp }, index) => {
-                              return (
-                                <TableRow key={index}>
-                                  <TableData>{username}</TableData>
-                                  <TableData>{value_num}</TableData>
-                                  <TableData>{time_stamp}</TableData>
-                                </TableRow>
-                              );
-                            }
-                          )}
-                        </Table>
+                        <div className="leaderboard-flex-parent">
+                          <div className="leaderboard-flex-table">
+                            <Table
+                              headers={["Username", leaderboardTitle, "Date"]}
+                            >
+                              {getTopFiveLeaderboardEntries(
+                                leaderboard.data[value_name]
+                              ).map(
+                                (
+                                  { username, value_num, time_stamp },
+                                  index
+                                ) => {
+                                  return (
+                                    <TableRow key={index}>
+                                      <TableData>{username}</TableData>
+                                      <TableData>{value_num}</TableData>
+                                      <TableData>{time_stamp}</TableData>
+                                    </TableRow>
+                                  );
+                                }
+                              )}
+                            </Table>
+                          </div>
+                          <div className="leaderboard-flex-checkbox">
+                            <Checkbox
+                              checked={isAscending}
+                              onChange={handleAscendingChange}
+                            ></Checkbox>
+                          </div>
+                        </div>
                       </Tab>
                     );
                   })}

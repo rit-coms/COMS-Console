@@ -35,6 +35,18 @@
         }
     }
 
+    .leaderboard-flex-parent {
+        display: flex;
+
+        .leaderboard-flex-table {
+            flex: 2;
+        }
+
+        .leaderboard-flex-checkbox {
+            margin-left: 5px;
+        }
+    }
+
     .game-leaderboard {
         display: flex;
     }
