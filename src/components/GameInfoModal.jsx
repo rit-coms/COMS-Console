@@ -151,6 +151,7 @@ export default function GameInfoModal({ showModal, closeModal, game }) {
                 <div className="leaderboard-flex-parent">
                   <div className="leaderboard-flex-checkbox">
                     <Checkbox
+                      dataId="leaderboard-toggle-ascending"
                       checked={isAscending}
                       onChange={handleAscendingChange}
                     ></Checkbox>
