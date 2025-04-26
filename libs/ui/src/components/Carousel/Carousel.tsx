@@ -76,7 +76,7 @@ export const Carousel = ({
                 title: "Coming Soon...",
                 author: "[Your Name Here]",
                 summary: "Got a game idea? Reach out to the COMS Tech Projects Chair to get started and they'll guide you through everything you need to bring your game to life. Just ask how!",
-                coverImage: "src/assets/coming_soon.png"
+                coverImage: "/assets/coming_soon.png"
             }
         ))
 

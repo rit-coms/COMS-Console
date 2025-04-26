@@ -17,7 +17,7 @@ export const GameVariants_PlaceholderImage: Story = {
             gameId={"Horizon"}
             author={"Author"}
             title={"Horizon"}
-            coverImage={"src/assets/coming_soon.png"}
+            coverImage={"/assets/coming_soon.png"}
             placeholder={true}
             onClick={()=>{}}
         />
