@@ -38,7 +38,7 @@ const getPageHierarchy = (page) => {
             0: document.body.querySelectorAll("[data-id='game-info-close-button']"),
             1: document.body.querySelectorAll("[data-id^='tab']"),
             2: document.body.querySelectorAll("[data-id='game-info-confirm-button']"),
-            3: document.body.querySelectorAll("[data-id='leaderboard-toggle-ascending']"),
+            3: document.body.querySelectorAll("[data-id='leaderboard-toggle-ascending-checkbox']"),
         };
 
     }
