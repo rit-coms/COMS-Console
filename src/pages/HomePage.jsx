@@ -18,7 +18,7 @@ export default function HomePage() {
 		allPlayersConnected && (
 			setTimeout(() => { 
 				updatePage("home page");
-			}, 0)
+			}, 10)
 		);
         
     }, [allPlayersConnected]);
