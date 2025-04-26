@@ -148,17 +148,26 @@ export default function GameInfoModal({ showModal, closeModal, game }) {
             <Tab label="Leaderboard">
               {(leaderboardData = Object.keys(leaderboard?.data ?? {}))
                 .length != 0 ? (
-                <Tabs dataId="leaderboard-tabs">
-                  {leaderboardData.map((value_name) => {
-                    const leaderboardTitle = value_name
-                      .split(" ")
-                      .map(
-                        (word) => word.charAt(0).toUpperCase() + word.slice(1)
-                      )
-                      .join(" ");
-                    return (
-                      <Tab label={leaderboardTitle}>
-                        <div className="leaderboard-flex-parent">
+                <div className="leaderboard-flex-parent">
+                  <div className="leaderboard-flex-checkbox">
+                    <Checkbox
+                      checked={isAscending}
+                      onChange={handleAscendingChange}
+                    ></Checkbox>
+                    <div style={{ textAlign: "center" }}>
+                      <Text fontSize="small">{isAscending ? "v" : "^"}</Text>
+                    </div>
+                  </div>
+                  <Tabs dataId="leaderboard-tabs">
+                    {leaderboardData.map((value_name) => {
+                      const leaderboardTitle = value_name
+                        .split(" ")
+                        .map(
+                          (word) => word.charAt(0).toUpperCase() + word.slice(1)
+                        )
+                        .join(" ");
+                      return (
+                        <Tab label={leaderboardTitle}>
                           <div className="leaderboard-flex-table">
                             <Table
                               headers={["Username", leaderboardTitle, "Date"]}
@@ -181,17 +190,11 @@ export default function GameInfoModal({ showModal, closeModal, game }) {
                               )}
                             </Table>
                           </div>
-                          <div className="leaderboard-flex-checkbox">
-                            <Checkbox
-                              checked={isAscending}
-                              onChange={handleAscendingChange}
-                            ></Checkbox>
-                          </div>
-                        </div>
-                      </Tab>
-                    );
-                  })}
-                </Tabs>
+                        </Tab>
+                      );
+                    })}
+                  </Tabs>
+                </div>
               ) : (
                 <div className="game-leaderboard">
                   No leaderboard data to show
