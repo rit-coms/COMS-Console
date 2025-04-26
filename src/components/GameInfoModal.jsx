@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, Modal, Pill, Tab, Table, TableData, TableRow, Tabs, Text } from "quackbox-design-system";
 import "../styles/GameInfoModal.css";
 import { invoke } from "@tauri-apps/api/tauri";
@@ -26,23 +26,25 @@ export default function GameInfoModal({ showModal, closeModal, game}) {
 		return date.toLocaleDateString("en-US", options);
 	};
 
-	// useEffect(() => {
-	// 	invoke("").then(leaderboard => {
-	// 		leaderboard = leaderboard.map(async gameInfo => {
-    //             return leaderboard;
-	// 		});
-	// 		console.log(leaderboard);
-	// 		Promise.all(leaderboard).then(leaderboard => setLeaderboard(leaderboard));
-	// 	},
-    //     (err) => {
-    //         console.error(err)
-    //     }
-    // );
-	// }, []);
+	useEffect(() => {
+		invoke("get_leaderboard_data", {gameTitle: game.title}).then(leaderboard => {
+			console.log(leaderboard);
+			// leaderboard = leaderboard.map(async gameInfo => {
+			// 	console.log(gameInfo);
+            //     return leaderboard;
+			// });
+			// Promise.all(leaderboard).then(leaderboard => setLeaderboard(leaderboard));
+			setLeaderboard(leaderboard);
+		},
+        (err) => {
+            console.error(err)
+        }
+    );
+	}, []);
 
-	const getTopFiveLeaderboard = () => {
-		return [...leaderboard]
-			.sort((a, b) => b.points - a.points)
+	const getTopFiveLeaderboardEntries = (entries) => {
+		return [...entries]
+			.sort((a, b) => b.value_num - a.value_num)
 			.slice(0, 5);
 	};
 
@@ -128,7 +130,7 @@ export default function GameInfoModal({ showModal, closeModal, game}) {
 					</Tab>
 					{!isPlaceholder && 
 						<Tab label="Leaderboard">
-							{leaderboard.length != 0 ?
+							{/* {leaderboard.length != 0 ?
 								<div className="game-leaderboard">
 									<Table headers={["Date", "Player", "Points"]}>
 										{getTopFiveLeaderboard().map((data, index) => (
@@ -142,9 +144,53 @@ export default function GameInfoModal({ showModal, closeModal, game}) {
 								</div>
 								:
 								<div className="game-leaderboard">
-									No leaderboard data to show
+									No leaderboard data t
+							 console.log(leaderboard);o show
 								</div>
+							 */ }
+							 {
+							//  leaderboard?.data ?
+							//  <Tabs dataId="leaderboard-tabs">
+							// 	{console.log(leaderboard)}
+							// 	{Object.entries(leaderboard.data).map(([value_name, entries]) => {
+							// 		<Tab label={value_name}>
+							// 			<Table headers={["Username", value_name, "Date"]}>
+							// 				{getTopFiveLeaderboardEntries(entries).map(({username, value_num, time_stamp}, index) => { console.log(username, value_num, time_stamp, index);
+							// 					<TableRow>
+							// 						<TableData>{username}</TableData>
+							// 						<TableData>{value_num}</TableData>
+							// 						<TableData>{time_stamp}</TableData>
+							// 					</TableRow>
+							// 				})}
+							// 			</Table>
+							// 		</Tab>
+							// 	})}
+							// </Tabs> :
+								// <div className="game-leaderboard">
+								// 	No leaderboard data to show
+								// </div>
+							
 							}
+							<Tabs dataId="leaderboard-tabs">
+								{Object.keys(leaderboard?.data ?? {}).map((value_name) => {
+							const leaderboardTitle = value_name.split(" ").map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+							return (<Tab label={leaderboardTitle}>
+								<Table headers={["Username", leaderboardTitle, "Date"]}>
+									{getTopFiveLeaderboardEntries(leaderboard.data[value_name]).map(({username, value_num, time_stamp}, index) => {
+										return (
+											<TableRow key={index}>
+												<TableData>{username}</TableData>
+												<TableData>{value_num}</TableData>
+												<TableData>{time_stamp}</TableData>
+											</TableRow>
+										);
+									}
+									)}
+								</Table>
+							</Tab>
+							)
+								})}
+							</Tabs>	
 						</Tab>
 					}
 				</Tabs>

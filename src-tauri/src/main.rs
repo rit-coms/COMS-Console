@@ -27,7 +27,16 @@ fn main() {
             Some(vec![""]),
         ))
         .setup(|app| {
-            app.manage(Mutex::new(AppState::default()));
+            let db_path = app
+                .path_resolver()
+                .app_data_dir()
+                .unwrap()
+                .join("local")
+                .with_extension("db")
+                .into_os_string()
+                .into_string()
+                .unwrap();
+            app.manage(Mutex::new(AppState::new(db_path.clone())));
             // tauri::async_runtime::spawn(db::test_db());
 
             let (current_game_tx, current_game_rx) = watch::channel(None);
@@ -43,15 +52,6 @@ fn main() {
                 channel: current_game_rx.clone(),
             });
             tauri::async_runtime::spawn({
-                let db_path = app
-                    .path_resolver()
-                    .app_data_dir()
-                    .unwrap()
-                    .join("local")
-                    .with_extension("db")
-                    .into_os_string()
-                    .into_string()
-                    .unwrap();
                 setup_db(db_path.as_str());
                 create_default_guest(db_path.as_str());
                 setup_game_dev_api(db_path, game_state_shared)
