@@ -1,43 +1,20 @@
-
 # COMS Console (aka. The QuackBox)
 
 This repository hosts the software for the COMS Console, a Raspberry Pi-based project with a unique, duck-inspired design owned by the [Computing Organization for Multicultural Students](https://www.rit.edu/computing/coms/).
 
-## WIP backend refactor structure
-- main.rs (cross-platform)
-    - runs the actual tauri instance
-    - requires and sets up all the handlers and plugins
-- frontend-api
-  - games.rs
-    - Get game info
-    - Startup games
-  - More in the future?
-- quackl (pi-specific)
-    - pipe.rs
-        - This will be our communication layer with Quackl. I need to look more into linux / unix ipc, but I'm leaning towards either sockets or named pipes
-            - named pipes are nice for their simplicity
-            - sockets are nice because of their throughput
-- db (cross-platform)
-    - local.rs
-        - this is the public facing api for game developers that allows them to store data. 
-    - public.rs
-        - This if for actually making all the backend api calls to the unified db
-    - testing.rs
-        - This is for if a game dev downloaded the software wanting to test out their game's api calls. We'll have to manage a db that is locally stored to the users computer and can simulate the requests that they want to make
-
 ## Features
-
 - Window management of game launcher
-  - Automatic fullscreen and focus capture
   - Manages game and launcher screen real estate
 - Displays a library of all custom-made games
   - Retrieves and manages all games from a game library directory (varies by OS)
   - Supports multiple game-making platforms (and in the process of adding more!)
     - Pygame
     - Godot
-    - Web Games
-- Cross platform support
-- Automated CD builds for the Raspberry Pi, Mac, Windows, and Debian Linux
+    - Web Games (No Dev API Support)
+- Game developer libraries for Quackbox console integration
+  - Support for Leaderboard entries and Save Data
+- Cross-platform support
+- Automated CI + CD builds for the Raspberry Pi, Mac, Windows, and Debian Linux
 
 
 ## Tech Stack
@@ -48,11 +25,54 @@ This repository hosts the software for the COMS Console, a Raspberry Pi-based pr
 |                 | JavaScript    | <img title="JavaScript" src="https://skillicons.dev/icons?i=js" /> |
 | **Backend**     | Tauri         | <img title="Tauri" src="https://skillicons.dev/icons?i=tauri" />           |
 |                 | Rust          | <img title="Rust" src="https://skillicons.dev/icons?i=rust" />            |
+|                 | Sqlite        | <img title="Sqlite" src="https://skillicons.dev/icons?i=sqlite" /> |
 | **Build Tools** | Vite          | <img title="Vite" src="https://skillicons.dev/icons?i=vite" /> |
 
 
-
 ## Installation
+Check [releases](https://github.com/rit-coms/COMS-Console/releases/latest) for the latest packaged version!
+
+## Game Library Configuration
+
+The Game Library stores all custom games accessible through the COMS Console. Upon running the application for the first time, a games folder will be automatically created in the user data directory.
+
+If you have a zipped collection of games, unpack them into this folder to match the following structure:
+
+```
+coms-console
+└── games
+    ├── game1
+    │   ├── <game source files>
+    │   └── game-metadata.json
+    ├── game2
+    │   ├── <game source files>
+    │   └── game-metadata.json
+    ├── game3
+    │   ├── <game source files>
+    │   └── game-metadata.json
+    └── game4
+        ├── <game source files>
+        └── game-metadata.json
+```
+
+Each game should reside in its own folder with the following components:
+
+- `<game source files>`: All essential files for the game
+- `game-metadata.json`: Metadata file containing information about the game
+
+### Default `games` Folder Locations
+The games folder is located within the user’s application data directory, which varies by operating system:
+
+- Linux: `$XDG_DATA_HOME/coms-console or $HOME/.local/share/coms-console`
+
+- macOS: `$HOME/Library/Application Support/coms-console`
+
+- Windows: `$HOME\AppData\Roaming\coms-console`
+
+> [!NOTE]
+> Make sure to extract the games directly into the games folder to ensure the application can locate and display them properly.
+
+## Developer Setup
 > [!NOTE]
 > It's not necessary to install Homebrew or nvm, but it's highly recommended to install this way if it's your first time using these tools. These package managers will help differentiate dependency versions in between other projects.
 ### macOS
@@ -157,47 +177,8 @@ This repository hosts the software for the COMS Console, a Raspberry Pi-based pr
         cd ..
         npm install
         ```
-## Game Library Configuration
 
-The Game Library stores all custom games accessible through the COMS Console. Upon running the application for the first time, a games folder will be automatically created in the user data directory.
-
-If you have a zipped collection of games, unpack them into this folder to match the following structure:
-
-```
-coms-console
-└── games
-    ├── game1
-    │   ├── <game source files>
-    │   └── game-metadata.json
-    ├── game2
-    │   ├── <game source files>
-    │   └── game-metadata.json
-    ├── game3
-    │   ├── <game source files>
-    │   └── game-metadata.json
-    └── game4
-        ├── <game source files>
-        └── game-metadata.json
-```
-
-Each game should reside in its own folder with the following components:
-
-- `<game source files>`: All essential files for the game
-- `game-metadata.json`: Metadata file containing information about the game
-
-### Default `games` Folder Locations
-The games folder is located within the user’s application data directory, which varies by operating system:
-
-- Linux: `$XDG_DATA_HOME/coms-console or $HOME/.local/share/coms-console`
-
-- macOS: `$HOME/Library/Application Support/coms-console`
-
-- Windows: `$HOME\AppData\Roaming\coms-console`
-
-> [!NOTE]
-> Make sure to extract the games directly into the games folder to ensure the application can locate and display them properly.
-
-## Development & Building
+### Development & Building
 
 To startup this project's development server run
 
@@ -220,7 +201,7 @@ To build this project for the QuackBox
 npm run tauri build -- --features quackbox-raspi
 ```
 
-## Optimizations
+## Changes for v0.1.0
 
 - Migrated frontend from [Create React App](https://create-react-app.dev/) to [Vite](https://vite.dev/) for improved performance and faster build times
 - Cleaned up `package.json` by removing unnecessary dependencies
@@ -228,6 +209,9 @@ npm run tauri build -- --features quackbox-raspi
 - Configured Vite to work seamlessly with Tauri
 - Set Tauri to launch in fullscreen mode on startup for a better user experience
 - Introduced error handling for file system access that propagates to the front end
+
+## Changes for v1.0.0
+- 
 
 
 ## Future Project Roadmap
