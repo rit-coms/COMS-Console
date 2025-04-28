@@ -1,24 +1,26 @@
+import React from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { GamepadProvider } from "./context/GamepadContext";
+import { PageProvider } from "./context/PageContext";
+import { ToastManager, ToastProvider } from "./context/ToastContext";
+import HomePage from "./pages/HomePage";
 
-import { ControllerProvider } from './context/ControllerContext';
-import { PageProvider } from './context/PageContext';
-import HomePage from './pages/HomePage'
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-
-function App() {
+export default function App() {
 	return (
 		<div>
 			<BrowserRouter>
-				<ControllerProvider>
-					<PageProvider>
-						<Routes>
-							<Route path='/' element={<HomePage />} />
-						</Routes>
-					</PageProvider>
-				</ControllerProvider>
+				<ToastProvider>
+					<GamepadProvider>
+						<PageProvider>
+								<Routes>
+									<Route path="/" element={<HomePage />} />
+								</Routes>
+								<ToastManager />
+						</PageProvider>
+					</GamepadProvider>
+				</ToastProvider>
 			</BrowserRouter>
 		</div>
 
 	);
 }
-
-export default App;
