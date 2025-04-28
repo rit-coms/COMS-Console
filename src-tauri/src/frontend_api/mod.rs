@@ -103,6 +103,16 @@ impl TryFrom<GameInfoJS> for GameInfo {
 #[derive(Default)]
 pub struct AppState {
     games_list: Vec<GameInfo>,
+    db_path: String,
+}
+
+impl AppState {
+    pub fn new(db_path: String) -> Self {
+        AppState {
+            games_list: Vec::new(),
+            db_path,
+        }
+    }
 }
 
 pub struct GameSenderState {
@@ -251,7 +261,7 @@ async fn get_game_info_list(
         games_list.push(game_metadata);
     }
 
-    // println!("{}", serde_json::to_string_pretty(games_list).unwrap());
+    println!("{}", serde_json::to_string_pretty(games_list).unwrap());
 
     Ok(state.games_list.clone())
 }
@@ -358,8 +368,11 @@ struct FrontendLeaderboardEntry {
 /// * `Result<serde_json::Value, ErrorType>` - A JSON object representing the leaderboard data of a
 /// specific game or an `ErrorType` if an error occurs.
 #[tauri::command]
-pub fn get_leaderboard_data(game_title: String) -> Result<serde_json::Value, ErrorType> {
-    get_leaderboard_data_helper(game_title, "local")
+pub async fn get_leaderboard_data(
+    game_title: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<serde_json::Value, ErrorType> {
+    get_leaderboard_data_helper(game_title, state.lock().await.db_path.as_str())
 }
 
 /// This function allows us to mock databases for testing without having a db_name parameter
@@ -376,7 +389,7 @@ fn get_leaderboard_data_helper(
             Some(entries) => entries.push(FrontendLeaderboardEntry {
                 value_num: entry.value_num,
                 username: get_username(&entry.user_id, db_name)?,
-                time_stamp: "placeholder time".to_string(),
+                time_stamp: entry.time_stamp
             }),
             None => {
                 sorted_data.insert(
