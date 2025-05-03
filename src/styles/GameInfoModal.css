@@ -35,22 +35,6 @@
         }
     }
 
-<<<<<<< HEAD
-    .leaderboard-flex-parent {
-        display: flex;
-
-        .leaderboard-flex-table {
-            flex: 2;
-        }
-
-        .leaderboard-flex-checkbox {
-            margin-left: 5px;
-            vertical-align: middle;
-        }
-    }
-
-=======
->>>>>>> parent of 9afd1cf (Add checkbox)
     .game-leaderboard {
         display: flex;
     }

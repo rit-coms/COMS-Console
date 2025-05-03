@@ -8,10 +8,10 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
-      - uses: pguyot/arm-runner-action@v2.5.2
+      - uses: actions/checkout@v4
+      - uses: pguyot/arm-runner-action@v2.6.5
         with:
           base_image: https://dietpi.com/downloads/images/DietPi_RPi-ARMv8-Bullseye.img.xz
           cpu: cortex-a7
@@ -40,9 +40,18 @@ jobs:
             # Install frontend dependencies
             npm install
             # Build the application
-            npm run tauri build
+            npm run tauri build -- --features quackbox-raspi
       - name: Upload deb bundle
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: Debian Bundle
-          path: ${{ github.workspace }}/src-tauri/target/release/bundle/deb/*.deb
+          name: Quackbox Debian Bundle
+          path: |
+            ${{ github.workspace }}/src-tauri/target/release/bundle/deb/*.deb
+          overwrite: true
+      - name: Upload Quackbox Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: Quackbox Binary
+          overwrite: true
+          path: |
+            ${{ github.workspace }}/src-tauri/target/release/coms-console-launcher
