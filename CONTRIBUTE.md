@@ -1,6 +1,10 @@
 # How to Contribute
 If you're interested in helping add features or want to work on the console software, check out the [github issues](https://github.com/rit-coms/COMS-Console/issues). Below is a guide to how to setup your environment for development of the Quackbox software.
 
+If you're interested in learning more about the structure of the frontend, take a look at the [frontend reference](src/README.md).
+
+The backend is mostly undocumented, though some functions are documented using rust docstrings. To generate docs, navigate to the src-tauri directory and run `cargo doc --open`. That command will run and generate the current documentation on any declared modules.
+
 ## Developer Setup
 > [!NOTE]
 > It's not necessary to install Homebrew or nvm, but it's highly recommended to install this way if it's your first time using these tools. These package managers will help differentiate dependency versions in between other projects.
@@ -109,7 +113,7 @@ If you're interested in helping add features or want to work on the console soft
         ```
 
 ## Database Setup
-In the developer debug version, sqlite migration tables aren't automatically embedded. That means that you have to setup the
+In the developer debug version, sqlite migration tables aren't automatically embedded. That means that you have to setup the sqlite database. We're using [diesel.rs](https://diesel.rs/) for the interfacing with the sqlite database from rust.
 
 ### Diesel CLI Install
 Windows:
@@ -147,7 +151,7 @@ Create .env file with a database url like below
   - DATABASE_URL=%UserProfile%\AppData\Roaming\coms-console/local.db
   - (the above is untested on windows)
 
-### Redoing migrations
+### Redoing migrations (If the migrations tables change)
 ```sh
 # Run migrations to add all the tables to sqlite
 diesel migration run
@@ -160,7 +164,7 @@ diesel migration generate name-of-migration # creates a new sql migration
 ```
 
 
-### Development & Building
+## Development & Building
 
 To startup this project's development server run
 
@@ -169,7 +173,7 @@ To startup this project's development server run
 npm run tauri dev
 ```
 
-To build this project for your current platform
+To build the release versione of the project for your current platform
 
 ```bash
 # In top level of repository
