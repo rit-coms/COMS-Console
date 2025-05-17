@@ -16,7 +16,7 @@ const config = {
   redirects: [{ from: "/", to: "/docs/introduction" }],
   apis: {
     type: "file",
-    input: "./apis/openapi.yaml",
+    input: "./apis/openapi-v1.yaml",
     navigationId: "api",
   },
   docs: {

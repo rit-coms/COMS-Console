@@ -1,0 +1,139 @@
+openapi: 3.0.4
+info:
+  title: Quackbox API
+  description: |-
+    This is the API documentation for the Quackbox local web server based on the OpenAPI 3.0 specification.
+
+    Some useful links:
+    - [Quackbox GitHub Repository](https://github.com/rit-coms/COMS-Console)
+    - [The source API definition for the Quackbox](https://github.com/rit-coms/COMS-Console/tree/dev/zudoku-docs/quackbox-api-docs/apis)
+  contact:
+    email: coms@rit.edu
+    name: Computing Organization for Multicultural Students
+  license:
+    name: MIT License
+    url: https://opensource.org/licenses/MIT
+  version: 1.0.0
+servers:
+  - url: http://localhost:6174/api/v1
+tags:
+  - name: Leaderboard
+    description: Access to leaderboard data
+  - name: Save Data
+    description: Read and write save data
+paths:
+  /save-data:
+    get:
+      tags:
+        - Save Data
+      summary: Retrieve save data
+      description: Retrieve the save data for the current user. This will return a list of JSON objects with the save data.
+      operationId: getSaveData
+      parameters:
+        - $ref: '#/components/parameters/player_slot'
+        - $ref: '#/components/parameters/regex'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SaveDataEntry'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+  /save-data/{file_name}:
+    get:
+      tags:
+        - Save Data
+      summary: Retrieve a specific file
+      description: Retrieve a specific save data file for the current user. This will return a JSON object with the save data.
+      operationId: getSaveDataFile
+      parameters:
+        - name: file_name
+          in: path
+          description: The file name of the save data entry to retrieve.
+          required: true
+          schema:
+            type: string
+            example: "main_save"
+        - $ref: '#/components/parameters/player_slot'
+      responses:
+        "200":
+          description: successful operation
+          contact:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SaveDataEntry"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+components:
+  schemas:
+    SaveDataEntry:
+      type: object
+      properties:
+        data:
+          type: object
+          additionalProperties: true
+          description: The save data for the current user. This will be a JSON object with the save data as defined by the game developer.
+        time_stamp:
+          type: string
+          format: date-time
+          description: The time stamp of the save data entry.
+        file_name:
+          type: string
+          description: The file name of the save data entry.
+  parameters:
+    player_slot:
+      name: player_slot
+      in: query
+      description: The player slot (1-8) to retrieve save data for. If not specified, the save data for player 1 will be returned. 
+      required: false
+      schema:
+        type: integer
+        default: 1
+        example: 7
+    regex:
+      name: regex
+      in: query
+      description: A regular expression to filter the save data. Only save data that matches the regex will be returned.
+      required: false
+      schema:
+        type: string
+        format: pattern
+        default: "^.*$"
+        example: "rege(x(es)?|xps?)"
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Bad request"
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Not found"
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal server error"
+  
