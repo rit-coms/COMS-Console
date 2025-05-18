@@ -15,7 +15,7 @@ info:
     url: https://opensource.org/licenses/MIT
   version: 1.0.0
 servers:
-  - url: http://localhost:6174/api/v1
+  - url: http://localhost:6174/api/v2
 tags:
   - name: Leaderboard
     description: Access to leaderboard data
@@ -32,12 +32,6 @@ paths:
       parameters:
         - $ref: "#/components/parameters/player_slot"
         - $ref: "#/components/parameters/regex"
-        - name: file_name
-          in: query
-          description: The name of the save data file to retrieve. If not provided, all save data files will be retrieved.
-          required: false
-          schema:
-            type: string
       responses:
         "200":
           description: successful operation
@@ -49,7 +43,26 @@ paths:
                   $ref: "#/components/schemas/SaveDataEntry"
         "400":
           $ref: "#/components/responses/BadRequest"
-    post:
+  /save-data/{file_name}:
+    get:
+      tags:
+        - Save Data
+      summary: Retrieve a specific file
+      description: Retrieve a specific save data file for the current user. This will return a JSON object with the save data.
+      operationId: getSaveDataFile
+      parameters:
+        - $ref: "#/components/parameters/save_file_name"
+        - $ref: "#/components/parameters/player_slot"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SaveDataEntry"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+    put:
       tags:
         - Save Data
       summary: Create or update save data
@@ -72,9 +85,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/SaveDataEntry"
+                $ref: "#/components/schemas/SaveDataEntry"
         "400":
           $ref: "#/components/responses/BadRequest"
   /leaderboard:
@@ -82,19 +93,9 @@ paths:
       tags:
         - Leaderboard
       summary: Retrieve leaderboard data
-      description: Retrieve the leaderboard data for a given user. This will return a list of JSON objects with the leaderboard data.
+      description: Retrieve the leaderboard data from all users. This will return a list of JSON objects with the leaderboard data.
       operationId: getLeaderboard
       parameters:
-        - name: scope
-          in: query
-          description: The scope of the leaderboard data to retrieve. This can be either "global" for all entries or "user" for the entries of a specific user.
-          required: false
-          schema:
-            type: string
-            default: user
-            enum:
-              - global
-              - user
         - $ref: "#/components/parameters/player_slot"
         - $ref: "#/components/parameters/leaderboard_count"
         - $ref: "#/components/parameters/leaderboard_offset"
@@ -111,30 +112,7 @@ paths:
                   $ref: "#/components/schemas/LeaderboardEntry"
         "400":
           $ref: "#/components/responses/BadRequest"
-    post:
-      tags:
-        - Leaderboard
-      summary: Create a leaderboard entry
-      description: Create a leaderboard entry for a given user.
-      operationId: createLeaderboardEntry
-      parameters:
-        - $ref: "#/components/parameters/player_slot"
-        - $ref: "#/components/parameters/leaderboard_value_name"
-        - name: value_num
-          in: query
-          description: The value of the leaderboard entry. This is the score or other value that is being tracked on the leaderboard.
-          required: true
-          schema:
-            type: number
-      responses:
-        "200":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LeaderboardEntry"
-        "400":
-          $ref: "#/components/responses/BadRequest"
+
 components:
   schemas:
     SaveDataEntry:
@@ -237,3 +215,23 @@ components:
               error:
                 type: string
                 example: "Bad request"
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Not found"
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal server error"
