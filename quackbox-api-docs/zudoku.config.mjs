@@ -25,6 +25,16 @@ const config = {
   docs: {
     files: "/pages/**/*.{md,mdx}",
   },
+  page: {
+    logo: {
+      src: {
+        light: "/quack_box_banner.png",
+        dark: "/quack_box_banner.png"
+      },
+      alt: "Company Logo",
+      width: "182px", // optional width
+    }
+  },
   theme: {
     light: {
       background: "0 0% 100%",
