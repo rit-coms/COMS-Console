@@ -12,6 +12,8 @@
   "author": "Kenzie & Matt",
   "license": "ISC",
   "dependencies": {
+    "@asyncapi/generator": "^2.6.0",
+    "@asyncapi/html-template": "github:asyncapi/html-template",
     "@asyncapi/markdown-template": "^1.6.7",
     "@tauri-apps/api": "^1.6.0",
     "quackbox-design-system": "^5.0.3",
