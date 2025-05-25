@@ -1,4 +1,4 @@
-asyncapi: 3.0.0
+leaderboard_asyncapi: 3.0.0
 info:
   title: Quackbox API
   version: 2.0.0
@@ -44,7 +44,7 @@ channels:
       player_slot:
         $ref: "#/components/parameters/player_slot"
     messages:
-      save_data_entries:
+      save_data_info:
         $ref: "#/components/messages/save_data_info"
       get:
         $ref: "#/components/messages/get"
@@ -85,6 +85,24 @@ channels:
       get:
         $ref: "#/components/messages/get"
 operations:
+  get_save_data_info:
+    action: send
+    channel:
+      $ref: "#/channels/save_data_info"
+    summary: >-
+      Retrieve the save data information for the current user. This will return a list of JSON objects with file names and dates.
+    messages:
+      - $ref: "#/channels/save_data_info/messages/get"
+    reply:
+      channel:
+        $ref: "#/channels/save_data_info"
+      messages:
+        - $ref: "#/components/messages/save_data_info"
+    bindings:
+      http:
+        method: GET
+        query:
+          $ref: "#/components/schemas/save_data_list_params"
   upsert_save_data:
     action: send
     channel:
@@ -108,7 +126,7 @@ operations:
     channel:
       $ref: "#/channels/save_data"
     summary: >-
-      Retrieve the save data for the current user. This will return a list of JSON objects with the save data.
+      Retrieve the save data for the current user. This will return a JSON object with the save data as defined by the game developer.
     messages:
       - $ref: "#/channels/save_data/messages/get"
     reply:
@@ -120,22 +138,7 @@ operations:
       http:
         method: GET
         query:
-          type: object
-          properties:
-            player_slot:
-              type: string
-              description: >-
-                The player slot to retrieve save data for. This is the slot number of the player.
-                If not provided, player slot 1 will be used.
-            regex:
-              type: string
-              description: >-
-                A regular expression to filter the save data files by name. This will only return files that match the regex. If not provided, no filter will be applied
-            file_name:
-              type: string
-              description: >-
-                The name of the save data file to retrieve. If not provided, all save data files will be retrieved.
-          additionalProperties: false
+          $ref: "#/components/schemas/save_data_list_params"
   insert_leaderboard_entry:
     action: send
     channel:
@@ -171,7 +174,7 @@ operations:
       http:
         method: GET
         query:
-          $ref: "#/components/schemas/list_query_params"
+          $ref: "#/components/schemas/leaderboard_list_query_params"
   get_leaderboard_user:
     action: send
     channel:
@@ -190,7 +193,7 @@ operations:
       http:
         method: GET
         query:
-          $ref: "#/components/schemas/list_query_params"
+          $ref: "#/components/schemas/leaderboard_list_query_params"
   get_leaderboard_player_slot:
     action: send
     channel:
@@ -209,9 +212,30 @@ operations:
       http:
         method: GET
         query:
-          $ref: "#/components/schemas/list_query_params"
+          $ref: "#/components/schemas/leaderboard_list_query_params"
 components:
   messages:
+    save_data_info:
+      name: save_data_info
+      title: Save Data Info
+      summary: >-
+        Contains information about the save data entries for a specific player slot.
+      contentType: application/json
+      payload:
+        type: array
+        items:
+          $ref: "#/components/schemas/save_data_info"
+      description: >-
+        Contains a list of save data entries for a specific player slot. 
+        This will be a JSON object with the player slot and an array of save data entries.
+      bindings:
+        http:
+          statusCode: 200
+          headers:
+            type: object
+            Content-Type:
+              type: string
+              enum: ["application/json"]
     save_data_entry:
       name: save_data_entry
       title: Save Data Entry
@@ -322,6 +346,15 @@ components:
         Represents a GET request. Refer to the HTTP query parameters above for more information.
       contentType: application/json
   schemas:
+    save_data_info:
+      type: object
+      properties:
+        file_name:
+          type: string
+          description: The file name of the save data entry.
+        time_stamp:
+          $ref: "#/components/schemas/time_stamp"
+      additionalProperties: false
     time_stamp:
       type: string
       format: date-time
@@ -356,7 +389,7 @@ components:
           type: string
           description: The unique identifier for the user.
       additionalProperties: false
-    list_query_params:
+    leaderboard_list_query_params:
       type: object
       properties:
         limit:
@@ -375,6 +408,32 @@ components:
             Whether to sort the results in ascending order. If not provided, the default is false (descending order).
           default: false
       additionalProperties: false
+    save_data_list_params:
+      type: object
+      properties:
+        regex:
+          type: string
+          description: >-
+            A regular expression to filter the save data files by name. This will only return files that match the regex.
+            If not provided, no filter will be applied.
+        limit:
+          type: integer
+          description: >-
+            The maximum number of entries to return. If not provided, the default is 100.
+          default: 100
+        offset:
+          type: integer
+          description: >-
+            The number of entries to skip before returning results. If not provided, the default is 0.
+          default: 0
+        ascending:
+          type: boolean
+          description: >-
+            Whether to sort the results in ascending order by time saved. 
+            If not provided, the default is false (most recent first).
+          default: false
+      additionalProperties: false
+
   parameters:
     player_slot:
       description: >-
