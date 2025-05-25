@@ -147,7 +147,7 @@ operations:
       Create a new leaderboard entry for the user connected to the given player slot with the data contained
       within the request payload. The reply contains the newly created leaderboard entry.
     messages:
-      - $ref: "#/channels/leaderboard/messages/new_leaderboard_entry"
+      - $ref: "#/channels/leaderboard_player_slots/messages/new_leaderboard_entry"
     reply:
       channel:
         $ref: "#/channels/leaderboard_player_slots"
@@ -164,7 +164,7 @@ operations:
       Retrieve leaderboard data from all users for a specific leaderboard sorted by value (score, time, etc.). 
       This will return a list of JSON objects with the leaderboard entries.
     messages:
-      - $ref: "#/channels/leaderboard/messages/get"
+      - $ref: "#/channels/leaderboard_global/messages/get"
     reply:
       channel:
         $ref: "#/channels/leaderboard_global"
@@ -183,7 +183,7 @@ operations:
       Retrieve leaderboard data for a specific user and leaderboard sorted by value (score, time, etc). 
       This will return a list of JSON objects with the leaderboard entries.
     messages:
-      - $ref: "#/channels/leaderboard/messages/get"
+      - $ref: "#/channels/leaderboard_user/messages/get"
     reply:
       channel:
         $ref: "#/channels/leaderboard_user"
@@ -202,7 +202,7 @@ operations:
       Retrieve leaderboard data for a specific player slot and leaderboard sorted by value (score, time, etc). 
       This will return a list of JSON objects with the leaderboard entries.
     messages:
-      - $ref: "#/channels/leaderboard/messages/get"
+      - $ref: "#/channels/leaderboard_player_slots/messages/get"
     reply:
       channel:
         $ref: "#/channels/leaderboard_player_slots"
