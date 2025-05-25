@@ -158,7 +158,7 @@ operations:
               type: string
               description: >-
                 The player slot to retrieve leaderboard entries for. This is the slot number of the player.
-                If not provided, player slot 1 will be used.
+                If not provided, global leaderboard entries will be retrieved.
           additionalProperties: false
 components:
   messages:
