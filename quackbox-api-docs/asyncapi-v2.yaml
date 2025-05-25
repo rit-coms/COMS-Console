@@ -1,4 +1,4 @@
-leaderboard_asyncapi: 3.0.0
+asyncapi: 3.0.0
 info:
   title: Quackbox API
   version: 2.0.0
