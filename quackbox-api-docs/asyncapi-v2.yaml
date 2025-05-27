@@ -16,7 +16,7 @@ info:
     name: Computing Organization for Multicultural Students
 defaultContentType: application/json
 servers:
-  QuackboxAPI:
+  QuackboxHTTP:
     host: localhost:6174/api/v2
     protocol: http
     description: Local web server for interacting with the Quackbox.
@@ -25,7 +25,23 @@ servers:
         description: Access to leaderboard data
       - name: Save Data
         description: Read and write save data
+  QuackboxWS:
+    host: localhost:6174/api/v2
+    protocol: ws
+    description: WebSocket server for real-time interactions with the Quackbox.
+    tags:
+      - name: Controller Slots
+        description: Access to controller slot connections
 channels:
+  controller_slots:
+    address: /controller-slots
+    messages:
+      controller_slots:
+        $ref: "#/components/messages/controller_slots"
+      get:
+        $ref: "#/components/messages/get"
+    servers:
+      - $ref: "#/servers/QuackboxWS"
   save_data:
     address: /save-data/player_slots/{player_slot}
     parameters:
@@ -38,6 +54,8 @@ channels:
         $ref: "#/components/messages/new_save_data"
       get:
         $ref: "#/components/messages/get"
+    servers:
+      - $ref: "#/servers/QuackboxHTTP"
   save_data_info:
     address: /save-data/player_slots/{player_slot}/info
     parameters:
@@ -48,6 +66,8 @@ channels:
         $ref: "#/components/messages/save_data_info"
       get:
         $ref: "#/components/messages/get"
+    servers:
+      - $ref: "#/servers/QuackboxHTTP"
   leaderboard_global:
     address: /leaderboard/global/{leaderboard_name}
     parameters:
@@ -58,6 +78,8 @@ channels:
         $ref: "#/components/messages/leaderboard_entries"
       get:
         $ref: "#/components/messages/get"
+    servers:
+      - $ref: "#/servers/QuackboxHTTP"
   leaderboard_user:
     address: /leaderboard/global/{user_id}/{leaderboard_name}
     parameters:
@@ -70,6 +92,8 @@ channels:
         $ref: "#/components/messages/leaderboard_entry"
       get:
         $ref: "#/components/messages/get"
+    servers:
+      - $ref: "#/servers/QuackboxHTTP"
   leaderboard_player_slots:
     address: /leaderboard/{player_slot}/{leaderboard_name}
     parameters:
@@ -84,6 +108,8 @@ channels:
         $ref: "#/components/messages/new_leaderboard_entry"
       get:
         $ref: "#/components/messages/get"
+    servers:
+      - $ref: "#/servers/QuackboxHTTP"
 operations:
   get_save_data_info:
     action: send
