@@ -36,10 +36,12 @@ channels:
   controller_slots:
     address: /controller-slots
     messages:
-      controller_slots:
-        $ref: "#/components/messages/controller_slots"
-      get:
-        $ref: "#/components/messages/get"
+      controller_slot_swap:
+        $ref: "#/components/messages/controller_slot_swap"
+      controller_slot_update:
+        $ref: "#/components/messages/controller_slot_update"
+      controller_slots_state:
+        $ref: "#/components/messages/controller_slots_state"
     servers:
       - $ref: "#/servers/QuackboxWS"
   save_data:
@@ -239,7 +241,37 @@ operations:
         method: GET
         query:
           $ref: "#/components/schemas/leaderboard_list_query_params"
-components:
+  swap_controller_slots:
+    action: send
+    channel:
+      $ref: "#/channels/controller_slots"
+    summary: >-
+      Swap two controller slots. This will update the controller slots state and notify all connected clients.
+    messages:
+      - $ref: "#/channels/controller_slots/messages/controller_slot_swap"
+    reply:
+      channel:
+        $ref: "#/channels/controller_slots"
+      messages:
+        - $ref: "#/components/messages/controller_slots_state"
+  new_controller_slots_state:
+    action: receive
+    channel:
+      $ref: "#/channels/controller_slots"
+    summary: >-
+      Receive the updated state of all controllers. This will be sent when a controller slot is connected, stale, or disconnected.
+      The reply contains the current state of all controller slots.
+    messages:
+      - $ref: "#/channels/controller_slots/messages/controller_slots_state"
+  controller_slot_update:
+    action: receive
+    channel:
+      $ref: "#/channels/controller_slots"
+    summary: >-
+      Receive an update to a controller slot. This will be sent when a controller slot is connected, stale, or disconnected.
+      The reply contains the updated state of the controller slot.
+    messages:
+      - $ref: "#/channels/controller_slots/messages/controller_slot_update"
   messages:
     save_data_info:
       name: save_data_info
@@ -371,6 +403,65 @@ components:
       summary: >-
         Represents a GET request. Refer to the HTTP query parameters above for more information.
       contentType: application/json
+    controller_slot_swap:
+      name: controller_slot_swap
+      title: Controller Slot Swap
+      summary: >-
+        Represents a request to swap two controller slots.
+      payload:
+        type: object
+        properties:
+          from_slot:
+            $ref: "#/components/schemas/player_slot"
+          to_slot:
+            $ref: "#/components/schemas/player_slot"
+        required:
+          - from_slot
+          - to_slot
+    controller_slot_update:
+      name: controller_slot_update
+      title: Controller Slot Update
+      summary: >-
+        Represents an update to a controller slot. This will be sent when a controller slot is connected, stale, or disconnected.
+        A stale controller is one that has been recently disconncted and will be considered "disconnected" for a short period of time.
+      payload:
+        type: object
+        properties:
+          player_slot:
+            $ref: "#/components/schemas/player_slot"
+          connected:
+            type: string
+            description: The state of the udpated contoller slot.
+            enum: ["connected", "stale", "disconnected"]
+        additionalProperties: false
+        required:
+          - player_slot
+          - connected
+    controller_slots_state:
+      name: controller_slots_state
+      title: Controller Slots State
+      summary: >-
+        Contains the current state of all controller slots. This will be sent when the controller slots are updated.
+      contentType: application/json
+      payload:
+        type: array
+        maxItems: 8
+        minItems: 8
+        items:
+          type: string
+          description: The state of the controller slot.
+          enum: ["connected", "stale", "disconnected"]
+        additionalProperties: false
+      description: >-
+        Contains a list of controller slots and their states. This will be a JSON array with the player slot and state of each controller slot.
+      bindings:
+        http:
+          statusCode: 200
+          headers:
+            type: object
+            Content-Type:
+              type: string
+              enum: ["application/json"]
   schemas:
     save_data_info:
       type: object
@@ -459,7 +550,12 @@ components:
             If not provided, the default is false (most recent first).
           default: false
       additionalProperties: false
-
+    player_slot:
+      type: integer
+      description: >-
+        This is the controller slot number of the player, ranging from 1 to 8.
+      minimum: 1
+      maximum: 8
   parameters:
     player_slot:
       description: >-
