@@ -272,6 +272,7 @@ operations:
       The reply contains the updated state of the controller slot.
     messages:
       - $ref: "#/channels/controller_slots/messages/controller_slot_update"
+components:
   messages:
     save_data_info:
       name: save_data_info
@@ -567,12 +568,3 @@ operations:
     leaderboard_name:
       description: >-
         The name of the leaderboard value to retrieve. This is the title that should be displayed on the leaderboard.
-  messageTraits:
-    commonHeaders:
-      headers:
-        type: object
-        properties:
-          my-app-header:
-            type: integer
-            minimum: 0
-            maximum: 100
