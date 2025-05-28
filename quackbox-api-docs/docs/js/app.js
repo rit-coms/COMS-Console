@@ -16,7 +16,7 @@
   },
   "defaultContentType": "application/json",
   "servers": {
-    "QuackboxAPI": {
+    "QuackboxHTTP": {
       "host": "localhost:6174/api/v2",
       "protocol": "http",
       "description": "Local web server for interacting with the Quackbox.",
@@ -30,9 +30,120 @@
           "description": "Read and write save data"
         }
       ]
+    },
+    "QuackboxWS": {
+      "host": "localhost:6174/api/v2",
+      "protocol": "ws",
+      "description": "WebSocket server for real-time interactions with the Quackbox.",
+      "tags": [
+        {
+          "name": "Controller Slots",
+          "description": "Access to controller slot connections"
+        }
+      ]
     }
   },
   "channels": {
+    "controller_slots": {
+      "address": "/controller-slots",
+      "messages": {
+        "controller_slot_swap": {
+          "name": "controller_slot_swap",
+          "title": "Controller Slot Swap",
+          "summary": "Represents a request to swap two controller slots.",
+          "payload": {
+            "type": "object",
+            "properties": {
+              "from_slot": {
+                "type": "integer",
+                "description": "This is the controller slot number of the player, ranging from 1 to 8.",
+                "minimum": 1,
+                "maximum": 8,
+                "x-parser-schema-id": "player_slot"
+              },
+              "to_slot": "$ref:$.channels.controller_slots.messages.controller_slot_swap.payload.properties.from_slot"
+            },
+            "required": [
+              "from_slot",
+              "to_slot"
+            ],
+            "x-parser-schema-id": "<anonymous-schema-1>"
+          },
+          "x-parser-unique-object-id": "controller_slot_swap"
+        },
+        "controller_slot_update": {
+          "name": "controller_slot_update",
+          "title": "Controller Slot Update",
+          "summary": "Represents an update to a controller slot. This will be sent when a controller slot is connected, stale, or disconnected. A stale controller is one that has been recently disconncted and will be considered \"disconnected\" for a short period of time.",
+          "payload": {
+            "type": "object",
+            "properties": {
+              "player_slot": "$ref:$.channels.controller_slots.messages.controller_slot_swap.payload.properties.from_slot",
+              "connected": {
+                "type": "string",
+                "description": "The state of the udpated contoller slot.",
+                "enum": [
+                  "connected",
+                  "stale",
+                  "disconnected"
+                ],
+                "x-parser-schema-id": "<anonymous-schema-3>"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "player_slot",
+              "connected"
+            ],
+            "x-parser-schema-id": "<anonymous-schema-2>"
+          },
+          "x-parser-unique-object-id": "controller_slot_update"
+        },
+        "controller_slots_state": {
+          "name": "controller_slots_state",
+          "title": "Controller Slots State",
+          "summary": "Contains the current state of all controller slots. This will be sent when the controller slots are updated.",
+          "contentType": "application/json",
+          "payload": {
+            "type": "array",
+            "maxItems": 8,
+            "minItems": 8,
+            "items": {
+              "type": "string",
+              "description": "The state of the controller slot.",
+              "enum": [
+                "connected",
+                "stale",
+                "disconnected"
+              ],
+              "x-parser-schema-id": "<anonymous-schema-5>"
+            },
+            "additionalProperties": false,
+            "x-parser-schema-id": "<anonymous-schema-4>"
+          },
+          "description": "Contains a list of controller slots and their states. This will be a JSON array with the player slot and state of each controller slot.",
+          "bindings": {
+            "http": {
+              "statusCode": 200,
+              "headers": {
+                "type": "object",
+                "Content-Type": {
+                  "type": "string",
+                  "enum": [
+                    "application/json"
+                  ]
+                }
+              }
+            }
+          },
+          "x-parser-unique-object-id": "controller_slots_state"
+        }
+      },
+      "servers": [
+        "$ref:$.servers.QuackboxWS"
+      ],
+      "x-parser-unique-object-id": "controller_slots"
+    },
     "save_data": {
       "address": "/save-data/player_slots/{player_slot}",
       "parameters": {
@@ -63,7 +174,7 @@
                 "type": "object",
                 "additionalProperties": true,
                 "description": "The save data for the current user. This will be a JSON object with the save data as defined by the game developer.",
-                "x-parser-schema-id": "<anonymous-schema-2>"
+                "x-parser-schema-id": "<anonymous-schema-7>"
               },
               "time_stamp": {
                 "type": "string",
@@ -74,7 +185,7 @@
               "file_name": {
                 "type": "string",
                 "description": "The file name of the save data entry.",
-                "x-parser-schema-id": "<anonymous-schema-3>"
+                "x-parser-schema-id": "<anonymous-schema-8>"
               }
             },
             "additionalProperties": false,
@@ -106,7 +217,7 @@
             "type": "object",
             "additionalProperties": true,
             "description": "The save data for the current user. This will be a JSON object with the save data as defined by the game developer.",
-            "x-parser-schema-id": "<anonymous-schema-4>"
+            "x-parser-schema-id": "<anonymous-schema-9>"
           },
           "x-parser-unique-object-id": "new_save_data"
         },
@@ -118,6 +229,9 @@
           "x-parser-unique-object-id": "get"
         }
       },
+      "servers": [
+        "$ref:$.servers.QuackboxHTTP"
+      ],
       "x-parser-unique-object-id": "save_data"
     },
     "save_data_info": {
@@ -139,14 +253,14 @@
                 "file_name": {
                   "type": "string",
                   "description": "The file name of the save data entry.",
-                  "x-parser-schema-id": "<anonymous-schema-7>"
+                  "x-parser-schema-id": "<anonymous-schema-12>"
                 },
                 "time_stamp": "$ref:$.channels.save_data.messages.save_data_entry.payload.properties.time_stamp"
               },
               "additionalProperties": false,
               "x-parser-schema-id": "save_data_info"
             },
-            "x-parser-schema-id": "<anonymous-schema-6>"
+            "x-parser-schema-id": "<anonymous-schema-11>"
           },
           "description": "Contains a list of save data entries for a specific player slot.  This will be a JSON object with the player slot and an array of save data entries.",
           "bindings": {
@@ -167,6 +281,9 @@
         },
         "get": "$ref:$.channels.save_data.messages.get"
       },
+      "servers": [
+        "$ref:$.servers.QuackboxHTTP"
+      ],
       "x-parser-unique-object-id": "save_data_info"
     },
     "leaderboard_global": {
@@ -195,23 +312,23 @@
                 "leaderboard_name": {
                   "type": "string",
                   "description": "The name of the leaderboard value. This is the title that should be displayed on the leaderboard.",
-                  "x-parser-schema-id": "<anonymous-schema-10>"
+                  "x-parser-schema-id": "<anonymous-schema-15>"
                 },
                 "value_num": {
                   "type": "number",
                   "description": "The value of the leaderboard entry. This is the score or other value that is being tracked on the leaderboard.",
-                  "x-parser-schema-id": "<anonymous-schema-11>"
+                  "x-parser-schema-id": "<anonymous-schema-16>"
                 },
                 "user_id": {
                   "type": "string",
                   "description": "The unique identifier for the user.",
-                  "x-parser-schema-id": "<anonymous-schema-12>"
+                  "x-parser-schema-id": "<anonymous-schema-17>"
                 }
               },
               "additionalProperties": false,
               "x-parser-schema-id": "leaderboard_payload"
             },
-            "x-parser-schema-id": "<anonymous-schema-9>"
+            "x-parser-schema-id": "<anonymous-schema-14>"
           },
           "description": "Contains a list of leaderboard entries. This will be a JSON array of leaderboard objects.",
           "bindings": {
@@ -232,6 +349,9 @@
         },
         "get": "$ref:$.channels.save_data.messages.get"
       },
+      "servers": [
+        "$ref:$.servers.QuackboxHTTP"
+      ],
       "x-parser-unique-object-id": "leaderboard_global"
     },
     "leaderboard_user": {
@@ -268,6 +388,9 @@
         },
         "get": "$ref:$.channels.save_data.messages.get"
       },
+      "servers": [
+        "$ref:$.servers.QuackboxHTTP"
+      ],
       "x-parser-unique-object-id": "leaderboard_user"
     },
     "leaderboard_player_slots": {
@@ -289,21 +412,24 @@
               "leaderboard_name": {
                 "type": "string",
                 "description": "The name of the leaderboard value. This is the title that should be displayed on the leaderboard.",
-                "x-parser-schema-id": "<anonymous-schema-18>"
+                "x-parser-schema-id": "<anonymous-schema-23>"
               },
               "value_num": {
                 "type": "number",
                 "description": "The value of the leaderboard entry. This is the score or other value that is being tracked on the leaderboard.",
-                "x-parser-schema-id": "<anonymous-schema-19>"
+                "x-parser-schema-id": "<anonymous-schema-24>"
               }
             },
             "additionalProperties": false,
-            "x-parser-schema-id": "<anonymous-schema-17>"
+            "x-parser-schema-id": "<anonymous-schema-22>"
           },
           "x-parser-unique-object-id": "new_leaderboard_entry"
         },
         "get": "$ref:$.channels.save_data.messages.get"
       },
+      "servers": [
+        "$ref:$.servers.QuackboxHTTP"
+      ],
       "x-parser-unique-object-id": "leaderboard_player_slots"
     }
   },
@@ -330,25 +456,25 @@
               "regex": {
                 "type": "string",
                 "description": "A regular expression to filter the save data files by name. This will only return files that match the regex. If not provided, no filter will be applied.",
-                "x-parser-schema-id": "<anonymous-schema-24>"
+                "x-parser-schema-id": "<anonymous-schema-29>"
               },
               "limit": {
                 "type": "integer",
                 "description": "The maximum number of entries to return. If not provided, the default is 100.",
                 "default": 100,
-                "x-parser-schema-id": "<anonymous-schema-25>"
+                "x-parser-schema-id": "<anonymous-schema-30>"
               },
               "offset": {
                 "type": "integer",
                 "description": "The number of entries to skip before returning results. If not provided, the default is 0.",
                 "default": 0,
-                "x-parser-schema-id": "<anonymous-schema-26>"
+                "x-parser-schema-id": "<anonymous-schema-31>"
               },
               "ascending": {
                 "type": "boolean",
                 "description": "Whether to sort the results in ascending order by time saved.  If not provided, the default is false (most recent first).",
                 "default": false,
-                "x-parser-schema-id": "<anonymous-schema-27>"
+                "x-parser-schema-id": "<anonymous-schema-32>"
               }
             },
             "additionalProperties": false,
@@ -396,7 +522,7 @@
             "payload": {
               "type": "array",
               "items": "$ref:$.channels.save_data.messages.save_data_entry.payload",
-              "x-parser-schema-id": "<anonymous-schema-20>"
+              "x-parser-schema-id": "<anonymous-schema-25>"
             },
             "description": "Contains a list of save data entries. This will be a JSON array with the save data entries as defined by the game developer.",
             "bindings": {
@@ -468,19 +594,19 @@
                 "type": "integer",
                 "description": "The maximum number of entries to return. If not provided, the default is 100.",
                 "default": 100,
-                "x-parser-schema-id": "<anonymous-schema-21>"
+                "x-parser-schema-id": "<anonymous-schema-26>"
               },
               "offset": {
                 "type": "integer",
                 "description": "The number of entries to skip before returning results. If not provided, the default is 0.",
                 "default": 0,
-                "x-parser-schema-id": "<anonymous-schema-22>"
+                "x-parser-schema-id": "<anonymous-schema-27>"
               },
               "ascending": {
                 "type": "boolean",
                 "description": "Whether to sort the results in ascending order. If not provided, the default is false (descending order).",
                 "default": false,
-                "x-parser-schema-id": "<anonymous-schema-23>"
+                "x-parser-schema-id": "<anonymous-schema-28>"
               }
             },
             "additionalProperties": false,
@@ -531,6 +657,39 @@
         }
       },
       "x-parser-unique-object-id": "get_leaderboard_player_slot"
+    },
+    "swap_controller_slots": {
+      "action": "send",
+      "channel": "$ref:$.channels.controller_slots",
+      "summary": "Swap two controller slots. This will update the controller slots state and notify all connected clients.",
+      "messages": [
+        "$ref:$.channels.controller_slots.messages.controller_slot_swap"
+      ],
+      "reply": {
+        "channel": "$ref:$.channels.controller_slots",
+        "messages": [
+          "$ref:$.channels.controller_slots.messages.controller_slots_state"
+        ]
+      },
+      "x-parser-unique-object-id": "swap_controller_slots"
+    },
+    "new_controller_slots_state": {
+      "action": "receive",
+      "channel": "$ref:$.channels.controller_slots",
+      "summary": "Receive the updated state of all controllers. This will be sent when a controller slot is connected, stale, or disconnected. The reply contains the current state of all controller slots.",
+      "messages": [
+        "$ref:$.channels.controller_slots.messages.controller_slots_state"
+      ],
+      "x-parser-unique-object-id": "new_controller_slots_state"
+    },
+    "controller_slot_update": {
+      "action": "receive",
+      "channel": "$ref:$.channels.controller_slots",
+      "summary": "Receive an update to a controller slot. This will be sent when a controller slot is connected, stale, or disconnected. The reply contains the updated state of the controller slot.",
+      "messages": [
+        "$ref:$.channels.controller_slots.messages.controller_slot_update"
+      ],
+      "x-parser-unique-object-id": "controller_slot_update"
     }
   },
   "components": {
@@ -542,7 +701,10 @@
       "leaderboard_entry": "$ref:$.channels.leaderboard_user.messages.leaderboard_entry",
       "leaderboard_entries": "$ref:$.channels.leaderboard_global.messages.leaderboard_entries",
       "new_leaderboard_entry": "$ref:$.channels.leaderboard_player_slots.messages.new_leaderboard_entry",
-      "get": "$ref:$.channels.save_data.messages.get"
+      "get": "$ref:$.channels.save_data.messages.get",
+      "controller_slot_swap": "$ref:$.channels.controller_slots.messages.controller_slot_swap",
+      "controller_slot_update": "$ref:$.channels.controller_slots.messages.controller_slot_update",
+      "controller_slots_state": "$ref:$.channels.controller_slots.messages.controller_slots_state"
     },
     "schemas": {
       "save_data_info": "$ref:$.channels.save_data_info.messages.save_data_info.payload.items",
@@ -550,28 +712,13 @@
       "save_data_payload": "$ref:$.channels.save_data.messages.save_data_entry.payload",
       "leaderboard_payload": "$ref:$.channels.leaderboard_global.messages.leaderboard_entries.payload.items",
       "leaderboard_list_query_params": "$ref:$.operations.get_leaderboard_global.bindings.http.query",
-      "save_data_list_params": "$ref:$.operations.get_save_data_info.bindings.http.query"
+      "save_data_list_params": "$ref:$.operations.get_save_data_info.bindings.http.query",
+      "player_slot": "$ref:$.channels.controller_slots.messages.controller_slot_swap.payload.properties.from_slot"
     },
     "parameters": {
       "player_slot": "$ref:$.channels.save_data.parameters.player_slot",
       "user_id": "$ref:$.channels.leaderboard_user.parameters.user_id",
       "leaderboard_name": "$ref:$.channels.leaderboard_global.parameters.leaderboard_name"
-    },
-    "messageTraits": {
-      "commonHeaders": {
-        "headers": {
-          "type": "object",
-          "properties": {
-            "my-app-header": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 100,
-              "x-parser-schema-id": "<anonymous-schema-32>"
-            }
-          },
-          "x-parser-schema-id": "<anonymous-schema-31>"
-        }
-      }
     }
   },
   "x-parser-spec-parsed": true,
