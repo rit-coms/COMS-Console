@@ -419,6 +419,7 @@ components:
         required:
           - from_slot
           - to_slot
+        additionalProperties: false
     controller_slot_update:
       name: controller_slot_update
       title: Controller Slot Update
@@ -430,7 +431,7 @@ components:
         properties:
           player_slot:
             $ref: "#/components/schemas/player_slot"
-          connected:
+          state:
             type: string
             description: The state of the udpated contoller slot.
             enum: ["connected", "stale", "disconnected"]
