@@ -295,6 +295,15 @@ components:
             Content-Type:
               type: string
               enum: ["application/json"]
+      examples:
+        - summary: Example Save Data Info
+          payload:
+            - file_name: "save1.json"
+              time_stamp: "2023-10-01T12:00:00Z"
+            - file_name: "save2.json"
+              time_stamp: "2023-10-02T12:00:00Z"
+          headers:
+            Content-Type: "application/json"
     save_data_entry:
       name: save_data_entry
       title: Save Data Entry
@@ -313,6 +322,23 @@ components:
             Content-Type:
               type: string
               enum: ["application/json"]
+      examples:
+        - summary: Example Save Data Entry
+          payload:
+            data:
+              level: 5
+              score: 1000
+              items:
+                - name: "Sword"
+                  quantity: 1
+                - name: "Shield"
+                  quantity: 1
+                - name: "Potion"
+                  quantity: 3
+            time_stamp: "2023-10-01T12:00:00Z"
+            file_name: "save1.json"
+          headers:
+            Content-Type: "application/json"
     save_data_entries:
       name: save_data_entries
       title: Save Data Entries
@@ -333,6 +359,31 @@ components:
             Content-Type:
               type: string
               enum: ["application/json"]
+      examples:
+        - summary: Example Save Data Entries
+          payload:
+            - data:
+                level: 5
+                score: 1000
+                items:
+                  - name: "Sword"
+                    quantity: 1
+                  - name: "Shield"
+                    quantity: 1
+                  - name: "Potion"
+                    quantity: 3
+              time_stamp: "2023-10-01T12:00:00Z"
+              file_name: "save1.json"
+            - data:
+                level: 6
+                score: 1500
+                items:
+                  - name: "Bow"
+                    quantity: 1
+              time_stamp: "2023-10-02T12:00:00Z"
+              file_name: "save2.json"
+          headers:
+            Content-Type: "application/json"
     new_save_data:
       name: new_save_data
       title: New Save Data
@@ -340,9 +391,40 @@ components:
       contentType: application/json
       payload:
         type: object
-        additionalProperties: true
-        description: >-
-          The save data for the current user. This will be a JSON object with the save data as defined by the game developer.
+        properties:
+          data:
+            type: object
+            additionalProperties: true
+            description: >-
+              The save data for the current user. This will be a JSON object with the save data as defined by the game developer.
+          file_name:
+            type: string
+            description: The file name of the save data entry.
+        additionalProperties: false
+      bindings:
+        http:
+          statusCode: 201
+          headers:
+            type: object
+            Content-Type:
+              type: string
+              enum: ["application/json"]
+      examples:
+        - summary: Example New Save Data
+          payload:
+            data:
+              level: 5
+              score: 1000
+              items:
+                - name: "Sword"
+                  quantity: 1
+                - name: "Shield"
+                  quantity: 1
+                - name: "Potion"
+                  quantity: 3
+            file_name: "save1.json"
+          headers:
+            Content-Type: "application/json"
     leaderboard_entry:
       name: leaderboard_entry
       title: Leaderboard Entry
@@ -361,6 +443,14 @@ components:
             Content-Type:
               type: string
               enum: ["application/json"]
+      examples:
+        - summary: Example Leaderboard Entry
+          payload:
+            leaderboard_name: "High Scores"
+            value_num: 1500
+            user_id: "user123"
+          headers:
+            Content-Type: "application/json"
     leaderboard_entries:
       name: leaderboard_entries
       title: Leaderboard Entries
@@ -381,6 +471,17 @@ components:
             Content-Type:
               type: string
               enum: ["application/json"]
+      examples:
+        - summary: Example Leaderboard Entries
+          payload:
+            - leaderboard_name: "High Scores"
+              value_num: 1500
+              user_id: "user123"
+            - leaderboard_name: "High Scores"
+              value_num: 1200
+              user_id: "user456"
+          headers:
+            Content-Type: "application/json"
     new_leaderboard_entry:
       name: new_leaderboard_entry
       title: New Leaderboard Entry
@@ -398,6 +499,21 @@ components:
             type: number
             description: The value of the leaderboard entry. This is the score or other value that is being tracked on the leaderboard.
         additionalProperties: false
+      bindings:
+        http:
+          statusCode: 201
+          headers:
+            type: object
+            Content-Type:
+              type: string
+              enum: ["application/json"]
+      examples:
+        - summary: Example New Leaderboard Entry
+          payload:
+            leaderboard_name: "High Scores"
+            value_num: 1500
+          headers:
+            Content-Type: "application/json"
     get:
       name: get
       title: GET request
@@ -420,6 +536,13 @@ components:
           - from_slot
           - to_slot
         additionalProperties: false
+      examples:
+        - summary: Example Controller Slot Swap
+          payload:
+            from_slot: 1
+            to_slot: 2
+          headers:
+            Content-Type: "application/json"
     controller_slot_update:
       name: controller_slot_update
       title: Controller Slot Update
@@ -438,7 +561,7 @@ components:
         additionalProperties: false
         required:
           - player_slot
-          - connected
+          - state
     controller_slots_state:
       name: controller_slots_state
       title: Controller Slots State
@@ -456,14 +579,6 @@ components:
         additionalProperties: false
       description: >-
         Contains a list of controller slots and their states. This will be a JSON array with the player slot and state of each controller slot.
-      bindings:
-        http:
-          statusCode: 200
-          headers:
-            type: object
-            Content-Type:
-              type: string
-              enum: ["application/json"]
   schemas:
     save_data_info:
       type: object
