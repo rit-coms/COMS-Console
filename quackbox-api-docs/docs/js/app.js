@@ -67,8 +67,21 @@
               "from_slot",
               "to_slot"
             ],
+            "additionalProperties": false,
             "x-parser-schema-id": "<anonymous-schema-1>"
           },
+          "examples": [
+            {
+              "summary": "Example Controller Slot Swap",
+              "payload": {
+                "from_slot": 1,
+                "to_slot": 2
+              },
+              "headers": {
+                "Content-Type": "application/json"
+              }
+            }
+          ],
           "x-parser-unique-object-id": "controller_slot_swap"
         },
         "controller_slot_update": {
@@ -79,7 +92,7 @@
             "type": "object",
             "properties": {
               "player_slot": "$ref:$.channels.controller_slots.messages.controller_slot_swap.payload.properties.from_slot",
-              "connected": {
+              "state": {
                 "type": "string",
                 "description": "The state of the udpated contoller slot.",
                 "enum": [
@@ -93,7 +106,7 @@
             "additionalProperties": false,
             "required": [
               "player_slot",
-              "connected"
+              "state"
             ],
             "x-parser-schema-id": "<anonymous-schema-2>"
           },
@@ -122,20 +135,6 @@
             "x-parser-schema-id": "<anonymous-schema-4>"
           },
           "description": "Contains a list of controller slots and their states. This will be a JSON array with the player slot and state of each controller slot.",
-          "bindings": {
-            "http": {
-              "statusCode": 200,
-              "headers": {
-                "type": "object",
-                "Content-Type": {
-                  "type": "string",
-                  "enum": [
-                    "application/json"
-                  ]
-                }
-              }
-            }
-          },
           "x-parser-unique-object-id": "controller_slots_state"
         }
       },
@@ -206,6 +205,36 @@
               }
             }
           },
+          "examples": [
+            {
+              "summary": "Example Save Data Entry",
+              "payload": {
+                "data": {
+                  "level": 5,
+                  "score": 1000,
+                  "items": [
+                    {
+                      "name": "Sword",
+                      "quantity": 1
+                    },
+                    {
+                      "name": "Shield",
+                      "quantity": 1
+                    },
+                    {
+                      "name": "Potion",
+                      "quantity": 3
+                    }
+                  ]
+                },
+                "time_stamp": "2023-10-01T12:00:00Z",
+                "file_name": "save1.json"
+              },
+              "headers": {
+                "Content-Type": "application/json"
+              }
+            }
+          ],
           "x-parser-unique-object-id": "save_data_entry"
         },
         "new_save_data": {
@@ -215,10 +244,65 @@
           "contentType": "application/json",
           "payload": {
             "type": "object",
-            "additionalProperties": true,
-            "description": "The save data for the current user. This will be a JSON object with the save data as defined by the game developer.",
+            "properties": {
+              "data": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "The save data for the current user. This will be a JSON object with the save data as defined by the game developer.",
+                "x-parser-schema-id": "<anonymous-schema-10>"
+              },
+              "file_name": {
+                "type": "string",
+                "description": "The file name of the save data entry.",
+                "x-parser-schema-id": "<anonymous-schema-11>"
+              }
+            },
+            "additionalProperties": false,
             "x-parser-schema-id": "<anonymous-schema-9>"
           },
+          "bindings": {
+            "http": {
+              "statusCode": 201,
+              "headers": {
+                "type": "object",
+                "Content-Type": {
+                  "type": "string",
+                  "enum": [
+                    "application/json"
+                  ]
+                }
+              }
+            }
+          },
+          "examples": [
+            {
+              "summary": "Example New Save Data",
+              "payload": {
+                "data": {
+                  "level": 5,
+                  "score": 1000,
+                  "items": [
+                    {
+                      "name": "Sword",
+                      "quantity": 1
+                    },
+                    {
+                      "name": "Shield",
+                      "quantity": 1
+                    },
+                    {
+                      "name": "Potion",
+                      "quantity": 3
+                    }
+                  ]
+                },
+                "file_name": "save1.json"
+              },
+              "headers": {
+                "Content-Type": "application/json"
+              }
+            }
+          ],
           "x-parser-unique-object-id": "new_save_data"
         },
         "get": {
@@ -253,16 +337,16 @@
                 "file_name": {
                   "type": "string",
                   "description": "The file name of the save data entry.",
-                  "x-parser-schema-id": "<anonymous-schema-12>"
+                  "x-parser-schema-id": "<anonymous-schema-14>"
                 },
                 "time_stamp": "$ref:$.channels.save_data.messages.save_data_entry.payload.properties.time_stamp"
               },
               "additionalProperties": false,
               "x-parser-schema-id": "save_data_info"
             },
-            "x-parser-schema-id": "<anonymous-schema-11>"
+            "x-parser-schema-id": "<anonymous-schema-13>"
           },
-          "description": "Contains a list of save data entries for a specific player slot.  This will be a JSON object with the player slot and an array of save data entries.",
+          "description": "Contains a list of file names and time stamps for save data  entries for a specific player slot.",
           "bindings": {
             "http": {
               "statusCode": 200,
@@ -277,6 +361,24 @@
               }
             }
           },
+          "examples": [
+            {
+              "summary": "Example Save Data Info",
+              "payload": [
+                {
+                  "file_name": "save1.json",
+                  "time_stamp": "2023-10-01T12:00:00Z"
+                },
+                {
+                  "file_name": "save2.json",
+                  "time_stamp": "2023-10-02T12:00:00Z"
+                }
+              ],
+              "headers": {
+                "Content-Type": "application/json"
+              }
+            }
+          ],
           "x-parser-unique-object-id": "save_data_info"
         },
         "get": "$ref:$.channels.save_data.messages.get"
@@ -312,23 +414,23 @@
                 "leaderboard_name": {
                   "type": "string",
                   "description": "The name of the leaderboard value. This is the title that should be displayed on the leaderboard.",
-                  "x-parser-schema-id": "<anonymous-schema-15>"
+                  "x-parser-schema-id": "<anonymous-schema-17>"
                 },
                 "value_num": {
                   "type": "number",
                   "description": "The value of the leaderboard entry. This is the score or other value that is being tracked on the leaderboard.",
-                  "x-parser-schema-id": "<anonymous-schema-16>"
+                  "x-parser-schema-id": "<anonymous-schema-18>"
                 },
                 "user_id": {
                   "type": "string",
                   "description": "The unique identifier for the user.",
-                  "x-parser-schema-id": "<anonymous-schema-17>"
+                  "x-parser-schema-id": "<anonymous-schema-19>"
                 }
               },
               "additionalProperties": false,
               "x-parser-schema-id": "leaderboard_payload"
             },
-            "x-parser-schema-id": "<anonymous-schema-14>"
+            "x-parser-schema-id": "<anonymous-schema-16>"
           },
           "description": "Contains a list of leaderboard entries. This will be a JSON array of leaderboard objects.",
           "bindings": {
@@ -345,6 +447,26 @@
               }
             }
           },
+          "examples": [
+            {
+              "summary": "Example Leaderboard Entries",
+              "payload": [
+                {
+                  "leaderboard_name": "High Scores",
+                  "value_num": 1500,
+                  "user_id": "user123"
+                },
+                {
+                  "leaderboard_name": "High Scores",
+                  "value_num": 1200,
+                  "user_id": "user456"
+                }
+              ],
+              "headers": {
+                "Content-Type": "application/json"
+              }
+            }
+          ],
           "x-parser-unique-object-id": "leaderboard_entries"
         },
         "get": "$ref:$.channels.save_data.messages.get"
@@ -384,6 +506,19 @@
               }
             }
           },
+          "examples": [
+            {
+              "summary": "Example Leaderboard Entry",
+              "payload": {
+                "leaderboard_name": "High Scores",
+                "value_num": 1500,
+                "user_id": "user123"
+              },
+              "headers": {
+                "Content-Type": "application/json"
+              }
+            }
+          ],
           "x-parser-unique-object-id": "leaderboard_entry"
         },
         "get": "$ref:$.channels.save_data.messages.get"
@@ -412,17 +547,43 @@
               "leaderboard_name": {
                 "type": "string",
                 "description": "The name of the leaderboard value. This is the title that should be displayed on the leaderboard.",
-                "x-parser-schema-id": "<anonymous-schema-23>"
+                "x-parser-schema-id": "<anonymous-schema-25>"
               },
               "value_num": {
                 "type": "number",
                 "description": "The value of the leaderboard entry. This is the score or other value that is being tracked on the leaderboard.",
-                "x-parser-schema-id": "<anonymous-schema-24>"
+                "x-parser-schema-id": "<anonymous-schema-26>"
               }
             },
             "additionalProperties": false,
-            "x-parser-schema-id": "<anonymous-schema-22>"
+            "x-parser-schema-id": "<anonymous-schema-24>"
           },
+          "bindings": {
+            "http": {
+              "statusCode": 201,
+              "headers": {
+                "type": "object",
+                "Content-Type": {
+                  "type": "string",
+                  "enum": [
+                    "application/json"
+                  ]
+                }
+              }
+            }
+          },
+          "examples": [
+            {
+              "summary": "Example New Leaderboard Entry",
+              "payload": {
+                "leaderboard_name": "High Scores",
+                "value_num": 1500
+              },
+              "headers": {
+                "Content-Type": "application/json"
+              }
+            }
+          ],
           "x-parser-unique-object-id": "new_leaderboard_entry"
         },
         "get": "$ref:$.channels.save_data.messages.get"
@@ -456,25 +617,25 @@
               "regex": {
                 "type": "string",
                 "description": "A regular expression to filter the save data files by name. This will only return files that match the regex. If not provided, no filter will be applied.",
-                "x-parser-schema-id": "<anonymous-schema-29>"
+                "x-parser-schema-id": "<anonymous-schema-31>"
               },
               "limit": {
                 "type": "integer",
-                "description": "The maximum number of entries to return. If not provided, the default is 100.",
+                "description": "The maximum number of entries to return.",
                 "default": 100,
-                "x-parser-schema-id": "<anonymous-schema-30>"
+                "x-parser-schema-id": "<anonymous-schema-32>"
               },
               "offset": {
                 "type": "integer",
-                "description": "The number of entries to skip before returning results. If not provided, the default is 0.",
+                "description": "The number of entries to skip before returning results.",
                 "default": 0,
-                "x-parser-schema-id": "<anonymous-schema-31>"
+                "x-parser-schema-id": "<anonymous-schema-33>"
               },
               "ascending": {
                 "type": "boolean",
                 "description": "Whether to sort the results in ascending order by time saved.  If not provided, the default is false (most recent first).",
                 "default": false,
-                "x-parser-schema-id": "<anonymous-schema-32>"
+                "x-parser-schema-id": "<anonymous-schema-34>"
               }
             },
             "additionalProperties": false,
@@ -522,7 +683,7 @@
             "payload": {
               "type": "array",
               "items": "$ref:$.channels.save_data.messages.save_data_entry.payload",
-              "x-parser-schema-id": "<anonymous-schema-25>"
+              "x-parser-schema-id": "<anonymous-schema-27>"
             },
             "description": "Contains a list of save data entries. This will be a JSON array with the save data entries as defined by the game developer.",
             "bindings": {
@@ -539,6 +700,52 @@
                 }
               }
             },
+            "examples": [
+              {
+                "summary": "Example Save Data Entries",
+                "payload": [
+                  {
+                    "data": {
+                      "level": 5,
+                      "score": 1000,
+                      "items": [
+                        {
+                          "name": "Sword",
+                          "quantity": 1
+                        },
+                        {
+                          "name": "Shield",
+                          "quantity": 1
+                        },
+                        {
+                          "name": "Potion",
+                          "quantity": 3
+                        }
+                      ]
+                    },
+                    "time_stamp": "2023-10-01T12:00:00Z",
+                    "file_name": "save1.json"
+                  },
+                  {
+                    "data": {
+                      "level": 6,
+                      "score": 1500,
+                      "items": [
+                        {
+                          "name": "Bow",
+                          "quantity": 1
+                        }
+                      ]
+                    },
+                    "time_stamp": "2023-10-02T12:00:00Z",
+                    "file_name": "save2.json"
+                  }
+                ],
+                "headers": {
+                  "Content-Type": "application/json"
+                }
+              }
+            ],
             "x-parser-unique-object-id": "save_data_entries"
           }
         ]
@@ -592,21 +799,21 @@
             "properties": {
               "limit": {
                 "type": "integer",
-                "description": "The maximum number of entries to return. If not provided, the default is 100.",
+                "description": "The maximum number of entries to return.",
                 "default": 100,
-                "x-parser-schema-id": "<anonymous-schema-26>"
+                "x-parser-schema-id": "<anonymous-schema-28>"
               },
               "offset": {
                 "type": "integer",
-                "description": "The number of entries to skip before returning results. If not provided, the default is 0.",
+                "description": "The number of entries to skip before returning results.",
                 "default": 0,
-                "x-parser-schema-id": "<anonymous-schema-27>"
+                "x-parser-schema-id": "<anonymous-schema-29>"
               },
               "ascending": {
                 "type": "boolean",
-                "description": "Whether to sort the results in ascending order. If not provided, the default is false (descending order).",
+                "description": "Whether to sort the results in ascending order. If not provided, the default is descending order",
                 "default": false,
-                "x-parser-schema-id": "<anonymous-schema-28>"
+                "x-parser-schema-id": "<anonymous-schema-30>"
               }
             },
             "additionalProperties": false,
