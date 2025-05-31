@@ -4,7 +4,7 @@ use crate::{
     db::establish_connection,
     game_dev_api::{
         create_router,
-        handlers::{GameState, GameStateShared},
+        v1_handlers::{GameState, GameStateShared},
     },
 };
 use axum::Router;

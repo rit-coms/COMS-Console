@@ -4,9 +4,8 @@ use quackbox_backend::{
         test_context::{setup_initial_data, TestContext},
     },
     game_dev_api::{
-        create_router,
-        handlers::{
-            GameStateShared, LeaderboardGetParams, LeaderboardPost, SaveDataGetParams, SaveDataPost,
+        v1_handlers::{
+            LeaderboardGetParams, LeaderboardPost, SaveDataGetParams, SaveDataPost,
         },
     },
 };
@@ -270,7 +269,7 @@ async fn upsert_save_data() {
 
     setup_initial_data(&test_context.db_path).await;
 
-    test_context.current_game_tx.send(Some(0));
+    test_context.current_game_tx.send(Some(0)).expect("All receivers have been dropped");
     test_context.notifier.notified().await;
 
     let file_name: String = String::from("test data");

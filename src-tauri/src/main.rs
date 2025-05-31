@@ -3,11 +3,11 @@
 
 use db::setup_db;
 use frontend_api::{get_game_info, get_leaderboard_data, play_game, AppState, GameSenderState};
-use game_dev_api::handlers::GameState;
-use game_dev_api::handlers::GameStateShared;
 use game_dev_api::setup_game_dev_api;
+use game_dev_api::v1_handlers::GameState;
+use game_dev_api::v1_handlers::GameStateShared;
 use quackbox_backend::db::create_default_guest;
-use tauri::{api::path::local_data_dir, Manager};
+use tauri::Manager;
 use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 use tokio::sync::watch;
 use tokio::sync::Mutex;

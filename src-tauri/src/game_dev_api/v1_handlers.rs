@@ -3,7 +3,7 @@ use axum::{
     extract::{Query, State},
     http::StatusCode,
     response::IntoResponse,
-    Json,
+    Json, Router,
 };
 use axum_macros::FromRef;
 use serde::{Deserialize, Serialize};
@@ -52,7 +52,7 @@ pub struct SaveDataPost {
 
 /// Handles HTTP post requests for the axum webserver by inserting the given entry in the
 /// SQLite database.
-pub async fn set_leaderboard(
+pub async fn set_leaderboard_v1(
     State(state): State<ApiState>,
     State(game_state): State<GameStateShared>,
     Json(payload): Json<LeaderboardPost>,
@@ -92,7 +92,7 @@ pub struct LeaderboardGetParams {
 }
 
 /// Handles HTTP leaderboard get requests for the axum webserver
-pub async fn get_leaderboard(
+pub async fn get_leaderboard_v1(
     State(state): State<ApiState>,
     State(game_state): State<GameStateShared>,
     params: Query<LeaderboardGetParams>,
@@ -145,7 +145,7 @@ pub async fn get_leaderboard(
 }
 
 // Handles save-data HTTP post requests for the axum webserver
-pub async fn set_save_data(
+pub async fn set_save_data_v1(
     State(state): State<ApiState>,
     State(game_state): State<GameStateShared>,
     Json(payload): Json<SaveDataPost>,
@@ -183,7 +183,7 @@ pub struct SaveDataGetParams {
 /// Handles save-data HTTP get requests for the axum webserver.
 /// Can either get a list of save files for current user or
 /// get a specific file by user and name.
-pub async fn get_save_data(
+pub async fn get_save_data_v1(
     State(state): State<ApiState>,
     State(game_state): State<GameStateShared>,
     params: Query<SaveDataGetParams>,
@@ -191,7 +191,7 @@ pub async fn get_save_data(
     println!("Getting save data!");
     let game_id = game_state.id.read().await.unwrap().to_string();
     drop(game_state);
-    
+
     let user_id_s: Option<String> = match params.player_slot {
         Some(slot) => Some(slot.to_string()),
         None => None,
