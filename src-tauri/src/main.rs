@@ -3,14 +3,25 @@
 
 use std::sync::{Arc, Mutex};
 
+use db::setup_db;
+use frontend_api::{get_game_info, get_leaderboard_data, play_game, AppState, GameSenderState};
 use frontend_api::{get_game_info, play_game, LoadedGamesState};
+use game_dev_api::handlers::GameState;
+use game_dev_api::handlers::GameStateShared;
+use game_dev_api::setup_game_dev_api;
 use game_dev_api::setup_game_dev_api;
 use gamepad_manager::{
     gamepad_manager::{FrontendPlayerSlotConnection, GamepadManager},
     get_player_slot_states, swap_player_slots, update_controller_task,
 };
+use quackbox_backend::db::create_default_guest;
 use tauri::Manager;
+use tauri::{api::path::local_data_dir, Manager};
 use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
+use tokio::sync::watch;
+use tokio::sync::Mutex;
+use tokio::sync::Notify;
+use tokio::sync::RwLock;
 
 mod db;
 mod frontend_api;
@@ -27,18 +38,49 @@ fn main() {
         .setup(|app| {
             let (controller_slot_tx, controller_slot_rx) =
                 channel::<Vec<FrontendPlayerSlotConnection>>(100);
+            tauri::async_runtime::spawn(update_controller_task(app.handle().clone()));
+            let db_path = app
+                .path_resolver()
+                .app_data_dir()
+                .unwrap()
+                .join("local")
+                .with_extension("db")
+                .into_os_string()
+                .into_string()
+                .unwrap();
+            app.manage(Mutex::new(AppState::new(db_path.clone())));
             app.manage(LoadedGamesState::default());
             app.manage(GamepadManager::new(controller_slot_tx));
             // tauri::async_runtime::spawn(db::test_db());
-            tauri::async_runtime::spawn(setup_game_dev_api("local", controller_slot_rx));
-            tauri::async_runtime::spawn(update_controller_task(app.handle().clone()));
+
+            let (current_game_tx, current_game_rx) = watch::channel(None);
+            let notify = Arc::new(Notify::new());
+            app.manage(GameSenderState {
+                game_watch_tx: current_game_tx,
+                notifier: Arc::clone(&notify),
+            });
+
+            let game_state_shared: GameStateShared = Arc::new(GameState {
+                id: Arc::new(RwLock::new(None)),
+                notifier: Arc::clone(&notify),
+                channel: current_game_rx.clone(),
+            });
+            tauri::async_runtime::spawn({
+                setup_db(db_path.as_str());
+                create_default_guest(db_path.as_str());
+                setup_game_dev_api(db_path, game_state_shared)
+            });
             if cfg!(feature = "autostart") {
                 // Only enable autolaunch on raspberry pi
                 app.autolaunch().enable()?;
             }
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_game_info, play_game])
+        .invoke_handler(tauri::generate_handler![
+            get_game_info,
+            play_game,
+            get_leaderboard_data
+        ])
         .invoke_handler(tauri::generate_handler![
             swap_player_slots,
             get_player_slot_states
