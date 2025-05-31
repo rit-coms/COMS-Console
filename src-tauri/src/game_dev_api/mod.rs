@@ -1,10 +1,33 @@
+use std::sync::Arc;
+
 use axum::{routing::post, Router};
-use v1_handlers::{
-    get_leaderboard_v1, get_save_data_v1, set_leaderboard_v1, set_save_data_v1, ApiState, AppState,
-    GameStateShared,
-};
+use axum_macros::FromRef;
+use tokio::sync::{watch::Receiver, Notify, RwLock};
+use v1_handlers::{get_leaderboard_v1, get_save_data_v1, set_leaderboard_v1, set_save_data_v1};
 
 pub mod v1_handlers;
+mod v2_handlers;
+
+// TODO: rename to not be confused with the managed tauri app state
+#[derive(Clone, FromRef)]
+pub struct AppState {
+    pub api_state: ApiState,
+    pub game_state: GameStateShared,
+}
+
+#[derive(Clone)]
+pub struct ApiState {
+    pub database_path: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct GameState {
+    pub id: Arc<RwLock<Option<u64>>>, // The current game ID, if any
+    pub notifier: Arc<Notify>,
+    pub channel: Receiver<Option<u64>>,
+}
+
+pub type GameStateShared = Arc<GameState>;
 
 /// Listens to and updates the current shared game state
 /// by synchronizing the current game ID with the latest from a watch channel
@@ -117,7 +140,7 @@ pub async fn setup_game_dev_api(db_path: String, game_state: GameStateShared) {
 mod test {
     use std::sync::Arc;
 
-    use crate::game_dev_api::v1_handlers::GameState;
+    use crate::game_dev_api::GameState;
 
     use super::*;
     use tokio::sync::{watch, Notify, RwLock};
