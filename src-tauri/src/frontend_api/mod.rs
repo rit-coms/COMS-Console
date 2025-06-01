@@ -1,4 +1,3 @@
-use crate::db::insert_game;
 use crate::db::get_username;
 use crate::db::{get_leaderboard, get_leaderboard_game_data, insert_game};
 use anyhow::Error;
@@ -103,12 +102,10 @@ impl TryFrom<GameInfoJS> for GameInfo {
 }
 
 #[derive(Default)]
-pub struct LoadedGamesInner {
+pub struct AppState {
     games_list: Vec<GameInfo>,
     db_path: String,
 }
-
-pub type LoadedGamesState = RwLock<LoadedGamesInner>;
 
 impl AppState {
     pub fn new(db_path: String) -> Self {
@@ -118,6 +115,14 @@ impl AppState {
         }
     }
 }
+
+#[derive(Default)]
+pub struct LoadedGamesInner {
+    games_list: Vec<GameInfo>,
+    db_path: String,
+}
+
+pub type LoadedGamesState = RwLock<LoadedGamesInner>;
 
 pub struct GameSenderState {
     pub notifier: Arc<Notify>,

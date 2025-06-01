@@ -4,11 +4,10 @@
 use std::sync::{Arc, Mutex};
 
 use db::setup_db;
+use frontend_api::LoadedGamesState;
 use frontend_api::{get_game_info, get_leaderboard_data, play_game, AppState, GameSenderState};
-use frontend_api::{get_game_info, play_game, LoadedGamesState};
 use game_dev_api::handlers::GameState;
 use game_dev_api::handlers::GameStateShared;
-use game_dev_api::setup_game_dev_api;
 use game_dev_api::setup_game_dev_api;
 use gamepad_manager::{
     gamepad_manager::{FrontendPlayerSlotConnection, GamepadManager},
@@ -16,10 +15,8 @@ use gamepad_manager::{
 };
 use quackbox_backend::db::create_default_guest;
 use tauri::Manager;
-use tauri::{api::path::local_data_dir, Manager};
 use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 use tokio::sync::watch;
-use tokio::sync::Mutex;
 use tokio::sync::Notify;
 use tokio::sync::RwLock;
 
@@ -68,7 +65,7 @@ fn main() {
             tauri::async_runtime::spawn({
                 setup_db(db_path.as_str());
                 create_default_guest(db_path.as_str());
-                setup_game_dev_api(db_path, game_state_shared)
+                setup_game_dev_api(db_path, game_state_shared, controller_slot_rx)
             });
             if cfg!(feature = "autostart") {
                 // Only enable autolaunch on raspberry pi

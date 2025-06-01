@@ -1,10 +1,17 @@
+use axum::routing::any;
 use axum::{routing::post, Router};
 use handlers::{
-    get_leaderboard, get_save_data, set_leaderboard, set_save_data, ApiState, AppState,
-    GameStateShared,
+    get_leaderboard, get_save_data, player_slots_socket_handler, set_leaderboard, set_save_data,
+    ApiState, AppState, GameStateShared,
 };
+use tower_http::trace::{DefaultMakeSpan, TraceLayer};
+use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::util::SubscriberInitExt;
 use std::sync::Arc;
-use tokio::sync::{Notify};
+use tokio::sync::broadcast;
+use tokio::sync::Notify;
+
+use crate::gamepad_manager::gamepad_manager::FrontendPlayerSlotConnection;
 
 const VERSION: u8 = 1;
 
@@ -60,16 +67,23 @@ async fn handle_game_state_updates(game_state: GameStateShared) {
 /// use quackbox_backend::game_dev_api::create_router;
 /// use quackbox_backend::game_dev_api::handlers::GameState;
 /// use std::sync::Arc;
-/// use tokio::sync::{Mutex, RwLock, watch, Notify};
+/// use tokio::sync::{Mutex, RwLock, watch, Notify, broadcast};
+/// use quackbox_backend::gamepad_manager::gamepad_manager::FrontendPlayerSlotConnection;
 ///
 /// async fn setup_api() {
 ///     let game_id = Some(0);
-///     let (tx, rx) = watch::channel(game_id);
-///     let app = create_router("local", Arc::new(GameState {
-///         id: Arc::new(RwLock::new(game_id)),
-///         notifier: Arc::new(Notify::new()),
-///         channel: rx
-///     })).await;
+///     let (current_game_tx, current_game_rx) = watch::channel(game_id);
+///     let (player_slot_tx, player_slot_rx) =
+///         broadcast::channel::<Vec<FrontendPlayerSlotConnection>>(100);
+/// 
+///     let app = create_router(
+///         "local", 
+///         Arc::new(GameState {
+///             id: Arc::new(RwLock::new(game_id)),
+///             notifier: Arc::new(Notify::new()),
+///             channel: current_game_rx}),
+///         player_slot_rx
+///     ).await;
 ///
 ///     let listener = tokio::net::TcpListener::bind("127.0.0.1:8000")
 ///         .await
@@ -78,11 +92,15 @@ async fn handle_game_state_updates(game_state: GameStateShared) {
 ///     axum::serve(listener, app).await.unwrap();
 /// }
 /// ```
-pub async fn create_router(db_path: &str, game_state: GameStateShared, player_slot_rx: Receiver<Vec<FrontendPlayerSlotConnection>>) -> Router {
+pub async fn create_router(
+    db_path: &str,
+    game_state: GameStateShared,
+    player_slot_rx: broadcast::Receiver<Vec<FrontendPlayerSlotConnection>>,
+) -> Router {
     let route_prefix: String = format!("/api/v{}", VERSION.to_string());
     let api_state = ApiState {
         database_path: db_path.to_owned(),
-        player_slot_rx: player_slot_rx,
+        player_slot_rx: Arc::new(player_slot_rx),
     };
     let game_state = game_state;
 
@@ -112,14 +130,15 @@ pub async fn create_router(db_path: &str, game_state: GameStateShared, player_sl
             TraceLayer::new_for_http()
                 .make_span_with(DefaultMakeSpan::default().include_headers(true)),
         )
-        .with_state(api_state)
+        .with_state(app_state)
 }
 
 /// This function should be called in tauri builder to setup the http API for game
 /// developers to read and write game data.
 pub async fn setup_game_dev_api(
-    db_path: &str,
-    controller_slot_rx: Receiver<Vec<FrontendPlayerSlotConnection>>,
+    db_path: String,
+    game_state: GameStateShared,
+    controller_slot_rx: broadcast::Receiver<Vec<FrontendPlayerSlotConnection>>,
 ) {
     tracing_subscriber::registry()
         .with(
@@ -130,7 +149,7 @@ pub async fn setup_game_dev_api(
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    let app = create_router(db_path, controller_slot_rx);
+    let app = create_router(&db_path, game_state, controller_slot_rx).await;
 
     println!("Local webserver started successfully!!!");
     let listener = tokio::net::TcpListener::bind("127.0.0.1:6174")
@@ -144,10 +163,7 @@ mod test {
     use crate::game_dev_api::handlers::GameState;
 
     use super::*;
-    use tokio::sync::{
-        watch,
-        RwLock,
-    };
+    use tokio::sync::{watch, RwLock};
 
     #[tokio::test]
     async fn game_state_change() {
@@ -160,7 +176,9 @@ mod test {
             notifier: Arc::clone(&notify),
             channel: rx.clone(),
         });
-        let _router = create_router(db_name, Arc::clone(&game_state_shared)).await;
+        let (_, controller_slot_rx) =
+            broadcast::channel::<Vec<FrontendPlayerSlotConnection>>(100);
+        let _router = create_router(db_name, Arc::clone(&game_state_shared), controller_slot_rx).await;
 
         let game_id: Option<u64> = Some(512039487);
 

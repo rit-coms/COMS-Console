@@ -1,13 +1,5 @@
 use anyhow::{Error, Ok};
-use axum::http::StatusCode;
-use diesel::{insert_into, prelude::*, upsert::excluded};
-use dotenvy::dotenv;
-use models::*;
-use regex::Regex;
-use std::env;
-use std::option::Option;
-use std::path::Path;
-use diesel::{expression::is_aggregate::No, insert_into, prelude::*, sql_types::Nullable};
+use diesel::{insert_into, prelude::*};
 use models::*;
 use regex::Regex;
 use std::option::Option;
@@ -204,10 +196,10 @@ pub fn create_default_guest(db_path: &str) -> Vec<User> {
     const NAME_S: &str = "Guest";
     let connection = &mut establish_connection(db_path);
     insert_into(users)
-        .values((id.eq(ID_S), name.eq(NAME_S)))
+        .values((id.eq(ID_S), username.eq(NAME_S)))
         .on_conflict(id)
         .do_update()
-        .set((name.eq(NAME_S), rit_id.eq::<Option<&str>>(None)))
+        .set((username.eq(NAME_S), rit_id.eq::<Option<&str>>(None)))
         .load::<User>(connection)
         .expect("Could not make sure Guest user exists")
 }
@@ -216,7 +208,7 @@ pub fn create_user(id_s: &str, name_s: &str, db_path: &str) -> User {
     use self::schema::users::dsl::*;
     let connection = &mut establish_connection(db_path);
     insert_into(users)
-        .values((id.eq(id_s), name.eq(name_s)))
+        .values((id.eq(id_s), username.eq(name_s)))
         .get_result::<User>(connection)
         .expect("Could not create User")
 }
@@ -227,7 +219,7 @@ pub async fn get_user(name_s: &str, user_id_s: &str, db_path: &str) -> User {
 
     users
         .select(User::as_select())
-        .filter(name.eq(name_s))
+        .filter(username.eq(name_s))
         .filter(id.eq(user_id_s))
         .first(connection)
         .expect("Error loading user data")
@@ -306,7 +298,7 @@ pub fn get_username(id_s: &str, db_path: &str) -> Result<String, Error> {
     use self::schema::users::dsl::*;
     let connection = &mut establish_connection(db_path);
 
-    Ok(users.select(name).filter(id.eq(id_s)).first(connection)?)
+    Ok(users.select(username).filter(id.eq(id_s)).first(connection)?)
 }
 
 mod tests {
@@ -390,7 +382,7 @@ mod tests {
         assert!(updated_users.len() == 1); // test context already has a user with id 1
         let guest_user = updated_users.first().unwrap();
         assert_eq!(guest_user.id, "1");
-        assert_eq!(guest_user.name, "Guest");
+        assert_eq!(guest_user.username, "Guest");
         assert_eq!(guest_user.rit_id, None);
 
         // shouldn't error out if the default guest already exists

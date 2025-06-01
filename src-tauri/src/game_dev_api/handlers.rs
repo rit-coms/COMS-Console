@@ -10,12 +10,15 @@ use axum::{
     Json,
 };
 use axum_macros::FromRef;
+use futures_util::{SinkExt, StreamExt};
 use serde::{Deserialize, Serialize};
-use serde_json::{from_str, Value};
+use serde_json::{from_str, json, Value};
+use std::ops::ControlFlow;
 use std::sync::Arc;
 use std::{option::Option, path::PathBuf};
 use tokio::{
-    sync::watch::Receiver,
+    sync::watch,
+    sync::broadcast,
     sync::{Notify, RwLock},
 };
 
@@ -26,17 +29,17 @@ pub struct AppState {
     pub game_state: GameStateShared,
 }
 
-#[derive(Clone)]
+#[derive(Clone, FromRef)]
 pub struct ApiState {
     pub database_path: String,
-    pub player_slot_rx: Arc<Receiver<Vec<FrontendPlayerSlotConnection>>>,
+    pub player_slot_rx: Arc<broadcast::Receiver<Vec<FrontendPlayerSlotConnection>>>,
 }
 
 #[derive(Debug, Clone)]
 pub struct GameState {
     pub id: Arc<RwLock<Option<u64>>>,
     pub notifier: Arc<Notify>,
-    pub channel: Receiver<Option<u64>>,
+    pub channel: watch::Receiver<Option<u64>>,
 }
 
 pub type GameStateShared = Arc<GameState>;
@@ -196,7 +199,7 @@ pub async fn get_save_data(
     println!("Getting save data!");
     let game_id = game_state.id.read().await.unwrap().to_string();
     drop(game_state);
-    
+
     let user_id_s: Option<String> = match params.player_slot {
         Some(slot) => Some(slot.to_string()),
         None => None,

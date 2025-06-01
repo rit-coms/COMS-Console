@@ -11,8 +11,6 @@ use quackbox_backend::{
     },
 };
 
-extern crate diesel_migrations;
-
 const SAVE_DATA_PATH: &str = "/api/v1/save-data";
 
 #[tokio::test]
@@ -28,7 +26,7 @@ async fn read_and_write_user_table_db() {
     let result = get_user(name_s, user_id_s, &test_context.db_path).await;
 
     assert_eq!(user_id_s, result.id.as_str());
-    assert_eq!(name_s, result.name.as_str());
+    assert_eq!(name_s, result.username.as_str());
 }
 
 #[tokio::test]
@@ -270,7 +268,7 @@ async fn upsert_save_data() {
 
     setup_initial_data(&test_context.db_path).await;
 
-    test_context.current_game_tx.send(Some(0));
+    test_context.current_game_tx.send(Some(0)).expect("Recievers for this channel have been dropped");
     test_context.notifier.notified().await;
 
     let file_name: String = String::from("test data");

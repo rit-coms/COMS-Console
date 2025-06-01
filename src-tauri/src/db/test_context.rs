@@ -5,15 +5,14 @@ use crate::{
     game_dev_api::{
         create_router,
         handlers::{GameState, GameStateShared},
-    },
+    }, gamepad_manager::gamepad_manager::FrontendPlayerSlotConnection,
 };
 use axum::Router;
 use axum_test::TestServer;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use tauri::api::path::local_data_dir;
 use tokio::sync::{
-    watch::{self, Receiver, Sender},
-    Notify, RwLock,
+    broadcast, watch::{self, Receiver, Sender}, Notify, RwLock
 };
 
 use super::{
@@ -47,7 +46,8 @@ const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
 /// ```
 pub struct TestContext {
     pub db_path: String,
-    pub current_game_tx: Sender<Option<u64>>,
+    pub current_game_tx: Sender<Option<u64>>, // Can be used to transmit what game is currently being played (by ID)
+    pub player_slot_tx: broadcast::Sender<Vec<FrontendPlayerSlotConnection>>,
     pub notifier: Arc<Notify>,
     pub server: TestServer,
 }
@@ -70,11 +70,15 @@ impl TestContext {
         let (current_game_tx, current_game_rx) = watch::channel(None);
         let notifier = Arc::new(Notify::new());
 
-        let app = setup_test_server(&db_path, current_game_rx, Arc::clone(&notifier)).await;
+        let (player_slot_tx, player_slot_rx) =
+            broadcast::channel::<Vec<FrontendPlayerSlotConnection>>(100);
+
+        let app = setup_test_server(&db_path, current_game_rx, Arc::clone(&notifier), player_slot_rx).await;
 
         Self {
-            db_path: db_path,
-            current_game_tx,
+            db_path: db_path.to_string(),
+            current_game_tx: current_game_tx,
+            player_slot_tx: player_slot_tx,
             notifier,
             server: TestServer::new(app).expect("Failed to set up test server"),
         }
@@ -91,18 +95,18 @@ pub async fn setup_initial_user_data(db_path: &str) {
     let users = vec![
         User {
             id: String::from("1"),
-            name: String::from("user1"),
+            username: String::from("user1"),
             rit_id: None,
         },
         User {
             id: String::from("2"),
-            name: String::from("user2"),
+            username: String::from("user2"),
             rit_id: None,
         },
     ];
 
     for user in users {
-        create_user(&user.id, &user.name, db_path);
+        create_user(&user.id, &user.username, db_path);
     }
 }
 
@@ -176,6 +180,7 @@ async fn setup_test_server(
     db_path: &str,
     current_game_rx: Receiver<Option<u64>>,
     notifier: Arc<Notify>,
+    player_slot_rx: broadcast::Receiver<Vec<FrontendPlayerSlotConnection>>
 ) -> Router {
     let game_state_shared: GameStateShared = Arc::new(GameState {
         id: Arc::new(RwLock::new(None)),
@@ -183,5 +188,5 @@ async fn setup_test_server(
         channel: current_game_rx,
     });
 
-    return create_router(db_path, game_state_shared).await;
+    return create_router(db_path, game_state_shared, player_slot_rx).await;
 }

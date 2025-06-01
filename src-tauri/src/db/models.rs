@@ -18,7 +18,7 @@ pub struct LeaderboardEntry {
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct User {
     pub id: String,
-    pub name: String,
+    pub username: String,
     pub rit_id: Option<String>,
 }
 
