@@ -19,19 +19,6 @@ Alternative install with cargo:
 cargo binstall diesel_cli
 ```
 
-### Create Database url for sqlite diesel
-Create .env file with a database url like below
-- Linux: 
-  - DATABASE_URL=$XDG_DATA_HOME/coms-console
-  - DATABASE_URL=$HOME/.local/share/coms-console/local.db (recommended)
-
-- macOS: 
-  - DATABASE_URL=$HOME/Library/Application\ Support/coms-console/local.db
-
-- Windows: 
-  - DATABASE_URL=%UserProfile%\AppData\Roaming\coms-console/local.db
-  - (the above is untested on windows)
-
 ### Redoing migrations
 ```sh
 # Run migrations to add all the tables to sqlite
@@ -43,3 +30,8 @@ diesel database reset
 # Add new migration
 diesel migration generate name-of-migration # creates a new sql migration
 ```
+
+### Further Diesel Reference
+- [Diesel.rs Getting Starting](https://diesel.rs/guides/getting-started)
+- [Diesel.rs Guides](https://diesel.rs/guides/)
+- [Diesel.rs API Docs](https://docs.diesel.rs/master/diesel/index.html)
