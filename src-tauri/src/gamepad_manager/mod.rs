@@ -15,7 +15,7 @@ pub async fn update_controller_task(app_handle: AppHandle) -> Result<(), Error> 
 
     // populate gamepad_map with initial connected gamepads
     for (id, _) in gilrs.gamepads() {
-        state_manager.connect_controller(id);
+        state_manager.connect_controller(id.into());
     }
 
     loop {
@@ -26,14 +26,14 @@ pub async fn update_controller_task(app_handle: AppHandle) -> Result<(), Error> 
                     event: EventType::Connected,
                     ..
                 } => {
-                    state_manager.connect_controller(id);
+                    state_manager.connect_controller(id.into());
                 }
                 Event {
                     id,
                     event: EventType::Disconnected,
                     ..
                 } => {
-                    state_manager.disconnect_controller(id);
+                    state_manager.disconnect_controller(id.into());
                 }
                 _ => (),
             }
@@ -54,21 +54,4 @@ pub fn get_player_slot_states(
 #[tauri::command]
 pub fn swap_player_slots(manager: State<'_, GamepadManager>, slot1: usize, slot2: usize) {
     manager.swap_slots(slot1, slot2);
-}
-
-#[cfg(test)]
-mod tests {
-    fn next_slot_num_under_max() {
-        todo!()
-    }
-    fn get_next_slot_over_max() {
-        todo!()
-    }
-
-    fn swap_player_with_empty() {
-        todo!()
-    }
-    fn swap_player_slot() {
-        todo!()
-    }
 }

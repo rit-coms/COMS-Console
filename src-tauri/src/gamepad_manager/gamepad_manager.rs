@@ -3,7 +3,6 @@ use std::fmt;
 use std::fmt::Display;
 use std::time::Duration;
 
-use gilrs::GamepadId;
 use inner::GamepadManagerInner;
 use serde::Serialize;
 use std::sync::Arc;
@@ -18,9 +17,9 @@ pub const MAX_CONTROLLERS: usize = 8;
 
 #[derive(Debug)]
 enum PlayerSlotConnectionStatus {
-    Connected(GamepadId),
+    Connected(usize), // the usize is the id of the Gamepad
     Disconnected,
-    Stale(GamepadId, JoinHandle<()>),
+    Stale(usize, JoinHandle<()>),
 }
 
 impl Display for PlayerSlotConnectionStatus {
@@ -75,7 +74,7 @@ impl GamepadManager {
         }
     }
 
-    pub fn connect_controller(&self, id: GamepadId) {
+    pub fn connect_controller(&self, id: usize) {
         // Check if the connected controller was previously stale
         let mut lock = self.state.write().unwrap();
         if let Some(slot) = lock.get_slot_num(&id) {
@@ -97,7 +96,7 @@ impl GamepadManager {
         }
     }
 
-    pub fn disconnect_controller(&self, id: GamepadId) {
+    pub fn disconnect_controller(&self, id: usize) {
         let mut lock = self.state.write().unwrap();
         if let Some(slot_num) = lock.get_slot_num(&id) {
             let slot_num = *slot_num;
@@ -124,7 +123,7 @@ impl GamepadManager {
         lock.get_slots().iter().map(|value| value.into()).collect()
     }
 
-    async fn stale_timer(id: GamepadId, slots: Arc<RwLock<GamepadManagerInner>>) {
+    async fn stale_timer(id: usize, slots: Arc<RwLock<GamepadManagerInner>>) {
         sleep(CONTROLLER_STALE_TIME).await;
         let mut lock = slots.write().unwrap();
         let slot: usize;
@@ -142,7 +141,7 @@ mod inner {
     use super::*;
     pub struct GamepadManagerInner {
         player_slots: [PlayerSlotConnectionStatus; MAX_CONTROLLERS],
-        gamepad_map: HashMap<GamepadId, usize>,
+        gamepad_map: HashMap<usize, usize>,
         sender: Sender<Vec<FrontendPlayerSlotConnection>>,
     }
 
@@ -176,7 +175,7 @@ mod inner {
             &self.player_slots[slot_num]
         }
 
-        pub fn get_slot_num(&self, id: &GamepadId) -> Option<&usize> {
+        pub fn get_slot_num(&self, id: &usize) -> Option<&usize> {
             self.gamepad_map.get(id)
         }
 
@@ -189,11 +188,11 @@ mod inner {
             self.broadcast_state();
         }
 
-        pub fn register_id(&mut self, id: GamepadId, slot_num: usize) {
+        pub fn register_id(&mut self, id: usize, slot_num: usize) {
             self.gamepad_map.insert(id, slot_num);
         }
 
-        pub fn remove_id(&mut self, id: &GamepadId) {
+        pub fn remove_id(&mut self, id: &usize) {
             self.gamepad_map.remove(id);
         }
 
@@ -246,5 +245,24 @@ mod inner {
             }
             return None;
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use gilrs::Gamepad;
+
+    fn next_slot_num_under_max() {
+        
+    }
+    fn get_next_slot_over_max() {
+        todo!()
+    }
+
+    fn swap_player_with_empty() {
+        todo!()
+    }
+    fn swap_player_slot() {
+        todo!()
     }
 }
