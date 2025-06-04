@@ -55,3 +55,54 @@ pub fn get_player_slot_states(
 pub fn swap_player_slots(manager: State<'_, GamepadManager>, slot1: usize, slot2: usize) {
     manager.swap_slots(slot1, slot2);
 }
+
+mod tests {
+    use std::time::Duration;
+
+    use tokio::{sync::broadcast::Sender, time::sleep};
+
+    use crate::gamepad_manager::gamepad_manager::FrontendPlayerSlotConnection;
+
+    use super::GamepadManager;
+
+    impl GamepadManager {
+        fn new_mock() -> Self {
+            GamepadManager::new(Sender::new(10), 0.0)
+        }
+    }
+
+
+    #[tokio::test]
+    async fn next_slot_num_under_max() {
+        let manager = GamepadManager::new_mock();
+        for id in 1..=8 {
+            manager.connect_controller(id);
+        }
+        manager.disconnect_controller(8);
+        sleep(Duration::from_millis(20)).await;
+        assert_eq!(
+            manager.get_slots(), 
+            vec![
+                FrontendPlayerSlotConnection::Connected,
+                FrontendPlayerSlotConnection::Connected,
+                FrontendPlayerSlotConnection::Connected,
+                FrontendPlayerSlotConnection::Connected,
+                FrontendPlayerSlotConnection::Connected,
+                FrontendPlayerSlotConnection::Connected,
+                FrontendPlayerSlotConnection::Connected,
+                FrontendPlayerSlotConnection::Disconnected
+            ]
+        )
+    }
+
+    fn get_next_slot_over_max() {
+        todo!()
+    }
+
+    fn swap_player_with_empty() {
+        todo!()
+    }
+    fn swap_player_slot() {
+        todo!()
+    }
+}

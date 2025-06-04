@@ -11,8 +11,6 @@ use tokio::sync::broadcast::Sender;
 use tokio::task::JoinHandle;
 use tokio::time::sleep;
 
-const CONTROLLER_STALE_TIME: Duration = Duration::from_secs(5);
-
 pub const MAX_CONTROLLERS: usize = 8;
 
 #[derive(Debug)]
@@ -51,7 +49,7 @@ impl Into<FrontendPlayerSlotConnection> for &PlayerSlotConnectionStatus {
     }
 }
 
-#[derive(Serialize, Clone)]
+#[derive(Serialize, Clone, PartialEq, Eq, Debug)]
 pub enum FrontendPlayerSlotConnection {
     Connected,
     Disconnected,
@@ -65,12 +63,14 @@ pub enum FrontendPlayerSlotConnection {
 /// through the provided methods.
 pub struct GamepadManager {
     state: Arc<RwLock<GamepadManagerInner>>,
+    timeout_s: f32
 }
 
 impl GamepadManager {
-    pub fn new(sender: Sender<Vec<FrontendPlayerSlotConnection>>) -> Self {
+    pub fn new(sender: Sender<Vec<FrontendPlayerSlotConnection>>, timeout_s: f32) -> Self {
         GamepadManager {
             state: Arc::new(RwLock::new(GamepadManagerInner::new(sender))),
+            timeout_s: timeout_s
         }
     }
 
@@ -88,7 +88,7 @@ impl GamepadManager {
             }
         } else {
             // Connect the new controller
-            let next_slot = lock.get_next_slot_num_under_max();
+            let next_slot = lock.get_next_slot_num();
             if let Some(open_slot) = next_slot {
                 lock.register_id(id, open_slot);
                 lock.set_slot(open_slot, PlayerSlotConnectionStatus::Connected(id));
@@ -104,7 +104,7 @@ impl GamepadManager {
                 slot_num,
                 PlayerSlotConnectionStatus::Stale(
                     id,
-                    tokio::spawn(Self::stale_timer(id, Arc::clone(&self.state))),
+                    tokio::spawn(Self::stale_timer(id, self.timeout_s , Arc::clone(&self.state))),
                 ),
             );
         }
@@ -123,8 +123,8 @@ impl GamepadManager {
         lock.get_slots().iter().map(|value| value.into()).collect()
     }
 
-    async fn stale_timer(id: usize, slots: Arc<RwLock<GamepadManagerInner>>) {
-        sleep(CONTROLLER_STALE_TIME).await;
+    async fn stale_timer(id: usize, timeout_s: f32, slots: Arc<RwLock<GamepadManagerInner>>) {
+        sleep(Duration::from_secs_f32(timeout_s)).await;
         let mut lock = slots.write().unwrap();
         let slot: usize;
         if let Some(slot_num) = lock.get_slot_num(&id) {
@@ -236,7 +236,7 @@ mod inner {
         }
 
         /// Get the index of the lowest slot number that is disconnected in a given array of player slot connections
-        pub fn get_next_slot_num_under_max(&self) -> Option<usize> {
+        pub fn get_next_slot_num(&self) -> Option<usize> {
             for (i, connection) in self.player_slots.iter().enumerate() {
                 match connection {
                     PlayerSlotConnectionStatus::Disconnected => return Some(i),
@@ -245,24 +245,5 @@ mod inner {
             }
             return None;
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use gilrs::Gamepad;
-
-    fn next_slot_num_under_max() {
-        
-    }
-    fn get_next_slot_over_max() {
-        todo!()
-    }
-
-    fn swap_player_with_empty() {
-        todo!()
-    }
-    fn swap_player_slot() {
-        todo!()
     }
 }

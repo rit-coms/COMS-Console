@@ -47,7 +47,7 @@ fn main() {
                 .unwrap();
             app.manage(Mutex::new(AppState::new(db_path.clone())));
             app.manage(LoadedGamesState::default());
-            app.manage(GamepadManager::new(controller_slot_tx));
+            app.manage(GamepadManager::new(controller_slot_tx, 5.0));
             // tauri::async_runtime::spawn(db::test_db());
 
             let (current_game_tx, current_game_rx) = watch::channel(None);
