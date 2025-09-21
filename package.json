@@ -12,7 +12,8 @@
   "author": "Kenzie & Matt",
   "license": "ISC",
   "dependencies": {
-    "@tauri-apps/api": "^1.6.0",
+    "@tauri-apps/api": "^2.8.0",
+    "@tauri-apps/plugin-process": "~2.3.0",
     "quackbox-design-system": "^5.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -23,7 +24,7 @@
     "web-vitals": "^4.2.3"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^1.6.2",
+    "@tauri-apps/cli": "^2.8.4",
     "@testing-library/react": "^16.2.0",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.13.10",

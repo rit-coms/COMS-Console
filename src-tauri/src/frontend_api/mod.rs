@@ -389,7 +389,7 @@ fn get_leaderboard_data_helper(
             Some(entries) => entries.push(FrontendLeaderboardEntry {
                 value_num: entry.value_num,
                 username: get_username(&entry.user_id, db_name)?,
-                time_stamp: entry.time_stamp
+                time_stamp: entry.time_stamp,
             }),
             None => {
                 sorted_data.insert(
