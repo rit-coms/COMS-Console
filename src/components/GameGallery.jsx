@@ -10,8 +10,8 @@ import * as Filter from "../helpers/FilterGames";
 import * as Search from "../helpers/SearchGames";
 import { FilterContext } from "../context/FilterContext";
 import { SearchContext } from "../context/SearchContext";
-import { invoke } from "@tauri-apps/api/core"
-import { convertFileSrc } from "@tauri-apps/api/core";
+import { invoke } from "@tauri-apps/api";
+import { convertFileSrc } from "@tauri-apps/api/tauri";
 
 function GameGallery() {
   const [showFullGallery, setShowFullGallery] = useState(false);

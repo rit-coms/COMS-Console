@@ -10,7 +10,7 @@ use std::{
     process::Command,
     sync::Mutex,
 };
-use tauri::{AppHandle, Manager, State};
+use tauri::{AppHandle, State};
 use url::Url;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -163,9 +163,9 @@ fn get_game_info_files(
 
     // generating app data directory and games folder if it doesn't exist
     let app_data_dir = app_handle
-        .path()
+        .path_resolver()
         .app_data_dir()
-        .expect("Could not find app data directory")
+        .ok_or("Could not find app data directory")?
         .join("games");
     println!("{:?}", app_data_dir);
 
@@ -336,10 +336,10 @@ pub fn play_game(
     {
         // create new game window
         Some(exec_url) => {
-            let game_window = tauri::WebviewWindowBuilder::new(
+            let game_window = tauri::WindowBuilder::new(
                 &app_handle,
                 "external",
-                tauri::WebviewUrl::External(exec_url),
+                tauri::WindowUrl::External(exec_url),
             )
             .build()?;
 
