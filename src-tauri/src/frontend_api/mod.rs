@@ -1,17 +1,23 @@
-use crate::db::insert_game;
+use crate::db::get_username;
+use crate::db::{get_leaderboard, get_leaderboard_game_data, insert_game};
 use anyhow::Error;
 use chrono::{serde::ts_seconds_option, DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::{
-    env, fs,
+    collections::HashMap,
+    env,
+    fs::{self, File},
     hash::{DefaultHasher, Hash, Hasher},
     io::BufReader,
     path::PathBuf,
     process::Command,
-    sync::Mutex,
+    sync::Arc,
 };
 use tauri::{AppHandle, State};
+use tokio::sync::{oneshot, watch::Sender, Mutex, Notify};
 use url::Url;
+
+use crate::db;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(try_from = "GameInfoJS")]
@@ -97,9 +103,24 @@ impl TryFrom<GameInfoJS> for GameInfo {
 #[derive(Default)]
 pub struct AppState {
     games_list: Vec<GameInfo>,
+    db_path: String,
 }
 
-#[derive(Serialize)]
+impl AppState {
+    pub fn new(db_path: String) -> Self {
+        AppState {
+            games_list: Vec::new(),
+            db_path,
+        }
+    }
+}
+
+pub struct GameSenderState {
+    pub notifier: Arc<Notify>,
+    pub game_watch_tx: Sender<Option<u64>>,
+}
+
+#[derive(Serialize, Debug)]
 #[serde(transparent)]
 pub struct ErrorType(String);
 
@@ -153,11 +174,11 @@ impl<T: ToString> From<T> for ErrorType {
 ///
 /// fetchGameInfo();
 /// ```
-fn get_game_info_files(
-    state: State<'_, Mutex<AppState>>,
-    app_handle: AppHandle,
+async fn get_game_info_list(
+    state: &State<'_, Mutex<AppState>>,
+    app_handle: &AppHandle,
 ) -> Result<Vec<GameInfo>, ErrorType> {
-    let mut state = state.lock().unwrap();
+    let mut state = state.lock().await;
     let games_list = &mut state.games_list;
     games_list.clear();
 
@@ -245,27 +266,148 @@ fn get_game_info_files(
     Ok(state.games_list.clone())
 }
 
-fn get_game_info_database(
-    state: State<'_, Mutex<AppState>>,
-    app_handle: AppHandle,
-) -> Result<Vec<GameInfo>, ErrorType> {
-    todo!()
+#[derive(Deserialize)]
+struct GameDataList {
+    games: Vec<GameData>,
+}
+
+#[derive(Deserialize)]
+struct GameData {
+    title: String,
+    id: String,
+}
+
+/// Make sure every game listed in the games\all-games.json file is in the local database
+fn check_all_games(app_handle: &AppHandle) {
+    // getting the app data directory
+    let app_data_dir = app_handle
+        .path_resolver()
+        .app_data_dir()
+        .expect("Could not find app data directory");
+
+    // Getting the list of games within the all-games JSON file
+    let all_games_file_path = app_data_dir.join("games/all-games.json");
+    let all_games_file = File::open(&all_games_file_path).expect(
+        format!(
+            "all-games.json not found at {}",
+            &all_games_file_path.clone().display()
+        )
+        .as_str(),
+    );
+    let reader = BufReader::new(all_games_file);
+    // If this reading is ever too slow, we can switch to reading the file into memory as a string
+    // and then converting that string into a JSON Value
+    let games_list: GameDataList =
+        serde_json::from_reader(reader).expect("Failed to read all-games.json");
+
+    for game in games_list.games {
+        db::make_sure_game_exists(
+            &game.title,
+            &game.id,
+            app_handle
+                .path_resolver()
+                .app_data_dir()
+                .unwrap()
+                .join("local")
+                .with_extension("db")
+                .into_os_string()
+                .to_str()
+                .unwrap(),
+        );
+    }
+}
+
+// Given a list of games, set them to be installed in the database
+fn set_games_installed(games: &Vec<GameInfo>, app_handle: &AppHandle) {
+    for game in games {
+        db::insert_game(
+            &game.id.to_string(),
+            &game.title,
+            true,
+            app_handle
+                .path_resolver()
+                .app_data_dir()
+                .unwrap()
+                .join("local")
+                .with_extension("db")
+                .into_os_string()
+                .to_str()
+                .unwrap(),
+        );
+    }
 }
 
 #[tauri::command]
-pub fn get_game_info(
+pub async fn get_game_info(
     state: State<'_, Mutex<AppState>>,
     app_handle: AppHandle,
 ) -> Result<Vec<GameInfo>, ErrorType> {
+    let games = get_game_info_list(&state, &app_handle).await?;
+    set_games_installed(&games, &app_handle);
+    // Only populate the database with all games if code is running on the quackbox
     if cfg!(feature = "quackbox-raspi") {
-        get_game_info_database(state, app_handle)
-    } else {
-        let games = get_game_info_files(state, app_handle)?;
-        for game in games.iter() {
-            insert_game(&game.id.to_string(), &game.title, true, "local");
-        }
-        Ok(games)
+        check_all_games(&app_handle);
     }
+    Ok(games)
+}
+
+#[derive(Serialize, Debug)]
+struct FrontendLeaderboardEntry {
+    value_num: f64,
+    username: String,
+    time_stamp: String,
+}
+
+/// Retrieves a json object of all leaderboard data for a given game.
+///
+/// # Arguments
+/// `game_title` - The title of the game to get data for (case sensitive)
+///
+///
+/// # Returns
+/// * `Result<serde_json::Value, ErrorType>` - A JSON object representing the leaderboard data of a
+/// specific game or an `ErrorType` if an error occurs.
+#[tauri::command]
+pub async fn get_leaderboard_data(
+    game_title: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<serde_json::Value, ErrorType> {
+    get_leaderboard_data_helper(game_title, state.lock().await.db_path.as_str())
+}
+
+/// This function allows us to mock databases for testing without having a db_name parameter
+/// at the front end
+fn get_leaderboard_data_helper(
+    game_title: String,
+    db_name: &str,
+) -> Result<serde_json::Value, ErrorType> {
+    let data = get_leaderboard_game_data(&game_title, db_name)?;
+
+    let mut sorted_data: HashMap<String, Vec<FrontendLeaderboardEntry>> = HashMap::new();
+    for entry in data {
+        match sorted_data.get_mut(&entry.value_name) {
+            Some(entries) => entries.push(FrontendLeaderboardEntry {
+                value_num: entry.value_num,
+                username: get_username(&entry.user_id, db_name)?,
+                time_stamp: entry.time_stamp
+            }),
+            None => {
+                sorted_data.insert(
+                    entry.value_name,
+                    vec![FrontendLeaderboardEntry {
+                        value_num: entry.value_num,
+                        username: get_username(&entry.user_id, db_name)?,
+                        time_stamp: entry.time_stamp,
+                    }],
+                );
+            }
+        }
+    }
+
+    Ok(serde_json::json!({
+        "title": game_title,
+        "data": sorted_data
+    }))
 }
 
 /// Runs a game based on its ID.
@@ -309,19 +451,24 @@ pub fn get_game_info(
 /// startGame('12345');
 /// ```
 #[tauri::command]
-pub fn play_game(
+pub async fn play_game(
     state: State<'_, Mutex<AppState>>,
+    game_sender_state: State<'_, GameSenderState>,
     window: tauri::Window,
     app_handle: AppHandle,
     id: String,
 ) -> Result<(), ErrorType> {
-    let games_list = &state.lock()?.games_list;
+    let games_list = &state.lock().await.games_list;
     let path = env::current_dir()?;
     let id = id.parse::<u64>()?;
     let game_info = games_list
         .iter()
         .find(|g| g.id == id)
         .ok_or("Game ID not found")?;
+    game_sender_state.game_watch_tx.send(Some(id))?;
+    println!("sending id: {}", id);
+    game_sender_state.notifier.notified().await;
+    println!("Recieved notification, starting game");
 
     window.minimize()?;
 
@@ -346,6 +493,7 @@ pub fn play_game(
             game_window.maximize()?;
             game_window.set_focus()?;
             game_window.set_fullscreen(true)?;
+            wait_for_window_close(game_window).await;
         }
         None => {
             let path = path.join(&game_info.file_path).join(&game_info.exec);
@@ -366,8 +514,39 @@ pub fn play_game(
         }
     }
 
+    game_sender_state.game_watch_tx.send(None)?;
     window.maximize()?;
     window.set_focus()?;
     window.set_fullscreen(true)?;
+    game_sender_state.notifier.notified().await;
+    println!("Recieved notification, game closed");
     Ok(())
+}
+
+async fn wait_for_window_close(window: tauri::Window) {
+    let (tx, rx) = oneshot::channel();
+
+    // Listen for the window close event
+    window.once("tauri://close-requested", move |_| {
+        let _ = tx.send(());
+    });
+
+    // Wait for the close event
+    let _ = rx.await;
+}
+
+mod tests {
+    use super::*;
+    use crate::db::test_context::{setup_initial_data, TestContext};
+
+    #[tokio::test]
+    async fn test_get_leaderboard_data() {
+        let context = TestContext::new("test_get_leaderboard_data_frontend").await;
+        setup_initial_data(&context.db_path).await;
+
+        let data = get_leaderboard_data_helper("game0".to_string(), &context.db_path)
+            .expect("Failed to get leaderboard data");
+
+        println!("{:?}", data);
+    }
 }

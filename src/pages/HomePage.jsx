@@ -1,74 +1,53 @@
-import { useContext, useEffect } from "react";
-import Bubble from "../components/Bubble";
-import GameGallery from "../components/GameGallery"
+import React, { useEffect } from "react";
+import { useGamepadContext, usePageContext, useToastContext } from "../context/contexts";
+import { NavigationProvider } from "../context/NavigationContext";
 import Navigation from "../components/Navigation";
-import { FilterProvider } from "../context/FilterContext";
-import { SearchProvider } from "../context/SearchContext";
-import { SortProvider } from "../context/SortContext";
-import { ControllerContext } from "../context/ControllerContext";
+import GameGallery from "../components/GameGallery";
+import Footer from "../components/Footer";
 import ControllerConnectPage from "./ControllerConnectPage";
-import { PageContext } from "../context/PageContext";
+import "../styles/HomePage.css";
 
 export default function HomePage() {
 
-	const {isConnected, players, currentButton} = useContext(ControllerContext)
-	const _players = Object.values(players['current']).slice(2, 4)
-
-	const {
-		modifyHierarchyIndex, modifyElementIndex, pageHierarchy,
-		pageIndex, focusElement, clickElement, clearClasslist
-	} = useContext(PageContext)
-
-
-	useEffect(() => {
-		console.log(pageHierarchy)
-		console.log("PAGEINDEX: ", pageIndex)
-	})
+	const { players, allPlayersConnected, setAllPlayersConnected } = useGamepadContext();
+	const { updatePage } = usePageContext();
+	const { showToast } = useToastContext();
 
 	useEffect(() => {
 
-		if (_players.filter((player) => player != null).length > 0) {
+		allPlayersConnected && (
+			setTimeout(() => { 
+				updatePage("home page");
+			}, 10)
+		);
+        
+    }, [allPlayersConnected]);
 
-			clearClasslist()
-			focusElement()
+	useEffect(() => {
 
-			switch (currentButton) {
-				case "DOWN":
-					modifyHierarchyIndex('increase')
-					break
-				case "UP":
-					modifyHierarchyIndex('decrease')
-					break
-				case "RIGHT":
-					modifyElementIndex('increase')
-					break
-				case "LEFT":
-					modifyElementIndex('decrease')
-					break
-				case "A":
-					clickElement()
-					break
-			}
-
+		if (allPlayersConnected && players.length == 0) {
+			console.log(players)
+			showToast("All Players disconnected, rerouting...", "danger")
+			setTimeout(() => {
+				updatePage("controller connect");
+			}, 0)
+			setTimeout(() => {
+				setAllPlayersConnected(false);
+			}, 1500)
 		}
 
-	}, [currentButton])
-
+	}, [players.length])
 
 	return (
-		<> {
-			isConnected || (import.meta.env.DEV) ? // disables controller connect when running in dev mode
-				<SearchProvider>
-					<SortProvider>
-						<FilterProvider>
-							<Bubble />
-							<Navigation />
-							<GameGallery />
-						</FilterProvider>
-					</SortProvider>
-				</SearchProvider>
-				: <ControllerConnectPage />
-		}
-		</>
-	)
+		allPlayersConnected || (import.meta.env.DEV) ? // disables controller connect when running in dev mode
+			<NavigationProvider>
+				<div className="home-page">
+					<Navigation />
+					<GameGallery />
+					<Footer />
+				</div>
+			</NavigationProvider>
+		: <ControllerConnectPage />
+		
+	);
 }
