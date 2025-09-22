@@ -1,43 +1,20 @@
-
 # COMS Console (aka. The QuackBox)
 
 This repository hosts the software for the COMS Console, a Raspberry Pi-based project with a unique, duck-inspired design owned by the [Computing Organization for Multicultural Students](https://www.rit.edu/computing/coms/).
 
-## WIP backend refactor structure
-- main.rs (cross-platform)
-    - runs the actual tauri instance
-    - requires and sets up all the handlers and plugins
-- frontend-api
-  - games.rs
-    - Get game info
-    - Startup games
-  - More in the future?
-- quackl (pi-specific)
-    - pipe.rs
-        - This will be our communication layer with Quackl. I need to look more into linux / unix ipc, but I'm leaning towards either sockets or named pipes
-            - named pipes are nice for their simplicity
-            - sockets are nice because of their throughput
-- db (cross-platform)
-    - local.rs
-        - this is the public facing api for game developers that allows them to store data. 
-    - public.rs
-        - This if for actually making all the backend api calls to the unified db
-    - testing.rs
-        - This is for if a game dev downloaded the software wanting to test out their game's api calls. We'll have to manage a db that is locally stored to the users computer and can simulate the requests that they want to make
-
 ## Features
-
-- Window management of game launcher
-  - Automatic fullscreen and focus capture
+- 🖥️ Window management of game launcher
   - Manages game and launcher screen real estate
-- Displays a library of all custom-made games
-  - Retrieves and manages all games from a game library directory (varies by OS)
-  - Supports multiple game-making platforms (and in the process of adding more!)
-    - Pygame
-    - Godot
-    - Web Games
-- Cross platform support
-- Automated CD builds for the Raspberry Pi, Mac, Windows, and Debian Linux
+- 🎮 Displays a library of all custom-made games
+  - 📂 Retrieves and manages all games from a game library directory (varies by OS)
+  - 🛠️ Supports multiple game-making platforms (and in the process of adding more!)
+    - 🐍 Pygame
+    - 🎲 Godot
+    - 🌐 Web Games (No Dev API Support)
+- 🛠️ Game developer libraries for Quackbox console integration
+  - 🏆 Support for Leaderboard entries and Save Data
+- 🌍 Cross-platform support
+- 🤖 Automated CI + CD builds for the Raspberry Pi, Mac, Windows, and Debian Linux
 
 
 ## Tech Stack
@@ -48,116 +25,14 @@ This repository hosts the software for the COMS Console, a Raspberry Pi-based pr
 |                 | JavaScript    | <img title="JavaScript" src="https://skillicons.dev/icons?i=js" /> |
 | **Backend**     | Tauri         | <img title="Tauri" src="https://skillicons.dev/icons?i=tauri" />           |
 |                 | Rust          | <img title="Rust" src="https://skillicons.dev/icons?i=rust" />            |
+|                 | Sqlite        | <img title="Sqlite" src="https://skillicons.dev/icons?i=sqlite" /> |
 | **Build Tools** | Vite          | <img title="Vite" src="https://skillicons.dev/icons?i=vite" /> |
 
 
-
 ## Installation
-> [!NOTE]
-> It's not necessary to install Homebrew or nvm, but it's highly recommended to install this way if it's your first time using these tools. These package managers will help differentiate dependency versions in between other projects.
-### macOS
+Check [releases](https://github.com/rit-coms/COMS-Console/releases/latest) for the latest packaged version!
 
-1. Install [Homebrew](https://brew.sh/)
-2. Install Rust
-    ```bash
-    brew install rustup
-    ```
-3. Install nvm and the latest version of Node.js
-    ```bash
-    brew install nvm
-    nvm install 'lts/*'
-    nvm alias default 'lts/*'
-    ```
-4. Run the following commands in the `COMS-Console` directory:
-    ```bash
-    source ~/.bashrc
-    ```
-   1. Install Rust and the Tauri CLI
-        ```bash
-        rustup-init
-        cargo install tauri-cli
-        ```
-   2. Fetch all of the `cargo` dependencies
-        ```bash
-        cd src-tauri
-        cargo fetch
-        ```
-   3. Install all of the `package.json` dependencies in the `COMS-Console` directory
-        ```bash
-        cd ..
-        npm install
-        ```
-
-### Windows
-
-1. Install [Node.js](https://nodejs.org/en/download/package-manager)
-2. Install [Rustup](https://www.rust-lang.org/tools/install)
-3. Install [nvm](https://github.com/coreybutler/nvm-windows/releases)
-4. Open a new terminal and run the following commands in the `COMS-Console` directory:
-
-   1. Install the Tauri CLI
-        ```bash
-        cargo install tauri-cli
-        ```
-   2. Fetch all of the `cargo` dependencies
-        ```bash
-        cd src-tauri
-        cargo fetch
-        ```
-   3. Install all of the `package.json` dependencies in the `COMS-Console` directory
-        ```bash
-        cd ..
-        npm install
-        ```
-
-### Linux (Debian-based Systems)
-1. Update the system package list
-    ```bash
-    sudo apt update
-    ```
-2. Install the required libraries and tools
-    ```bash
-    sudo apt install libwebkit2gtk-4.0-dev \ 
-    build-essential \
-    curl \
-    wget \ 
-    file \
-    libssl-dev \ 
-    libgtk-3-dev \ 
-    libayatana-appindicator3-dev \
-    librsvg2-dev
-    ```
-3. Install Rust
-    ```bash
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-    rustup-init
-    ```
-4. Install nvm and the latest version of Node.js
-    ```bash
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
-    source ~/.bashrc
-    nvm install 'lts/*'
-    nvm alias default 'lts/*'
-    ```
-5. Run the following commands in the `COMS-Console` directory:
-    ```bash
-    source ~/.bashrc
-    ```
-   1. Install the Tauri CLI
-        ```bash
-        cargo install tauri-cli
-        ```
-   2. Fetch all of the `cargo` dependencies
-        ```bash
-        cd src-tauri
-        cargo fetch
-        ```
-   3. Install all of the `package.json` dependencies in the `COMS-Console` directory
-        ```bash
-        cd ..
-        npm install
-        ```
-## Game Library Configuration
+## Game Library Configuration (For Game Developers)
 
 The Game Library stores all custom games accessible through the COMS Console. Upon running the application for the first time, a games folder will be automatically created in the user data directory.
 
@@ -166,6 +41,7 @@ If you have a zipped collection of games, unpack them into this folder to match 
 ```
 coms-console
 └── games
+    ├── all-games.json
     ├── game1
     │   ├── <game source files>
     │   └── game-metadata.json
@@ -183,7 +59,8 @@ coms-console
 Each game should reside in its own folder with the following components:
 
 - `<game source files>`: All essential files for the game
-- `game-metadata.json`: Metadata file containing information about the game
+- `game-metadata.json`: Metadata file containing information about the game 
+- `all-games.json`: A file containing all the games currently on the Quackbox. The ids in this file are used for the leaderboard saves
 
 ### Default `games` Folder Locations
 The games folder is located within the user’s application data directory, which varies by operating system:
@@ -197,30 +74,11 @@ The games folder is located within the user’s application data directory, whic
 > [!NOTE]
 > Make sure to extract the games directly into the games folder to ensure the application can locate and display them properly.
 
-## Development & Building
+## Development
+Checkout the [developer setup guide](CONTRIBUTE.md) if you're interested in contributing.
 
-To startup this project's development server run
-
-```bash
-# In top level of repository
-npm run tauri dev
-```
-
-To build this project for your current platform
-
-```bash
-# In top level of repository
-npm run tauri build
-```
-
-To build this project for the QuackBox
-
-```bash
-# In top level of repository
-npm run tauri build -- --features quackbox-raspi
-```
-
-## Optimizations
+## Changelog Summary
+### Changes for v0.1.0
 
 - Migrated frontend from [Create React App](https://create-react-app.dev/) to [Vite](https://vite.dev/) for improved performance and faster build times
 - Cleaned up `package.json` by removing unnecessary dependencies
@@ -228,6 +86,16 @@ npm run tauri build -- --features quackbox-raspi
 - Configured Vite to work seamlessly with Tauri
 - Set Tauri to launch in fullscreen mode on startup for a better user experience
 - Introduced error handling for file system access that propagates to the front end
+
+## Changes for v1.0.0
+
+- Added a http web server to handle leaderboard and save data requests made locally to port 6174
+- Added a sqlite database to store user and game data
+- Reorganized structure of project to promote modularity
+- Created integration tests to reduce introduction of bugs
+- Introduced the [Quackbox Design System](https://github.com/rit-coms/quackbox-design-system) to improve user interface and experience
+- Overhauled the controller connection and navigation systems
+- Introduced CI using Github Actions and updated old CD pipelines
 
 
 ## Future Project Roadmap
@@ -239,6 +107,8 @@ npm run tauri build -- --features quackbox-raspi
 - **Kiosk Mode:** Run with less overhead using a custom kiosk window manager like [cage](https://github.com/cage-kiosk/cage) (for pi only)
 
 ### Backend
+
+- **Game Updating & Version Control** Integrate a system for downloading updated versions of games
 
 - **Pause Menu Screen:** Implement a general overlay that communicates to the game to pause and give the options to quit out of a game
 
@@ -255,8 +125,6 @@ npm run tauri build -- --features quackbox-raspi
 - **Dark Mode:** Introduce a dark mode option for user experience and accesibility
 
 - **Expanded Controller Support:** Increase support for various game controllers to enhance accessibility and user engagement
-
-- **QuackBox Design System:** Implement a QuackBox-specific design system, to improve user interface and experience
 
 ## Feedback
 

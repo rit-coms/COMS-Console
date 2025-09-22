@@ -1,6 +1,7 @@
 import React, { createContext, useEffect, useRef, useState } from "react";
 import { useGamepadContext } from "./contexts";
 
+// Determins the clickable and/or focusable elements on each page
 const getPageHierarchy = (page) => {
     switch (page) {
         case "controller connect": 
@@ -44,6 +45,7 @@ const getPageHierarchy = (page) => {
     }
 };
 
+// Assigns outline colors for each playerIndex
 const getPlayerColor = (index) => {
     const playerNumber = index + 1;
 
@@ -73,6 +75,7 @@ export const PageProvider = ({ children }) => {
         1: document.body.querySelectorAll("button[data-id='controller-connect-modal-confirm-button']")
     });
 
+    // if DOM changes, update elements according to the page hierarchy
     const updatePageElements = (page) => {
         setTimeout(() => {
             setPageElements(
@@ -82,6 +85,7 @@ export const PageProvider = ({ children }) => {
         
     };
 
+    // on page change, player focus is reset
     const resetPlayerFocus = (flag = false) => {
         clearFocus();
         setPlayerFocus((prevFocus) => {
@@ -93,12 +97,14 @@ export const PageProvider = ({ children }) => {
         });
     };
 
+    // update page with new elements and reset player focus
     const updatePage = (page) => {
         setPage(page);
         setPageElements(getPageHierarchy(page));
         resetPlayerFocus(); 
     };
 
+    // clicks the R/L caret within the gameGallery and updated players' indexes to reflect
     const clickCaret = (direction, playerIndex) => {
         const element = document.body.querySelector(`[data-id="carousel-${direction}-caret"]`);
         if (element.classList.value.includes("disabled"))
@@ -119,6 +125,7 @@ export const PageProvider = ({ children }) => {
         
     };
 
+    // on d-pad input, move the player in the appropriate direction
     const updateFocus = (playerIndex, direction) => {
 
         const currentFocus = playerFocus[playerIndex];
@@ -138,6 +145,7 @@ export const PageProvider = ({ children }) => {
 
             case "RIGHT":
                 if (page === "home page" && updatedFocus.x === 1 && updatedFocus.y === pageElements[updatedFocus.x].length - 1) {
+                    // if player is in the game gallery, allow repositioning
                     clickCaret("right", playerIndex);
                 }
                 updatedFocus.y = Math.min(updatedFocus.y + 1, pageElements[updatedFocus.x].length - 1);
@@ -145,6 +153,7 @@ export const PageProvider = ({ children }) => {
 
             case "LEFT":
                 if (page === "home page" && updatedFocus.x === 1 && updatedFocus.y === 0) {
+                    // if player is in the game gallery, allow repositioning
                     clickCaret("left", playerIndex);
                 }
                 updatedFocus.y = Math.max(updatedFocus.y - 1, 0);
@@ -178,7 +187,7 @@ export const PageProvider = ({ children }) => {
 
     useEffect(() => {
         if (Object.keys(players).length > 0) {
-            // Handle pressedButton inputs for connected player
+            // Handle pressedButton inputs for connected players
             players.forEach((player) => {
 
                 const pressed = pressedButton[player.playerIndex];
@@ -196,7 +205,7 @@ export const PageProvider = ({ children }) => {
     }, [pressedButton]); 
 
     useEffect(() => {
-        
+        // set the initial element index the player will focus on
         setPlayerFocus((prevFocus) => {
             // set the initial player focus
             const updatedFocus = { ...prevFocus };
@@ -213,6 +222,7 @@ export const PageProvider = ({ children }) => {
     }, [gamepads]);
 
     useEffect(() => {
+        // if the amount of players change, reset their focus
         if (players.length < playersLengthRef.current)
             resetPlayerFocus(true);
         playersLengthRef.current = players.length;
@@ -220,7 +230,7 @@ export const PageProvider = ({ children }) => {
     }, [players.length]);
 
     useEffect(() => {
-
+        // for each player, highlight the current element they are focused on
         players.forEach((player, index) => {
 
             if (!player.isConnected || !playerFocus[player.playerIndex])
@@ -236,14 +246,14 @@ export const PageProvider = ({ children }) => {
 
     }, [playerFocus, pageElements]);
     
-  return (
-    <PageContext.Provider value={{ 
-        playerFocus, setPlayerFocus, updateFocus,
-        clickElement, updatePageElements,
-        updatePage
-    }}>
-        {children}
-    </PageContext.Provider>
-  );
+    return (
+        <PageContext.Provider value={{ 
+            playerFocus, setPlayerFocus, updateFocus,
+            clickElement, updatePageElements,
+            updatePage
+        }}>
+            {children}
+        </PageContext.Provider>
+    );
 
 };
