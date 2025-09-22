@@ -7,7 +7,9 @@
     "build": "vite build",
     "dev": "vite",
     "tauri": "tauri",
-    "cargo": "cd src-tauri && cargo"
+    "cargo": "cd src-tauri && cargo",
+    "doc-v1": "cd quackbox-api-docs/docs-v1 && vite",
+    "doc-v2": "cd quackbox-api-docs/docs-v2 && vite"
   },
   "author": "Kenzie & Matt",
   "license": "ISC",
