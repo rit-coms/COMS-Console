@@ -10,7 +10,6 @@ use crate::{
 use axum::Router;
 use axum_test::TestServer;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
-use tauri::api::path::local_data_dir;
 use tokio::sync::{
     watch::{self, Receiver, Sender},
     Notify, RwLock,
@@ -54,13 +53,13 @@ pub struct TestContext {
 
 impl TestContext {
     pub async fn new(db_name: &str) -> Self {
-        let dir = local_data_dir().unwrap();
-        let db_path = dir
-            .join(db_name)
-            .with_extension("db")
-            .into_os_string()
-            .into_string()
-            .unwrap();
+        let db_file = tempfile::Builder::new()
+            .prefix(db_name)
+            .suffix(".db")
+            .tempfile()
+            .expect(&format!("Failed to create temp file for {db_name}"));
+
+        let db_path = db_file.path().as_os_str().to_str().unwrap();
         let mut connection = establish_connection(&db_path);
 
         connection
@@ -73,7 +72,7 @@ impl TestContext {
         let app = setup_test_server(&db_path, current_game_rx, Arc::clone(&notifier)).await;
 
         Self {
-            db_path: db_path,
+            db_path: db_path.to_string(),
             current_game_tx,
             notifier,
             server: TestServer::new(app).expect("Failed to set up test server"),
