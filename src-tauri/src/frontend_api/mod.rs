@@ -542,9 +542,9 @@ mod tests {
     #[tokio::test]
     async fn test_get_leaderboard_data() {
         let context = TestContext::new("test_get_leaderboard_data_frontend").await;
-        setup_initial_data(&context.db_path).await;
+        setup_initial_data(context.get_db_path()).await;
 
-        let data = get_leaderboard_data_helper("game0".to_string(), &context.db_path)
+        let data = get_leaderboard_data_helper("game0".to_string(), context.get_db_path())
             .expect("Failed to get leaderboard data");
 
         println!("{:?}", data);

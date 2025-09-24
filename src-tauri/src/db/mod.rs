@@ -316,18 +316,18 @@ mod tests {
         let name_s = "A random user";
 
         let mut buffer = Uuid::encode_buffer();
-        let user = create_user(user_id_s, name_s, &test_context.db_path);
+        let user = create_user(user_id_s, name_s, test_context.get_db_path());
         let game_id_s = Uuid::new_v4().as_simple().encode_lower(&mut buffer);
         let example_game_name = "Example Game";
 
-        insert_game(game_id_s, example_game_name, true, &test_context.db_path);
+        insert_game(game_id_s, example_game_name, true, test_context.get_db_path());
 
         insert_leaderboard_entry(
             user_id_s,
             game_id_s,
             "spaghetti",
             10.0,
-            &test_context.db_path,
+            test_context.get_db_path(),
         )
         .expect("Failed to insert entry");
 
@@ -339,7 +339,7 @@ mod tests {
             game_id_s,
             file_name_s,
             &data_b,
-            &test_context.db_path,
+            test_context.get_db_path(),
         )
         .await;
     }
@@ -347,18 +347,18 @@ mod tests {
     #[tokio::test]
     pub async fn test_get_username() {
         let context = TestContext::new("get_username").await;
-        setup_initial_data(&context.db_path).await;
+        setup_initial_data(context.get_db_path()).await;
 
-        let username = get_username("1", &context.db_path).expect("Failed to retrieve username");
+        let username = get_username("1", context.get_db_path()).expect("Failed to retrieve username");
         assert_eq!(username, "user1".to_string())
     }
 
     #[tokio::test]
     pub async fn test_get_leaderboard_game_data() {
         let context = TestContext::new("get_leaderboard_game_data").await;
-        setup_initial_data(&context.db_path).await;
+        setup_initial_data(context.get_db_path()).await;
 
-        let data = get_leaderboard_game_data("game0", &context.db_path)
+        let data = get_leaderboard_game_data("game0", context.get_db_path())
             .expect("Failed to get leaderboard game data");
         assert!(data.len() == 3);
         println!("{:?}", data);
@@ -374,10 +374,10 @@ mod tests {
     #[tokio::test]
     pub async fn test_create_default_guest() {
         let context = TestContext::new("create_default_guest").await;
-        setup_initial_data(&context.db_path).await;
+        setup_initial_data(context.get_db_path()).await;
 
         // creates default guest
-        let updated_users = create_default_guest(&context.db_path);
+        let updated_users = create_default_guest(context.get_db_path());
 
         assert!(updated_users.len() == 1); // test context already has a user with id 1
         let guest_user = updated_users.first().unwrap();
@@ -386,6 +386,6 @@ mod tests {
         assert_eq!(guest_user.rit_id, None);
 
         // shouldn't error out if the default guest already exists
-        create_default_guest(&context.db_path);
+        create_default_guest(context.get_db_path());
     }
 }

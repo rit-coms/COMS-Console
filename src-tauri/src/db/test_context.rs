@@ -10,6 +10,7 @@ use crate::{
 use axum::Router;
 use axum_test::TestServer;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
+use tempfile::NamedTempFile;
 use tokio::sync::{
     watch::{self, Receiver, Sender},
     Notify, RwLock,
@@ -45,7 +46,7 @@ const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
 /// }
 /// ```
 pub struct TestContext {
-    pub db_path: String,
+    pub db_file: NamedTempFile,
     pub current_game_tx: Sender<Option<u64>>,
     pub notifier: Arc<Notify>,
     pub server: TestServer,
@@ -61,6 +62,7 @@ impl TestContext {
 
         let db_path = db_file.path().as_os_str().to_str().unwrap();
         let mut connection = establish_connection(&db_path);
+        println!("{db_path}");
 
         connection
             .run_pending_migrations(MIGRATIONS)
@@ -72,17 +74,15 @@ impl TestContext {
         let app = setup_test_server(&db_path, current_game_rx, Arc::clone(&notifier)).await;
 
         Self {
-            db_path: db_path.to_string(),
+            db_file,
             current_game_tx,
             notifier,
             server: TestServer::new(app).expect("Failed to set up test server"),
         }
     }
-}
 
-impl Drop for TestContext {
-    fn drop(&mut self) {
-        remove_file(&self.db_path).expect("Failed to delete file");
+    pub fn get_db_path(&self) -> &str {
+        return self.db_file.path().as_os_str().to_str().unwrap();
     }
 }
 
