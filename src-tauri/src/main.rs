@@ -7,7 +7,7 @@ use game_dev_api::handlers::GameState;
 use game_dev_api::handlers::GameStateShared;
 use game_dev_api::setup_game_dev_api;
 use quackbox_backend::db::create_default_guest;
-use tauri::{api::path::local_data_dir, Manager};
+use tauri::Manager;
 use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 use tokio::sync::watch;
 use tokio::sync::Mutex;
@@ -29,7 +29,7 @@ fn main() {
         ))
         .setup(|app| {
             let db_path = app
-                .path_resolver()
+                .path()
                 .app_data_dir()
                 .unwrap()
                 .join("local")

@@ -13,7 +13,7 @@ use std::{
     process::Command,
     sync::Arc,
 };
-use tauri::{AppHandle, State};
+use tauri::{AppHandle, Listener, Manager, State};
 use tokio::sync::{oneshot, watch::Sender, Mutex, Notify};
 use url::Url;
 
@@ -184,10 +184,10 @@ async fn get_game_info_list(
 
     // generating app data directory and games folder if it doesn't exist
     let app_data_dir = app_handle
-        .path_resolver()
-        .app_data_dir()
-        .ok_or("Could not find app data directory")?
+        .path()
+        .app_data_dir()?
         .join("games");
+
     println!("{:?}", app_data_dir);
 
     fs::create_dir_all(app_data_dir.clone())?;
@@ -281,7 +281,7 @@ struct GameData {
 fn check_all_games(app_handle: &AppHandle) {
     // getting the app data directory
     let app_data_dir = app_handle
-        .path_resolver()
+        .path()
         .app_data_dir()
         .expect("Could not find app data directory");
 
@@ -305,7 +305,7 @@ fn check_all_games(app_handle: &AppHandle) {
             &game.title,
             &game.id,
             app_handle
-                .path_resolver()
+                .path()
                 .app_data_dir()
                 .unwrap()
                 .join("local")
@@ -325,7 +325,7 @@ fn set_games_installed(games: &Vec<GameInfo>, app_handle: &AppHandle) {
             &game.title,
             true,
             app_handle
-                .path_resolver()
+                .path()
                 .app_data_dir()
                 .unwrap()
                 .join("local")
@@ -483,10 +483,10 @@ pub async fn play_game(
     {
         // create new game window
         Some(exec_url) => {
-            let game_window = tauri::WindowBuilder::new(
+            let game_window = tauri::WebviewWindowBuilder::new(
                 &app_handle,
                 "external",
-                tauri::WindowUrl::External(exec_url),
+                tauri::WebviewUrl::External(exec_url),
             )
             .build()?;
 
@@ -523,7 +523,7 @@ pub async fn play_game(
     Ok(())
 }
 
-async fn wait_for_window_close(window: tauri::Window) {
+async fn wait_for_window_close(window: tauri::WebviewWindow) {
     let (tx, rx) = oneshot::channel();
 
     // Listen for the window close event
