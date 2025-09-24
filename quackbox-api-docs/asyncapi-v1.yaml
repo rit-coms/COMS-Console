@@ -10,7 +10,7 @@ info:
     - [The source API definition for the Quackbox](TODO)
   license:
     name: MIT License
-    url: https://www.apache.org/licenses/LICENSE-2.0
+    url: https://mit-license.org/
   contact:
     email: coms@rit.edu
     name: Computing Organization for Multicultural Students
@@ -171,7 +171,7 @@ components:
       payload:
         $ref: "#/components/schemas/save_data_payload"
       description: >-
-        Containts a timestamp of when the save data entry was created, the file name of the save data entry, and the save data itself.
+        Contains a timestamp of when the save data entry was created, the file name of the save data entry, and the save data itself.
       bindings:
         http:
           statusCode: 200

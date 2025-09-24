@@ -10,7 +10,7 @@ info:
     - [The source API definition for the Quackbox](TODO)
   license:
     name: MIT License
-    url: https://www.apache.org/licenses/LICENSE-2.0
+    url: https://mit-license.org/
   contact:
     email: coms@rit.edu
     name: Computing Organization for Multicultural Students
@@ -313,7 +313,7 @@ components:
       payload:
         $ref: "#/components/schemas/save_data_payload"
       description: >-
-        Containts a timestamp of when the save data entry was created, the file name of the save data entry, and the save data itself.
+        Contains a timestamp of when the save data entry was created, the file name of the save data entry, and the save data itself.
       bindings:
         http:
           statusCode: 200
@@ -548,7 +548,7 @@ components:
       title: Controller Slot Update
       summary: >-
         Represents an update to a controller slot. This will be sent when a controller slot is connected, stale, or disconnected.
-        A stale controller is one that has been recently disconncted and will be considered "disconnected" for a short period of time.
+        A stale controller is one that has been recently disconnected and will be considered "disconnected" for a short period of time.
       payload:
         type: object
         properties:
@@ -556,7 +556,7 @@ components:
             $ref: "#/components/schemas/player_slot"
           state:
             type: string
-            description: The state of the udpated contoller slot.
+            description: The state of the updated contoller slot.
             enum: ["connected", "stale", "disconnected"]
         additionalProperties: false
         required:
