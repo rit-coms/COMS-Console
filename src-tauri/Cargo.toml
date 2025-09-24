@@ -25,7 +25,7 @@ diesel = { version = "2.2.0", features = ["sqlite", "returning_clauses_for_sqlit
 # build libsqlite3 as part of the build process
 # uncomment this line if you run into setup issues
 libsqlite3-sys = { version = "0.30", features = ["bundled"] }
-uuid = "1.11.0"
+uuid = { version = "1.18.1", features = ["v4"] }
 tokio = { version = "1.29.1", features = ["full"] }
 axum = "0.8.1"
 serde_with = "3.0.0"
