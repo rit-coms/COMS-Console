@@ -320,7 +320,12 @@ mod tests {
         let game_id_s = Uuid::new_v4().as_simple().encode_lower(&mut buffer);
         let example_game_name = "Example Game";
 
-        insert_game(game_id_s, example_game_name, true, test_context.get_db_path());
+        insert_game(
+            game_id_s,
+            example_game_name,
+            true,
+            test_context.get_db_path(),
+        );
 
         insert_leaderboard_entry(
             user_id_s,
@@ -349,7 +354,8 @@ mod tests {
         let context = TestContext::new("get_username").await;
         setup_initial_data(context.get_db_path()).await;
 
-        let username = get_username("1", context.get_db_path()).expect("Failed to retrieve username");
+        let username =
+            get_username("1", context.get_db_path()).expect("Failed to retrieve username");
         assert_eq!(username, "user1".to_string())
     }
 

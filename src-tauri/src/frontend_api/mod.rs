@@ -183,10 +183,7 @@ async fn get_game_info_list(
     games_list.clear();
 
     // generating app data directory and games folder if it doesn't exist
-    let app_data_dir = app_handle
-        .path()
-        .app_data_dir()?
-        .join("games");
+    let app_data_dir = app_handle.path().app_data_dir()?.join("games");
 
     println!("{:?}", app_data_dir);
 
