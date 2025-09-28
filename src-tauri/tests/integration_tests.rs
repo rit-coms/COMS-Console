@@ -28,7 +28,7 @@ async fn read_and_write_user_table_db() {
     let result = get_user(name_s, user_id_s, &test_context.db_path).await;
 
     assert_eq!(user_id_s, result.id.as_str());
-    assert_eq!(name_s, result.name.as_str());
+    assert_eq!(name_s, result.username.as_str());
 }
 
 #[tokio::test]

@@ -102,7 +102,7 @@ pub async fn setup_initial_user_data(db_path: &str) {
     ];
 
     for user in users {
-        create_user(&user.id, &user.name, db_path);
+        create_user(&user.id, &user.username, db_path);
     }
 }
 

@@ -107,6 +107,12 @@ pub struct LoadedGamesInner {
     db_path: String,
 }
 
+#[derive(Default)]
+pub struct AppState {
+    games_list: Vec<GameInfo>,
+    db_path: String,
+}
+
 impl AppState {
     pub fn new(db_path: String) -> Self {
         AppState {

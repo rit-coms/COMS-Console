@@ -15,10 +15,7 @@ diesel::table! {
         game_id -> Text,
         value_name -> Text,
         value_num -> Double,
-<<<<<<< HEAD
-=======
         time_stamp -> Text,
->>>>>>> origin/main
     }
 }
 
