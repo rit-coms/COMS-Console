@@ -15,6 +15,10 @@ diesel::table! {
         game_id -> Text,
         value_name -> Text,
         value_num -> Double,
+<<<<<<< HEAD
+=======
+        time_stamp -> Text,
+>>>>>>> origin/main
     }
 }
 
@@ -25,6 +29,7 @@ diesel::table! {
         game_id -> Text,
         file_name -> Text,
         data -> Binary,
+        time_stamp -> Text,
     }
 }
 
@@ -41,9 +46,4 @@ diesel::joinable!(leaderboard -> users (user_id));
 diesel::joinable!(saves -> games (game_id));
 diesel::joinable!(saves -> users (user_id));
 
-diesel::allow_tables_to_appear_in_same_query!(
-    games,
-    leaderboard,
-    saves,
-    users,
-);
+diesel::allow_tables_to_appear_in_same_query!(games, leaderboard, saves, users,);

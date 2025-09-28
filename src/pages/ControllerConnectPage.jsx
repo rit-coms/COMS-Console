@@ -1,97 +1,109 @@
-
-import { useContext, useEffect } from 'react'
-import '../styles/ControllerConnect.css'
-import { ControllerContext } from '../context/ControllerContext'
-import { PageContext } from '../context/PageContext'
+import React, { useEffect, useState } from "react";
+import { useGamepadContext, usePageContext, useToastContext } from "../context/contexts";
+import { Modal, PlayerContainer, PlayerTile } from "quackbox-design-system";
+import duck_connected from '../assets/duck_connected.png'
 
 export default function ControllerConnectPage() {
 
-    const {
-        currentButton, players, allControllersConnected,
-    } = useContext(ControllerContext)
-
-    const _players = Object.values(players['current']).slice(2, 4)
-
-    const {
-        changePage, modifyHierarchyIndex, modifyElementIndex,
-        focusElement, clickElement, clearClasslist
-    } = useContext(PageContext)
-
-    // onload, change page
+    const { players, setPlayers, pressedButton, setAllPlayersConnected, disconnectGamepad, setButtonAction } = useGamepadContext();
+    const { updatePageElements, updatePage } = usePageContext();
+    const { showToast } = useToastContext();
+    const [connected, setConnected] = useState(-1);
+    
     useEffect(() => {
-        changePage('controller connect')
-    }, [])
+        players.length !== 0 && updatePageElements("controller connect");
+    }, [players.length]);
+    
+    useEffect(() => {
+        setTimeout(() => {
+            updatePage("controller connect");
+        }, 0);
+    }, []);
 
     useEffect(() => {
-
-        if (_players.filter((player) => player != null).length > 0) {
-
-            clearClasslist()
-            focusElement()
-
-            switch (currentButton) {
-                case "DOWN":
-                    modifyHierarchyIndex('increase')
-                    break
-                case "UP":
-                    modifyHierarchyIndex('decrease')
-                    break
-                case "RIGHT":
-                    modifyElementIndex('increase')
-                    break
-                case "LEFT":
-                    modifyElementIndex('decrease')
-                    break
-                case "A":
-                    clickElement()
-                    break
-            }
-
-        }
-
-    }, [currentButton])
-
-    return (
-        <div className="controller-connect-container">
-
-            <div className="controller-connect-header">
-                <span>Waiting for controller connection...</span>
-            </div>
-
-            <div className="controller-connect-players-container">
-
-                {
-                    _players.map((player, index) => {
-                        return (
-                            <div key={index} className={player ? 'player connected' : 'player'}>
-                                <div className={player ? 'player-card connected' : 'player-card'}>
-                                    {
-                                        player ?
-                                            <div className="mascot"></div>
-                                            : null
-                                    }
-                                </div>
-                                <button className={player ? 'player-description connected' : 'player-description'}>
-                                    Player {index + 1}
-                                </button>
-                            </div>
-                        )
-                    })
+        if (connected === -1) return;
+        setTimeout(() => {
+            showToast(`Player ${connected} successfully connected`, "success");   
+        }, 250);
+        setConnected(-1);
+    }, [connected]);
+    
+    useEffect(() => {
+        setPlayers((prevPlayers) => {
+            return prevPlayers.map((player) => {
+                // Check when the RIGHT TRIGGER is clicked to connect player
+                if (pressedButton[player.playerIndex] === "RIGHT TRIGGER" && !player.isConnected) {
+                    updatePageElements("controller connect");
+                    setTimeout(() => {
+                        setConnected(player.playerIndex + 1);
+                    }, 0);
+                    return { ...player, isConnected: true };
                 }
 
-            </div>
+                return player;
+            });
+        });
+    }, [pressedButton]);
 
-            <div className="controller-connect-footer">
-                <button className='controller-submit'
-                    onClick={() => {
-                        allControllersConnected(); 
-                        changePage('home')
-                    }}
-                >
-                    Done
-                </button>
-            </div>
+    const handleConfirmation = () => {
 
-        </div>
-    )
+        if (players.length <= 0)
+            return;
+
+        const totalPlayers = players.length;
+        const disconnectedPlayers = (players.map((player) => !player.isConnected ? player.playerIndex : null));
+        const disconnectedPlayersIndex = disconnectedPlayers.filter((player) => player !== null);
+
+        if (disconnectedPlayersIndex.length === totalPlayers) {
+            showToast("Connect player(s) to continue", "danger")
+        } else {
+            // Disconnect unconnected players
+            disconnectedPlayersIndex.forEach((index) => {
+                disconnectGamepad(index);
+                
+                setTimeout(() => {
+                    setAllPlayersConnected(true);
+                }, 4000);
+            });
+        }
+
+        if (disconnectedPlayersIndex.length === 0) {
+            setTimeout(() => {
+                setAllPlayersConnected(true);
+            }, 2000);
+        }
+        
+    };
+
+    return (
+
+        <Modal
+            isOpen
+            title={"Waiting for controller connection..."}
+            subtitle={"Press the right trigger to connect"}
+            alignTitle={"center"}
+            alignContentCenter
+            confirmLabel="Done"
+            confirmLabelColorPrimary
+            disableActionButtons={players.filter((player) => player.isConnected).length === 0}
+            onConfirmation={handleConfirmation}
+            dataId={"controller-connect-modal"}
+        >
+            <PlayerContainer numPlayers={players.length} dataId={"player-container"}>
+                {players.map((player, index) => {
+                    return (
+                        <PlayerTile
+                            key={index}
+                            dataId={"player-tile"}
+                            playerNumber={player.playerIndex + 1}
+                            isConnected={player.isConnected}
+                            src={ duck_connected }
+                        />
+                    );
+                })}
+            </PlayerContainer>
+
+        </Modal>
+
+    );
 }

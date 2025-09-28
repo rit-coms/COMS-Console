@@ -1,113 +1,16 @@
+.game-gallery-container {
+    background-color: var(--color-white);
+    border: var(--border-stroke-md) solid var(--color-blue);
+    border-radius: var(--border-radius);
+    padding: 3vh 0.5vh;
+    margin: 2vw;
 
-.game-gallery {
-    display: flex;
-    padding: 10px;
-
-    /* Game Gallery Card */
-    .game-gallery-card {
-        background-color: var(--grey);
-        display: inline-flex;
-        justify-content: center;
-        height: 425px;
-        min-width: 300px;
-        max-width: 300px;
-        margin-left: 25px;
-        border-radius: 6px;
-
+    .game-gallery-header {
+        margin: 20px;
     }
 
-    .game-gallery-card:hover {
-        cursor: pointer;
-        padding: 2px;
-        box-shadow: 3px 3px 3px rgba(196, 196, 196, 0.5);
+    .game-gallery {
+        margin: 20px;
+        padding: 12px 6px;
     }
-
-    /* See All Button */
-    .see-all-container {
-        padding: 30px 0px 30px 0px;
-
-        .see-all-button {
-            background-color: var(--off-white);
-            border: 3px solid var(--cyan);
-            margin-right: 30px;
-            align-items: center;
-            color: var(--cyan);
-            font-size: 30px;
-        }
-    }
-
-    /* Game Gallery Container */
-    .game-gallery-container {
-        background-color: var(--off-white);
-        border: 3px solid var(--cyan);
-        border-radius: 8px;
-        display: block;
-        width: 100%;
-        overflow-x: scroll;
-        padding: 30px 0px 30px 0px;
-
-        .game-gallery-back-container {
-            position: sticky;
-            left: 0px;
-            padding: 10px; 
-            color: var(--cyan);
-        }
-
-        .back-button-title {
-            background-color: var(--off-white);
-            align-items: center;
-            width: fit-content;
-            padding: 10px 20px 10px 20px;
-            border-radius: 6px;
-            border: 3px solid var(--cyan);
-            font-size: 24px;
-            margin-left: 23px;
-            color: var(--cyan);
-
-            .back-button-icon {
-                justify-content: center;
-                font-size: 28px;
-            }
-        }
-
-        .back-button-title:hover {
-            cursor: pointer;
-            padding: 12px 22px 12px 22px;
-            box-shadow: 3px 3px 3px rgba(196, 196, 196, 0.5);
-        }
-
-        .game-gallery-sort {
-            color: var(--cyan);
-            display: flex;
-            font-size: 24px;
-            margin-left: 25px;
-            position: sticky;
-            left: 25px;
-            text-wrap: nowrap;
-        }
-
-        .game-carousel {
-            display: flex;
-        }
-
-        .full-gallery {
-            flex-wrap: wrap;
-            justify-content: space-around;
-        }
-
-        .full-gallery .game-gallery-card {
-            margin: 25px;
-            
-        }
-        
-    }
-
 }
-
-/* remove the scrollbar */
-::-webkit-scrollbar {
-    display: none;
-}
-
-
-
