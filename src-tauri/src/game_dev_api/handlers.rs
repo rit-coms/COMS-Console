@@ -1,5 +1,5 @@
 use crate::db::{self};
-use crate::gamepad_manager::gamepad_manager::FrontendPlayerSlotConnection;
+use crate::gamepad_manager::gamepad_manager::FrontendControllerSlotConnection;
 use axum::body::Bytes;
 use axum::extract::ws::{Message, WebSocket};
 use axum::extract::{ConnectInfo, WebSocketUpgrade};
@@ -32,7 +32,7 @@ pub struct AppState {
 #[derive(Clone, FromRef)]
 pub struct ApiState {
     pub database_path: String,
-    pub player_slot_rx: Arc<broadcast::Receiver<Vec<FrontendPlayerSlotConnection>>>,
+    pub player_slot_rx: Arc<broadcast::Receiver<Vec<FrontendControllerSlotConnection>>>,
 }
 
 #[derive(Debug, Clone)]

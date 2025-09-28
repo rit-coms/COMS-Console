@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use anyhow::Error;
-use gamepad_manager::{FrontendPlayerSlotConnection, GamepadManager};
+use gamepad_manager::{FrontendControllerSlotConnection, GamepadManager};
 use gilrs::{Event, EventType, Gilrs};
 use tauri::{AppHandle, Manager, State};
 use tokio::time::sleep;
@@ -46,7 +46,7 @@ pub async fn update_controller_task(app_handle: AppHandle) -> Result<(), Error> 
 #[tauri::command]
 pub fn get_player_slot_states(
     manager: State<'_, GamepadManager>,
-) -> Result<Vec<FrontendPlayerSlotConnection>, ErrorType> {
+) -> Result<Vec<FrontendControllerSlotConnection>, ErrorType> {
     Ok(manager.get_slots())
 }
 
@@ -61,7 +61,7 @@ mod tests {
 
     use tokio::{sync::broadcast::Sender, time::sleep};
 
-    use crate::gamepad_manager::gamepad_manager::FrontendPlayerSlotConnection;
+    use crate::gamepad_manager::gamepad_manager::FrontendControllerSlotConnection;
 
     use super::GamepadManager;
 
@@ -83,14 +83,14 @@ mod tests {
         assert_eq!(
             manager.get_slots(), 
             vec![
-                FrontendPlayerSlotConnection::Connected,
-                FrontendPlayerSlotConnection::Connected,
-                FrontendPlayerSlotConnection::Connected,
-                FrontendPlayerSlotConnection::Connected,
-                FrontendPlayerSlotConnection::Connected,
-                FrontendPlayerSlotConnection::Connected,
-                FrontendPlayerSlotConnection::Connected,
-                FrontendPlayerSlotConnection::Disconnected
+                FrontendControllerSlotConnection::Connected,
+                FrontendControllerSlotConnection::Connected,
+                FrontendControllerSlotConnection::Connected,
+                FrontendControllerSlotConnection::Connected,
+                FrontendControllerSlotConnection::Connected,
+                FrontendControllerSlotConnection::Connected,
+                FrontendControllerSlotConnection::Connected,
+                FrontendControllerSlotConnection::Disconnected
             ]
         )
     }

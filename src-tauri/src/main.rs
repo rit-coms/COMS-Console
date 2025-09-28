@@ -10,7 +10,7 @@ use game_dev_api::handlers::GameState;
 use game_dev_api::handlers::GameStateShared;
 use game_dev_api::setup_game_dev_api;
 use gamepad_manager::{
-    gamepad_manager::{FrontendPlayerSlotConnection, GamepadManager},
+    gamepad_manager::{FrontendControllerSlotConnection, GamepadManager},
     get_player_slot_states, swap_player_slots, update_controller_task,
 };
 use quackbox_backend::db::create_default_guest;
@@ -36,7 +36,7 @@ fn main() {
         ))
         .setup(|app| {
             let (controller_slot_tx, controller_slot_rx) =
-                channel::<Vec<FrontendPlayerSlotConnection>>(100);
+                channel::<Vec<FrontendControllerSlotConnection>>(100);
             tauri::async_runtime::spawn(update_controller_task(app.handle().clone()));
             let db_path = app
                 .path()

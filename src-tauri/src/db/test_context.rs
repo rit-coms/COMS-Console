@@ -5,7 +5,7 @@ use crate::{
     game_dev_api::{
         create_router,
         handlers::{GameState, GameStateShared},
-    }, gamepad_manager::gamepad_manager::FrontendPlayerSlotConnection,
+    }, gamepad_manager::gamepad_manager::FrontendControllerSlotConnection,
 };
 use axum::Router;
 use axum_test::TestServer;
@@ -45,7 +45,7 @@ const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
 /// }
 /// ```
 pub struct TestContext {
-    pub player_slot_tx: broadcast::Sender<Vec<FrontendPlayerSlotConnection>>,
+    pub player_slot_tx: broadcast::Sender<Vec<FrontendControllerSlotConnection>>,
     pub current_game_tx: Sender<Option<u64>>, // Can be used to transmit what game is currently being played (by ID)
     pub db_file: NamedTempFile,
     pub notifier: Arc<Notify>,
@@ -72,7 +72,7 @@ impl TestContext {
         let notifier = Arc::new(Notify::new());
 
         let (player_slot_tx, player_slot_rx) =
-            broadcast::channel::<Vec<FrontendPlayerSlotConnection>>(100);
+            broadcast::channel::<Vec<FrontendControllerSlotConnection>>(100);
 
         let app = setup_test_server(&db_path, current_game_rx, Arc::clone(&notifier), player_slot_rx).await;
 
@@ -179,7 +179,7 @@ async fn setup_test_server(
     db_path: &str,
     current_game_rx: Receiver<Option<u64>>,
     notifier: Arc<Notify>,
-    player_slot_rx: broadcast::Receiver<Vec<FrontendPlayerSlotConnection>>
+    player_slot_rx: broadcast::Receiver<Vec<FrontendControllerSlotConnection>>
 ) -> Router {
     let game_state_shared: GameStateShared = Arc::new(GameState {
         id: Arc::new(RwLock::new(None)),

@@ -14,13 +14,14 @@ use tokio::time::sleep;
 pub const MAX_CONTROLLERS: usize = 8;
 
 #[derive(Debug)]
-enum PlayerSlotConnectionStatus {
+enum ControllerSlotConnectionStatus {
     Connected(usize), // the usize is the id of the Gamepad
     Disconnected,
     Stale(usize, JoinHandle<()>),
 }
 
-impl Display for PlayerSlotConnectionStatus {
+/// Prints a neat display of the controller slot connections
+impl Display for ControllerSlotConnectionStatus {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         const RED: &str = "\x1b[31m";
         const YELLOW: &str = "\x1b[33m";
@@ -28,29 +29,29 @@ impl Display for PlayerSlotConnectionStatus {
         const RESET: &str = "\x1b[0m";
         const SQUARE: &str = "⬛";
         match self {
-            PlayerSlotConnectionStatus::Connected(gamepad_id) => {
+            ControllerSlotConnectionStatus::Connected(gamepad_id) => {
                 write!(f, "{}{} {}", GREEN, gamepad_id, RESET)
             }
-            PlayerSlotConnectionStatus::Disconnected => write!(f, "{}{}{}", RED, SQUARE, RESET),
-            PlayerSlotConnectionStatus::Stale(gamepad_id, _) => {
+            ControllerSlotConnectionStatus::Disconnected => write!(f, "{}{}{}", RED, SQUARE, RESET),
+            ControllerSlotConnectionStatus::Stale(gamepad_id, _) => {
                 write!(f, "{}{} {}", YELLOW, gamepad_id, RESET)
             }
         }
     }
 }
 
-impl Into<FrontendPlayerSlotConnection> for &PlayerSlotConnectionStatus {
-    fn into(self) -> FrontendPlayerSlotConnection {
+impl Into<FrontendControllerSlotConnection> for &ControllerSlotConnectionStatus {
+    fn into(self) -> FrontendControllerSlotConnection {
         match self {
-            PlayerSlotConnectionStatus::Connected(_) => FrontendPlayerSlotConnection::Connected,
-            PlayerSlotConnectionStatus::Disconnected => FrontendPlayerSlotConnection::Disconnected,
-            PlayerSlotConnectionStatus::Stale(_, _) => FrontendPlayerSlotConnection::Stale,
+            ControllerSlotConnectionStatus::Connected(_) => FrontendControllerSlotConnection::Connected,
+            ControllerSlotConnectionStatus::Disconnected => FrontendControllerSlotConnection::Disconnected,
+            ControllerSlotConnectionStatus::Stale(_, _) => FrontendControllerSlotConnection::Stale,
         }
     }
 }
 
 #[derive(Serialize, Clone, PartialEq, Eq, Debug)]
-pub enum FrontendPlayerSlotConnection {
+pub enum FrontendControllerSlotConnection {
     Connected,
     Disconnected,
     Stale,
@@ -58,7 +59,7 @@ pub enum FrontendPlayerSlotConnection {
 
 /// Represents the state of every controller connection.
 ///
-/// All methods are thread save, no Mutex is required for calling any methods with this object.
+/// All methods are thread safe, no Mutex is required for calling any methods with this object.
 /// However, these methods may be blocking if another thread is also reading or modifying this object
 /// through the provided methods.
 pub struct GamepadManager {
@@ -67,22 +68,28 @@ pub struct GamepadManager {
 }
 
 impl GamepadManager {
-    pub fn new(sender: Sender<Vec<FrontendPlayerSlotConnection>>, timeout_s: f32) -> Self {
+    pub fn new(sender: Sender<Vec<FrontendControllerSlotConnection>>, timeout_s: f32) -> Self {
         GamepadManager {
             state: Arc::new(RwLock::new(GamepadManagerInner::new(sender))),
             timeout_s: timeout_s
         }
     }
 
+    /// Registers or reconnects a controller to the Gamepad manager. Stale controllers will be 
+    /// reconnected and new controllers will be assigned the next available slot.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `id` - The id of the controller that was plugged in
     pub fn connect_controller(&self, id: usize) {
         // Check if the connected controller was previously stale
         let mut lock = self.state.write().unwrap();
         if let Some(slot) = lock.get_slot_num(&id) {
             let slot = *slot;
             match lock.get_slot(slot) {
-                PlayerSlotConnectionStatus::Stale(_, timer) => {
+                ControllerSlotConnectionStatus::Stale(_, timer) => {
                     timer.abort();
-                    lock.set_slot(slot, PlayerSlotConnectionStatus::Connected(id));
+                    lock.set_slot(slot, ControllerSlotConnectionStatus::Connected(id));
                 }
                 _ => panic!("Controller {} is not stale but is being reconnected", id),
             }
@@ -91,18 +98,25 @@ impl GamepadManager {
             let next_slot = lock.get_next_slot_num();
             if let Some(open_slot) = next_slot {
                 lock.register_id(id, open_slot);
-                lock.set_slot(open_slot, PlayerSlotConnectionStatus::Connected(id));
+                lock.set_slot(open_slot, ControllerSlotConnectionStatus::Connected(id));
             }
         }
     }
 
+    /// Unregisters a controller with a given id from the gamepad manager. This will open up
+    /// a controller slot, and other controller connections will remain unaffected (they will
+    /// not be moved to fill in the hole).
+    /// 
+    /// # Arguments
+    /// 
+    /// * `id` - The id of the controller that was disconnected
     pub fn disconnect_controller(&self, id: usize) {
         let mut lock = self.state.write().unwrap();
         if let Some(slot_num) = lock.get_slot_num(&id) {
             let slot_num = *slot_num;
             lock.set_slot(
                 slot_num,
-                PlayerSlotConnectionStatus::Stale(
+                ControllerSlotConnectionStatus::Stale(
                     id,
                     tokio::spawn(Self::stale_timer(id, self.timeout_s , Arc::clone(&self.state))),
                 ),
@@ -110,7 +124,13 @@ impl GamepadManager {
         }
     }
 
-    /// Note: arguments are one-indexed NOT zero indexed.
+    /// Swap the controllers for two given slots. Arguments are one-indexed, so player 1
+    /// is assigned to slot 1.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `slot1` - The first slot number to switch
+    /// * `slot2` - The second slot number to switch
     pub fn swap_slots(&self, mut slot1: usize, mut slot2: usize) {
         slot1 -= 1;
         slot2 -= 1;
@@ -118,11 +138,25 @@ impl GamepadManager {
         lock.swap_slots(slot1, slot2);
     }
 
-    pub fn get_slots(&self) -> Vec<FrontendPlayerSlotConnection> {
+    /// Get the current state of the controller slot connections.
+    /// 
+    /// # Returns
+    /// 
+    /// * `Vec<FrontendControllerSlotConnection>` - a Vec with each index being connected, disconnected,
+    /// or stale
+    pub fn get_slots(&self) -> Vec<FrontendControllerSlotConnection> {
         let lock = self.state.read().unwrap();
         lock.get_slots().iter().map(|value| value.into()).collect()
     }
 
+    /// Set a timer for when a controller is discnnected. The slot will remain stale for the given timeout and then
+    /// will be disconnected.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `id` - The id of the controller to set a stale timer for
+    /// * `timeout_s` - The timeout duration before the controller is disconnected
+    /// * `slots` - 
     async fn stale_timer(id: usize, timeout_s: f32, slots: Arc<RwLock<GamepadManagerInner>>) {
         sleep(Duration::from_secs_f32(timeout_s)).await;
         let mut lock = slots.write().unwrap();
@@ -132,7 +166,7 @@ impl GamepadManager {
         } else {
             panic!("Stale controller not in gamepad map")
         }
-        lock.set_slot(slot, PlayerSlotConnectionStatus::Disconnected);
+        lock.set_slot(slot, ControllerSlotConnectionStatus::Disconnected);
         lock.remove_id(&id);
     }
 }
@@ -140,9 +174,9 @@ impl GamepadManager {
 mod inner {
     use super::*;
     pub struct GamepadManagerInner {
-        player_slots: [PlayerSlotConnectionStatus; MAX_CONTROLLERS],
+        player_slots: [ControllerSlotConnectionStatus; MAX_CONTROLLERS],
         gamepad_map: HashMap<usize, usize>,
-        sender: Sender<Vec<FrontendPlayerSlotConnection>>,
+        sender: Sender<Vec<FrontendControllerSlotConnection>>,
     }
 
     impl fmt::Display for GamepadManagerInner {
@@ -155,9 +189,9 @@ mod inner {
     }
 
     impl GamepadManagerInner {
-        pub fn new(sender: Sender<Vec<FrontendPlayerSlotConnection>>) -> Self {
+        pub fn new(sender: Sender<Vec<FrontendControllerSlotConnection>>) -> Self {
             GamepadManagerInner {
-                player_slots: [const { PlayerSlotConnectionStatus::Disconnected }; MAX_CONTROLLERS],
+                player_slots: [const { ControllerSlotConnectionStatus::Disconnected }; MAX_CONTROLLERS],
                 gamepad_map: HashMap::new(),
                 sender: sender,
             }
@@ -171,7 +205,7 @@ mod inner {
                 .send(self.player_slots.iter().map(|value| value.into()).collect());
         }
 
-        pub fn get_slot(&self, slot_num: usize) -> &PlayerSlotConnectionStatus {
+        pub fn get_slot(&self, slot_num: usize) -> &ControllerSlotConnectionStatus {
             &self.player_slots[slot_num]
         }
 
@@ -179,11 +213,11 @@ mod inner {
             self.gamepad_map.get(id)
         }
 
-        pub fn get_slots(&self) -> &[PlayerSlotConnectionStatus; MAX_CONTROLLERS] {
+        pub fn get_slots(&self) -> &[ControllerSlotConnectionStatus; MAX_CONTROLLERS] {
             &self.player_slots
         }
 
-        pub fn set_slot(&mut self, slot_num: usize, value: PlayerSlotConnectionStatus) {
+        pub fn set_slot(&mut self, slot_num: usize, value: ControllerSlotConnectionStatus) {
             self.player_slots[slot_num] = value;
             self.broadcast_state();
         }
@@ -204,20 +238,20 @@ mod inner {
                 let slot_2_state = self.get_slot(slot2);
                 // Update id to slot mappings
                 match slot_1_state {
-                    PlayerSlotConnectionStatus::Connected(gamepad_id) => {
+                    ControllerSlotConnectionStatus::Connected(gamepad_id) => {
                         slot_1_id = Some(*gamepad_id)
                     }
-                    PlayerSlotConnectionStatus::Stale(gamepad_id, _) => {
+                    ControllerSlotConnectionStatus::Stale(gamepad_id, _) => {
                         slot_1_id = Some(*gamepad_id)
                     }
                     _ => (),
                 }
 
                 match slot_2_state {
-                    PlayerSlotConnectionStatus::Connected(gamepad_id) => {
+                    ControllerSlotConnectionStatus::Connected(gamepad_id) => {
                         slot_2_id = Some(*gamepad_id)
                     }
-                    PlayerSlotConnectionStatus::Stale(gamepad_id, _) => {
+                    ControllerSlotConnectionStatus::Stale(gamepad_id, _) => {
                         slot_2_id = Some(*gamepad_id)
                     }
                     _ => (),
@@ -239,7 +273,7 @@ mod inner {
         pub fn get_next_slot_num(&self) -> Option<usize> {
             for (i, connection) in self.player_slots.iter().enumerate() {
                 match connection {
-                    PlayerSlotConnectionStatus::Disconnected => return Some(i),
+                    ControllerSlotConnectionStatus::Disconnected => return Some(i),
                     _ => (),
                 }
             }

@@ -11,7 +11,7 @@ use std::sync::Arc;
 use tokio::sync::broadcast;
 use tokio::sync::Notify;
 
-use crate::gamepad_manager::gamepad_manager::FrontendPlayerSlotConnection;
+use crate::gamepad_manager::gamepad_manager::FrontendControllerSlotConnection;
 
 const VERSION: u8 = 1;
 
@@ -95,7 +95,7 @@ async fn handle_game_state_updates(game_state: GameStateShared) {
 pub async fn create_router(
     db_path: &str,
     game_state: GameStateShared,
-    player_slot_rx: broadcast::Receiver<Vec<FrontendPlayerSlotConnection>>,
+    player_slot_rx: broadcast::Receiver<Vec<FrontendControllerSlotConnection>>,
 ) -> Router {
     let route_prefix: String = format!("/api/v{}", VERSION.to_string());
     let api_state = ApiState {
@@ -138,7 +138,7 @@ pub async fn create_router(
 pub async fn setup_game_dev_api(
     db_path: String,
     game_state: GameStateShared,
-    controller_slot_rx: broadcast::Receiver<Vec<FrontendPlayerSlotConnection>>,
+    controller_slot_rx: broadcast::Receiver<Vec<FrontendControllerSlotConnection>>,
 ) {
     tracing_subscriber::registry()
         .with(
@@ -177,7 +177,7 @@ mod test {
             channel: rx.clone(),
         });
         let (_, controller_slot_rx) =
-            broadcast::channel::<Vec<FrontendPlayerSlotConnection>>(100);
+            broadcast::channel::<Vec<FrontendControllerSlotConnection>>(100);
         let _router = create_router(db_name, Arc::clone(&game_state_shared), controller_slot_rx).await;
 
         let game_id: Option<u64> = Some(512039487);
