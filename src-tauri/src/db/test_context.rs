@@ -10,7 +10,7 @@ use crate::{
 use axum::Router;
 use axum_test::TestServer;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
-use tauri::api::path::local_data_dir;
+use tempfile::NamedTempFile;
 use tokio::sync::{
     broadcast, watch::{self, Receiver, Sender}, Notify, RwLock
 };
@@ -45,23 +45,24 @@ const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
 /// }
 /// ```
 pub struct TestContext {
-    pub db_path: String,
-    pub current_game_tx: Sender<Option<u64>>, // Can be used to transmit what game is currently being played (by ID)
     pub player_slot_tx: broadcast::Sender<Vec<FrontendPlayerSlotConnection>>,
+    pub current_game_tx: Sender<Option<u64>>, // Can be used to transmit what game is currently being played (by ID)
+    pub db_file: NamedTempFile,
     pub notifier: Arc<Notify>,
     pub server: TestServer,
 }
 
 impl TestContext {
     pub async fn new(db_name: &str) -> Self {
-        let dir = local_data_dir().unwrap();
-        let db_path = dir
-            .join(db_name)
-            .with_extension("db")
-            .into_os_string()
-            .into_string()
-            .unwrap();
+        let db_file = tempfile::Builder::new()
+            .prefix(db_name)
+            .suffix(".db")
+            .tempfile()
+            .expect(&format!("Failed to create temp file for {db_name}"));
+
+        let db_path = db_file.path().as_os_str().to_str().unwrap();
         let mut connection = establish_connection(&db_path);
+        println!("{db_path}");
 
         connection
             .run_pending_migrations(MIGRATIONS)
@@ -76,18 +77,16 @@ impl TestContext {
         let app = setup_test_server(&db_path, current_game_rx, Arc::clone(&notifier), player_slot_rx).await;
 
         Self {
-            db_path: db_path.to_string(),
-            current_game_tx: current_game_tx,
-            player_slot_tx: player_slot_tx,
+            player_slot_tx,
+            current_game_tx,
+            db_file,
             notifier,
             server: TestServer::new(app).expect("Failed to set up test server"),
         }
     }
-}
 
-impl Drop for TestContext {
-    fn drop(&mut self) {
-        remove_file(&self.db_path).expect("Failed to delete file");
+    pub fn get_db_path(&self) -> &str {
+        return self.db_file.path().as_os_str().to_str().unwrap();
     }
 }
 

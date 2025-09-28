@@ -28,6 +28,8 @@ use tokio::sync::broadcast::channel;
 
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_autostart::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_autostart::init(
             MacosLauncher::LaunchAgent,
             Some(vec![""]),
@@ -37,7 +39,7 @@ fn main() {
                 channel::<Vec<FrontendPlayerSlotConnection>>(100);
             tauri::async_runtime::spawn(update_controller_task(app.handle().clone()));
             let db_path = app
-                .path_resolver()
+                .path()
                 .app_data_dir()
                 .unwrap()
                 .join("local")
