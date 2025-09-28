@@ -4,7 +4,7 @@ use handlers::{
     GameStateShared,
 };
 use std::sync::Arc;
-use tokio::sync::{Notify};
+use tokio::sync::Notify;
 
 const VERSION: u8 = 1;
 
@@ -124,10 +124,7 @@ mod test {
     use crate::game_dev_api::handlers::GameState;
 
     use super::*;
-    use tokio::sync::{
-        watch,
-        RwLock,
-    };
+    use tokio::sync::{watch, RwLock};
 
     #[tokio::test]
     async fn game_state_change() {
