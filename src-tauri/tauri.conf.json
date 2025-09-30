@@ -2,65 +2,55 @@
   "build": {
     "beforeBuildCommand": "npm run build",
     "beforeDevCommand": "npm run dev",
-    "devPath": "http://localhost:5173",
-    "distDir": "../dist"
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:5173"
   },
-  "package": {
-    "productName": "coms-console-launcher",
-    "version": "1.0.0"
-  },
-  "tauri": {
-    "allowlist": {
-      "protocol": {
-        "asset": true,
-        "assetScope": ["**"]
-      },
-      "process": {
-        "exit": true
-      },
-      "all": false,
-      "window": {
-        "setFullscreen": true
-      }
+  "bundle": {
+    "active": true,
+    "category": "DeveloperTool",
+    "copyright": "",
+    "targets": [
+      "deb",
+      "nsis",
+      "msi",
+      "app",
+      "dmg"
+    ],
+    "externalBin": [],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": ""
     },
-    "bundle": {
-      "active": true,
-      "category": "DeveloperTool",
-      "copyright": "",
+    "longDescription": "",
+    "macOS": {
+      "entitlements": null,
+      "exceptionDomain": "",
+      "frameworks": [],
+      "providerShortName": null,
+      "signingIdentity": null
+    },
+    "shortDescription": "",
+    "linux": {
       "deb": {
         "depends": []
-      },
-      "externalBin": [],
-      "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
-        "icons/icon.ico"
-      ],
-      "identifier": "coms-console",
-      "longDescription": "",
-      "macOS": {
-        "entitlements": null,
-        "exceptionDomain": "",
-        "frameworks": [],
-        "providerShortName": null,
-        "signingIdentity": null
-      },
-      "shortDescription": "",
-      "targets": ["deb", "nsis", "msi", "app", "dmg", "updater"],
-      "windows": {
-        "certificateThumbprint": null,
-        "digestAlgorithm": "sha256",
-        "timestampUrl": ""
       }
     },
-    "security": {
-      "csp": "default-src 'self'; img-src 'self' https://i.iheart.com/v3/catalog/artist/61088 asset: https://asset.localhost; style-src 'unsafe-inline' tauri://localhost/assets/index-BZf4yVik.css tauri://localhost/assets https://fonts.googleapis.com/css2; font-src: https://fonts.gstatic.com/s/poppins/v22"
-    },
-    "updater": {
-      "active": false
-    },
+    "createUpdaterArtifacts": "v1Compatible"
+  },
+  "productName": "coms-console-launcher",
+  "mainBinaryName": "coms-console-launcher",
+  "version": "1.0.0",
+  "identifier": "coms-console",
+  "plugins": {},
+  "app": {
     "windows": [
       {
         "visible": false,
@@ -68,8 +58,18 @@
         "height": 600,
         "resizable": true,
         "title": "COMS Console",
-        "width": 800
+        "width": 800,
+        "useHttpsScheme": true
       }
-    ]
+    ],
+    "security": {
+      "assetProtocol": {
+        "scope": [
+          "**"
+        ],
+        "enable": true
+      },
+      "csp": "default-src 'self'; img-src 'self' https://i.iheart.com/v3/catalog/artist/61088 asset: https://asset.localhost; style-src 'unsafe-inline' tauri://localhost/assets/index-BZf4yVik.css tauri://localhost/assets https://fonts.googleapis.com/css2; font-src: https://fonts.gstatic.com/s/poppins/v22; connect-src ipc: http://ipc.localhost"
+    }
   }
 }
