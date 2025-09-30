@@ -3,7 +3,7 @@ import { useModal } from "../hooks/useModal";
 import { useNavigationContext, usePageContext } from "../context/contexts";
 import GameInfoModal from "./GameInfoModal";
 import { Carousel, Header, Text } from "quackbox-design-system";
-import { convertFileSrc, invoke } from "@tauri-apps/api/core";
+import { convertFileSrc, invoke } from "@tauri-apps/api/tauri";
 import "../styles/GameGallery.css";
 
 export default function GameGallery() {

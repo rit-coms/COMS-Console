@@ -1,10 +1,9 @@
 
 import React, { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { appWindow } from "@tauri-apps/api/window";
 import App from "./App";
 import "./index.css";
-const appWindow = getCurrentWebviewWindow()
 
 appWindow.setFullscreen(true);
 

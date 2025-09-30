@@ -1,5 +1,5 @@
 import React, { createContext, useEffect, useRef, useState } from "react";
-import { exit } from "@tauri-apps/plugin-process";
+import { exit } from "@tauri-apps/api/process";
 import { useToastContext } from "./contexts";
 
 // Button map for the gamepad
