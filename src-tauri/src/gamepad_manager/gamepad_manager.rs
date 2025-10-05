@@ -5,6 +5,7 @@ use std::time::Duration;
 
 use inner::GamepadManagerInner;
 use serde::Serialize;
+use tauri::AppHandle;
 use std::sync::Arc;
 use std::sync::RwLock;
 use tokio::sync::broadcast::Sender;
@@ -64,14 +65,14 @@ pub enum FrontendControllerSlotConnection {
 /// through the provided methods.
 pub struct GamepadManager {
     state: Arc<RwLock<GamepadManagerInner>>,
-    timeout_s: f32
+    timeout_s: f32,
 }
 
 impl GamepadManager {
-    pub fn new(sender: Sender<Vec<FrontendControllerSlotConnection>>, timeout_s: f32) -> Self {
+    pub fn new(timeout_s: f32) -> Self {
         GamepadManager {
-            state: Arc::new(RwLock::new(GamepadManagerInner::new(sender))),
-            timeout_s: timeout_s
+            state: Arc::new(RwLock::new(GamepadManagerInner::new())),
+            timeout_s: timeout_s,
         }
     }
 
@@ -176,7 +177,6 @@ mod inner {
     pub struct GamepadManagerInner {
         player_slots: [ControllerSlotConnectionStatus; MAX_CONTROLLERS],
         gamepad_map: HashMap<usize, usize>,
-        sender: Sender<Vec<FrontendControllerSlotConnection>>,
     }
 
     impl fmt::Display for GamepadManagerInner {
@@ -189,20 +189,11 @@ mod inner {
     }
 
     impl GamepadManagerInner {
-        pub fn new(sender: Sender<Vec<FrontendControllerSlotConnection>>) -> Self {
+        pub fn new() -> Self {
             GamepadManagerInner {
                 player_slots: [const { ControllerSlotConnectionStatus::Disconnected }; MAX_CONTROLLERS],
                 gamepad_map: HashMap::new(),
-                sender: sender,
             }
-        }
-
-        fn broadcast_state(&self) {
-            // Ignore the error for if the reciever is dropped (it shouldn't be dropped)
-            println!("{}", self);
-            let _ = self
-                .sender
-                .send(self.player_slots.iter().map(|value| value.into()).collect());
         }
 
         pub fn get_slot(&self, slot_num: usize) -> &ControllerSlotConnectionStatus {
@@ -219,7 +210,6 @@ mod inner {
 
         pub fn set_slot(&mut self, slot_num: usize, value: ControllerSlotConnectionStatus) {
             self.player_slots[slot_num] = value;
-            self.broadcast_state();
         }
 
         pub fn register_id(&mut self, id: usize, slot_num: usize) {
@@ -266,7 +256,6 @@ mod inner {
             }
 
             self.player_slots.swap(slot1, slot2);
-            self.broadcast_state();
         }
 
         /// Get the index of the lowest slot number that is disconnected in a given array of player slot connections

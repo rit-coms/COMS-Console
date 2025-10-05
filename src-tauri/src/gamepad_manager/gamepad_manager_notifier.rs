@@ -5,19 +5,27 @@ use crate::gamepad_manager::gamepad_manager::{FrontendControllerSlotConnection, 
 
 pub struct GamepadManagerNotifier {
     gamepad_manager: GamepadManager,
-    app_handle: AppHandle
+    app_handle: AppHandle,
+    sender: Sender<Vec<FrontendControllerSlotConnection>>,
 }
 
 impl GamepadManagerNotifier {
     pub fn new(sender: Sender<Vec<FrontendControllerSlotConnection>>, timeout_s: f32, app_handle: AppHandle) -> Self {
         GamepadManagerNotifier{
-            gamepad_manager: GamepadManager::new(sender, timeout_s),
-            app_handle
+            gamepad_manager: GamepadManager::new(timeout_s),
+            app_handle,
+            sender,
         }
     }
 
     fn notify(&self) {
-        self.app_handle.emit("controller-connections-updated", self.gamepad_manager.get_slots());
+        let current_slots = self.gamepad_manager.get_slots();
+        // Notify Tauri frontend
+        self.app_handle.emit("controller-connections-updated", current_slots.clone())
+            .expect("Failed to emit controller connections update to Tauri frontend");
+        // Notify game webserver
+        self.sender.send(current_slots)
+            .expect("Failed to emit controller connection update to game dev webserver");
     }
 
     pub fn connect_controller(&self, id: usize) {

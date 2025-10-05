@@ -1,17 +1,17 @@
 use std::time::Duration;
 
 use anyhow::Error;
-use gamepad_manager::{FrontendControllerSlotConnection, GamepadManager};
 use gilrs::{Event, EventType, Gilrs};
 use tauri::{AppHandle, Manager, State};
 use tokio::time::sleep;
 
-use crate::frontend_api::ErrorType;
+use crate::{frontend_api::ErrorType, gamepad_manager::{gamepad_manager::FrontendControllerSlotConnection, gamepad_manager_notifier::GamepadManagerNotifier}};
 pub mod gamepad_manager;
+pub mod gamepad_manager_notifier;
 
 pub async fn update_controller_task(app_handle: AppHandle) -> Result<(), Error> {
     let mut gilrs = Gilrs::new().unwrap();
-    let state_manager = app_handle.state::<GamepadManager>();
+    let state_manager = app_handle.state::<GamepadManagerNotifier>();
 
     // populate gamepad_map with initial connected gamepads
     for (id, _) in gilrs.gamepads() {
@@ -45,14 +45,14 @@ pub async fn update_controller_task(app_handle: AppHandle) -> Result<(), Error> 
 
 #[tauri::command]
 pub fn get_player_slot_states(
-    manager: State<'_, GamepadManager>,
+    manager: State<'_, GamepadManagerNotifier>,
 ) -> Result<Vec<FrontendControllerSlotConnection>, ErrorType> {
     Ok(manager.get_slots())
 }
 
 /// Note: arguments are NOT zero indexed
 #[tauri::command]
-pub fn swap_player_slots(manager: State<'_, GamepadManager>, slot1: usize, slot2: usize) {
+pub fn swap_player_slots(manager: State<'_, GamepadManagerNotifier>, slot1: usize, slot2: usize) {
     manager.swap_slots(slot1, slot2);
 }
 
@@ -61,25 +61,18 @@ mod tests {
 
     use tokio::{sync::broadcast::Sender, time::sleep};
 
-    use crate::gamepad_manager::gamepad_manager::FrontendControllerSlotConnection;
+    use crate::gamepad_manager::gamepad_manager::{FrontendControllerSlotConnection, GamepadManager};
 
-    use super::GamepadManager;
-
-    impl GamepadManager {
-        fn new_mock() -> Self {
-            GamepadManager::new(Sender::new(10), 0.0)
-        }
-    }
-
+    const TEST_TIMEOUT_S:f32 = 0.01;
 
     #[tokio::test]
     async fn next_slot_num_under_max() {
-        let manager = GamepadManager::new_mock();
+        let manager = GamepadManager::new(TEST_TIMEOUT_S);
         for id in 1..=8 {
             manager.connect_controller(id);
         }
         manager.disconnect_controller(8);
-        sleep(Duration::from_millis(20)).await;
+        sleep(Duration::from_secs_f32(TEST_TIMEOUT_S * 2.0)).await;
         assert_eq!(
             manager.get_slots(), 
             vec![

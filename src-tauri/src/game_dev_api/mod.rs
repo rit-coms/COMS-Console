@@ -68,13 +68,13 @@ async fn handle_game_state_updates(game_state: GameStateShared) {
 /// use quackbox_backend::game_dev_api::handlers::GameState;
 /// use std::sync::Arc;
 /// use tokio::sync::{Mutex, RwLock, watch, Notify, broadcast};
-/// use quackbox_backend::gamepad_manager::gamepad_manager::FrontendPlayerSlotConnection;
+/// use quackbox_backend::gamepad_manager::gamepad_manager::FrontendControllerSlotConnection;
 ///
 /// async fn setup_api() {
 ///     let game_id = Some(0);
 ///     let (current_game_tx, current_game_rx) = watch::channel(game_id);
 ///     let (player_slot_tx, player_slot_rx) =
-///         broadcast::channel::<Vec<FrontendPlayerSlotConnection>>(100);
+///         broadcast::channel::<Vec<FrontendControllerSlotConnection>>(100);
 /// 
 ///     let app = create_router(
 ///         "local", 
