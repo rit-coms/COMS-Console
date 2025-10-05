@@ -41,6 +41,25 @@ impl Display for ControllerSlotConnectionStatus {
     }
 }
 
+impl Display for FrontendControllerSlotConnection {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        const RED: &str = "\x1b[31m";
+        const YELLOW: &str = "\x1b[33m";
+        const GREEN: &str = "\x1b[32m";
+        const RESET: &str = "\x1b[0m";
+        const SQUARE: &str = "⬛";
+        match self {
+            &FrontendControllerSlotConnection::Connected => {
+                write!(f, "{}{}{}", GREEN, SQUARE, RESET)
+            }
+            &FrontendControllerSlotConnection::Disconnected => write!(f, "{}{}{}", RED, SQUARE, RESET),
+            &FrontendControllerSlotConnection::Stale => {
+                write!(f, "{}{}{}", YELLOW, SQUARE, RESET)
+            }
+        }
+    }
+}
+
 impl Into<FrontendControllerSlotConnection> for &ControllerSlotConnectionStatus {
     fn into(self) -> FrontendControllerSlotConnection {
         match self {
@@ -66,6 +85,16 @@ pub enum FrontendControllerSlotConnection {
 pub struct GamepadManager {
     state: Arc<RwLock<GamepadManagerInner>>,
     timeout_s: f32,
+}
+
+/// This trait allows the state of the Gamepad manager to be printed easily.
+/// The format is a row of colored numbers where red is disconnected, yellow is stale,
+/// and green is connected
+impl fmt::Display for GamepadManager {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.state.read().unwrap())?;
+        Ok(())
+    }
 }
 
 impl GamepadManager {
@@ -104,14 +133,14 @@ impl GamepadManager {
         }
     }
 
-    /// Unregisters a controller with a given id from the gamepad manager. This will open up
-    /// a controller slot, and other controller connections will remain unaffected (they will
-    /// not be moved to fill in the hole).
+    /// Unregisters a controller with a given id from the gamepad manager. This will set the given
+    /// controller to be stale. After `timeout_s` time, the slot will disconnect and other controller 
+    /// connections will remain unaffected (they will not be moved to fill in the hole).
     /// 
     /// # Arguments
     /// 
     /// * `id` - The id of the controller that was disconnected
-    pub fn disconnect_controller(&self, id: usize) {
+    pub fn disconnect_controller(&self, id: usize, on_timeout: Box<dyn Fn(Vec<FrontendControllerSlotConnection>) + Send + 'static>) {
         let mut lock = self.state.write().unwrap();
         if let Some(slot_num) = lock.get_slot_num(&id) {
             let slot_num = *slot_num;
@@ -119,7 +148,7 @@ impl GamepadManager {
                 slot_num,
                 ControllerSlotConnectionStatus::Stale(
                     id,
-                    tokio::spawn(Self::stale_timer(id, self.timeout_s , Arc::clone(&self.state))),
+                    tokio::spawn(Self::stale_timer(id, self.timeout_s , Arc::clone(&self.state), on_timeout)),
                 ),
             );
         }
@@ -158,7 +187,7 @@ impl GamepadManager {
     /// * `id` - The id of the controller to set a stale timer for
     /// * `timeout_s` - The timeout duration before the controller is disconnected
     /// * `slots` - 
-    async fn stale_timer(id: usize, timeout_s: f32, slots: Arc<RwLock<GamepadManagerInner>>) {
+    async fn stale_timer(id: usize, timeout_s: f32, slots: Arc<RwLock<GamepadManagerInner>>, on_timeout: Box<dyn Fn(Vec<FrontendControllerSlotConnection>) + Send + 'static>) {
         sleep(Duration::from_secs_f32(timeout_s)).await;
         let mut lock = slots.write().unwrap();
         let slot: usize;
@@ -169,6 +198,7 @@ impl GamepadManager {
         }
         lock.set_slot(slot, ControllerSlotConnectionStatus::Disconnected);
         lock.remove_id(&id);
+        (on_timeout)(lock.get_slots().iter().map(|status| status.into()).collect());
     }
 }
 

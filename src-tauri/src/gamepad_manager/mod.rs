@@ -71,7 +71,7 @@ mod tests {
         for id in 1..=8 {
             manager.connect_controller(id);
         }
-        manager.disconnect_controller(8);
+        manager.disconnect_controller(8, Box::new(|_| {}));
         sleep(Duration::from_secs_f32(TEST_TIMEOUT_S * 2.0)).await;
         assert_eq!(
             manager.get_slots(), 

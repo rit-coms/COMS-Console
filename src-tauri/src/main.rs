@@ -53,7 +53,7 @@ fn main() {
             app.manage(LoadedGamesState::default());
             app.manage(GamepadManagerNotifier::new(
                 controller_slot_tx,
-                5.0,
+                1.0,
                 app.handle().clone(),
             ));
             // tauri::async_runtime::spawn(db::test_db());
