@@ -292,6 +292,19 @@ components:
           type: string
           description: The file name of the save data entry.
       additionalProperties: false
+    new_save_data_payload:
+      type: object
+      properties:
+        data:
+          type: object:
+          additionalProperties: true
+          description: The save data to be saved. This will be a JSON object with the save data as defined by the game developer.
+        file_name:
+          type: string
+          description: The file name of the save data entry.
+        player_slot:
+          type: string
+          description: The controller slot of the user to associate the save data with
     leaderboard_payload:
       type: object
       properties:

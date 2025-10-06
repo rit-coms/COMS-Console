@@ -1,0 +1,5 @@
+To rebuild the documentation, cd into the root of the project and rn run
+```
+npm install -g @asyncapi/cli
+asyncapi generate fromTemplate quackbox-api-docs/asyncapi-v{VERSION} @asyncapi/html-template@3.0.0 -o example --use-new-generator
+```
