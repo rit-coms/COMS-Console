@@ -34,8 +34,8 @@ jobs:
       - name: Generate documentation
         working-directory: ./quackbox-api-docs
         run: |
-          asyncapi generate fromTemplate quackbox-api-docs/asyncapi-v1.yaml @asyncapi/html-template@3.0.0 -o quackbox-api-docs/docs-v1 --use-new-generator
-          asyncapi generate fromTemplate quackbox-api-docs/asyncapi-v2.yaml @asyncapi/html-template@3.0.0 -o quackbox-api-docs/docs-v2 --use-new-generator
+          asyncapi generate fromTemplate asyncapi-v1.yaml @asyncapi/html-template@3.0.0 -o quackbox-api-docs/docs-v1 --use-new-generator
+          asyncapi generate fromTemplate asyncapi-v2.yaml @asyncapi/html-template@3.0.0 -o quackbox-api-docs/docs-v2 --use-new-generator
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
