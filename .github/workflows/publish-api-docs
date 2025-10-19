@@ -1,0 +1,51 @@
+# This is a basic workflow to generate the asyncapi docs and host them on GitHub pages
+
+name: Publish API docs
+
+# Controls when the workflow will run
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main", "release/v2-dev" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install asyncapi tool
+        run: |
+          pnpm install @asyncapi/cli
+          pnpm install @asyncapi/generator
+
+      - name: Generate documentation
+        working-directory: ./quackbox-api-docs
+        run: |
+          asyncapi generate fromTemplate quackbox-api-docs/asyncapi-v1.yaml @asyncapi/html-template@3.0.0 -o quackbox-api-docs/docs-v1 --use-new-generator
+          asyncapi generate fromTemplate quackbox-api-docs/asyncapi-v2.yaml @asyncapi/html-template@3.0.0 -o quackbox-api-docs/docs-v2 --use-new-generator
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload entire repository
+          path: './quackbox-api-docs/site'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
