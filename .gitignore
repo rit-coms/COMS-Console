@@ -8,3 +8,4 @@ games
 .idea/
 pnpm-lock.yaml
 .env
+src-tauri/gen/
