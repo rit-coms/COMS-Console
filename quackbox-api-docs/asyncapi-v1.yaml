@@ -206,10 +206,7 @@ components:
       summary: Represents a new save data entry to be inserted into the Quackbox database
       contentType: application/json
       payload:
-        type: object
-        additionalProperties: true
-        description: >-
-          The save data for the current user. This will be a JSON object with the save data as defined by the game developer.
+        $ref: "#/components/schemas/new_save_data_payload"
     leaderboard_entry:
       name: leaderboard_entry
       title: Leaderboard Entry
@@ -296,7 +293,7 @@ components:
       type: object
       properties:
         data:
-          type: object:
+          type: object
           additionalProperties: true
           description: The save data to be saved. This will be a JSON object with the save data as defined by the game developer.
         file_name:
