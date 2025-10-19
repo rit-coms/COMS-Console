@@ -34,6 +34,7 @@ jobs:
       - name: Generate documentation
         working-directory: ./quackbox-api-docs
         run: |
+          export BROWSERSLIST="defaults" 
           asyncapi generate fromTemplate asyncapi-v1.yaml @asyncapi/html-template@3.0.0 -o quackbox-api-docs/docs-v1 --use-new-generator --force-write
           asyncapi generate fromTemplate asyncapi-v2.yaml @asyncapi/html-template@3.0.0 -o quackbox-api-docs/docs-v2 --use-new-generator --force-write
 
