@@ -48,8 +48,6 @@ jobs:
         with:
           # Upload entire repository
           path: './quackbox-api-docs/site'
+          name: github-pages
 
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
 
