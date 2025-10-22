@@ -1,0 +1,7 @@
+To rebuild the documentation, cd into the root of the project and run
+```
+npm install -g @asyncapi/cli
+asyncapi generate fromTemplate quackbox-api-docs/asyncapi-v{VERSION}.yaml @asyncapi/html-template@3.0.0 -o example --use-new-generator
+```
+
+Run `export BROWSERSLIST="defaults"` if you get a dumb error that you can't fix (Unknown browser query)
