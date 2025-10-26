@@ -1,5 +1,6 @@
 use anyhow::{Error, Ok};
-use diesel::{expression::is_aggregate::No, insert_into, prelude::*, sql_types::Nullable};
+use chrono::offset;
+use diesel::{dsl::Limit, expression::is_aggregate::No, insert_into, prelude::*, sql_types::Nullable};
 use models::*;
 use regex::Regex;
 use std::option::Option;
@@ -140,6 +141,9 @@ pub async fn get_save_data(
     user_id_s: &Option<String>,
     file_name_s: &Option<String>,
     regx: &Option<String>,
+    ascending: Option<bool>,
+    limit: Option<i64>,
+    offset: Option<i64>,
     db_path: &str,
 ) -> Result<Vec<Save>, Error> {
     use self::schema::saves::dsl::*;
@@ -161,16 +165,23 @@ pub async fn get_save_data(
         query = query.filter(file_name.eq(file_name_s));
     }
 
-    // TODO: uncomment when time_stamps implemented
-    // if let Some(ascending) = ascending {
-    //     if ascending {
-    //         query = query.order(time_stamp.asc());
-    //     } else {
-    //         query = query.order(time_stamp.desc());
-    //     }
-    // } else {
-    //     query = query.order(time_stamp.desc());
-    // }
+    if let Some(ascending) = ascending {
+        if ascending {
+            query = query.order(time_stamp.asc());
+        } else {
+            query = query.order(time_stamp.desc());
+        }
+    } else {
+        query = query.order(time_stamp.desc());
+    }
+
+    if let Some(limit) = limit {
+        query = query.limit(limit);
+    }
+
+    if let Some(offset) = offset {
+        query = query.offset(offset);
+    }
 
     let mut results: Vec<Save> = query
         .get_results(&mut connection)

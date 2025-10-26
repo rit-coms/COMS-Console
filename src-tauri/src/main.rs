@@ -4,8 +4,8 @@
 use db::setup_db;
 use frontend_api::{get_game_info, get_leaderboard_data, play_game, AppState, GameSenderState};
 use game_dev_api::setup_game_dev_api;
-use game_dev_api::v1_handlers::GameState;
-use game_dev_api::v1_handlers::GameStateShared;
+use game_dev_api::GameState;
+use game_dev_api::GameStateShared;
 use quackbox_backend::db::create_default_guest;
 use tauri::Manager;
 use tauri_plugin_autostart::{MacosLauncher, ManagerExt};

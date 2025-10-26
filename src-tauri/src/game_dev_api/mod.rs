@@ -77,7 +77,7 @@ async fn handle_game_state_updates(game_state: GameStateShared) {
 ///
 /// ```rust
 /// use quackbox_backend::game_dev_api::create_router;
-/// use quackbox_backend::game_dev_api::v1_handlers::GameState;
+/// use quackbox_backend::game_dev_api::GameState;
 /// use std::sync::Arc;
 /// use tokio::sync::{Mutex, RwLock, watch, Notify};
 ///

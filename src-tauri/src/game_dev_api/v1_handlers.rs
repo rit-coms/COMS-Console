@@ -145,7 +145,7 @@ pub async fn set_save_data_v1(
 }
 
 #[derive(Deserialize, Serialize)]
-pub struct SaveDataGetParams {
+pub struct SaveDataGetParamsV1 {
     pub file_name: Option<String>,
     pub regex: Option<String>,
     pub player_slot: Option<i16>,
@@ -157,7 +157,7 @@ pub struct SaveDataGetParams {
 pub async fn get_save_data_v1(
     State(state): State<ApiState>,
     State(game_state): State<GameStateShared>,
-    params: Query<SaveDataGetParams>,
+    params: Query<SaveDataGetParamsV1>,
 ) -> impl IntoResponse {
     println!("Getting save data!");
     let game_id = game_state.id.read().await.unwrap().to_string();
@@ -173,6 +173,9 @@ pub async fn get_save_data_v1(
         &user_id_s,
         &params.file_name,
         &params.regex,
+        None,
+        None,
+        None,
         &state.database_path,
     )
     .await;
