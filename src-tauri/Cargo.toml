@@ -11,22 +11,21 @@ rust-version = "1.60"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "1.5.5", features = [] }
+tauri-build = { version = "2", features = [] }
 
 [dependencies]
 serde_json = "1.0.128"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.8.0", features = [ "process-exit", "window-set-fullscreen", "protocol-asset"] }
+tauri = { version = "2", features = [ "protocol-asset"] }
 chrono = { version = "0.4.31", features = ["serde"] }
 anyhow = "1.0.89"
 url = "2.5.2"
-tauri-plugin-autostart = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
+tauri-plugin-autostart = { version = "2" }
 diesel = { version = "2.2.0", features = ["sqlite", "returning_clauses_for_sqlite_3_35", "chrono"] }
 # build libsqlite3 as part of the build process
 # uncomment this line if you run into setup issues
 libsqlite3-sys = { version = "0.30", features = ["bundled"] }
-dotenvy = "0.15"
-uuid = "1.11.0"
+uuid = { version = "1.18.1", features = ["v4"] }
 tokio = { version = "1.29.1", features = ["full"] }
 axum = "0.8.1"
 serde_with = "3.0.0"
@@ -36,6 +35,8 @@ axum-macros = "0.3.8"
 diesel_migrations = "2.0.0"
 axum-test = "17.2.0"
 regex = "1.9.6"
+tauri-plugin-process = "2"
+tempfile = "3.6.0"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem and the built-in dev server is disabled.
@@ -44,3 +45,6 @@ regex = "1.9.6"
 custom-protocol = ["tauri/custom-protocol"]
 quackbox-raspi = ["autostart"]
 autostart = []
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-autostart = "2"

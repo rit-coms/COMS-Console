@@ -11,7 +11,7 @@ import {
   Text,
 } from "quackbox-design-system";
 import "../styles/GameInfoModal.css";
-import { invoke } from "@tauri-apps/api/tauri";
+import { invoke } from "@tauri-apps/api/core";
 import { usePageContext } from "../context/contexts";
 
 import placeholder from "../assets/placeholder.png";

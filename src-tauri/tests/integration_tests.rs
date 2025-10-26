@@ -22,9 +22,9 @@ async fn read_and_write_user_table_db() {
     let user_id_s = "1141245215512";
     let name_s = "A random user";
 
-    create_user(user_id_s, name_s, &test_context.db_path);
+    create_user(user_id_s, name_s, test_context.get_db_path());
 
-    let result = get_user(name_s, user_id_s, &test_context.db_path).await;
+    let result = get_user(name_s, user_id_s, test_context.get_db_path()).await;
 
     assert_eq!(user_id_s, result.id.as_str());
     assert_eq!(name_s, result.name.as_str());
@@ -35,7 +35,7 @@ async fn read_and_write_leaderboard_data() {
     let test_context = TestContext::new("read_and_write_leaderboard_data").await;
     let leaderboard_path = "/api/v1/leaderboard";
 
-    setup_initial_data(&test_context.db_path).await;
+    setup_initial_data(test_context.get_db_path()).await;
 
     // set game id to 1
     test_context
@@ -90,7 +90,7 @@ async fn read_and_write_leaderboard_data() {
 async fn read_and_write_save_data() {
     let test_context = TestContext::new("read_and_write_save_data").await;
 
-    setup_initial_data(&test_context.db_path).await;
+    setup_initial_data(test_context.get_db_path()).await;
 
     // set game id to 0
     test_context
@@ -151,7 +151,7 @@ async fn get_save_data_error() {
     let test_context = TestContext::new("get_save_data_error").await;
     let save_data_path = "/api/v1/save-data";
 
-    setup_initial_data(&test_context.db_path).await;
+    setup_initial_data(test_context.get_db_path()).await;
 
     // set current game to id 1
     test_context
@@ -218,7 +218,7 @@ async fn get_leaderboard_data_error() {
     let test_context = TestContext::new("get_leaderboard_data_error").await;
     let leaderboard_path = "/api/v1/leaderboard";
 
-    setup_initial_data(&test_context.db_path).await;
+    setup_initial_data(test_context.get_db_path()).await;
 
     // set current game to id 0
     test_context
@@ -267,7 +267,7 @@ async fn get_leaderboard_data_error() {
 async fn upsert_save_data() {
     let test_context = TestContext::new("upsert_save_data").await;
 
-    setup_initial_data(&test_context.db_path).await;
+    setup_initial_data(test_context.get_db_path()).await;
 
     test_context.current_game_tx.send(Some(0)).expect("All receivers have been dropped");
     test_context.notifier.notified().await;

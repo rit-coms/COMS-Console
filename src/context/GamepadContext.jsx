@@ -1,7 +1,8 @@
 import React, { createContext, useEffect, useRef, useState } from "react";
-import { exit } from "@tauri-apps/api/process";
+import { exit } from "@tauri-apps/plugin-process";
 import { useToastContext } from "./contexts";
 
+// Button map for the gamepad
 const BUTTONS = {
     0: "B",
     1: "A",
@@ -21,6 +22,7 @@ const BUTTONS = {
     15: "RIGHT",
 };
 
+// Keybinds for use without gamepad
 const KEYMAP = [
     { // MOCK PLAYER ONE BUTTONS
         "k": 0,             // MOCK B
@@ -70,6 +72,9 @@ export const GamepadProvider = ({ children }) => {
     const killswitch = new Set();
     const recentlyDisconnected = useRef(new Set());
   
+    /**
+     * LISTENS FOR GAMEPAD CONNECTION
+     */
     useEffect(() => {
 
         const handleGamepadConnected = (e) => {
@@ -96,6 +101,7 @@ export const GamepadProvider = ({ children }) => {
         window.addEventListener("gamepadconnected", handleGamepadConnected);
         window.addEventListener("gamepaddisconnected", handleGamepadDisconnected);
         
+        // poll the gamepads every 100ms for input
         const intervalId = setInterval(() => {
             const gamepadsState = navigator.getGamepads();
             setGamepads((prevGamepads) =>
@@ -163,6 +169,7 @@ export const GamepadProvider = ({ children }) => {
     };
 
     useEffect(() => {
+        // Transforms the gamepads object into a players object
         setPlayers((prevPlayers) => {
             if (prevPlayers.length > 0) {
                 const updatedPlayers = [...prevPlayers];
@@ -192,14 +199,16 @@ export const GamepadProvider = ({ children }) => {
 
     }, [gamepads]);
 
-
+    /**
+     * KEYBINDS
+     */
     useEffect(() => {
 
         window.addEventListener("keydown", (event) => {
             if (event.key === "C" || event.key === "D") {
                 event.preventDefault();
                 
-                // Create a new gamepadconnected event
+                // Create a new simulated gamepadconnected event
                 const gamepadEvent = new Event("simulatedGamepadConnected");
                 gamepadEvent.gamepad = {
                     index: event.key === "C" ? 0 : 1,
@@ -213,6 +222,7 @@ export const GamepadProvider = ({ children }) => {
                 recentlyDisconnected.current.delete(gamepadEvent.gamepad.index);
                 
             } else if (event.key === "N" || event.key === "J") {
+                // Create a new simulated gamepaddisconnected event
                 const gamepadEvent = new Event("simulatedGamepadDisconnected");
                 gamepadEvent.gamepad = {
                     index: event.key === "N" ? 0 : 1,
@@ -249,7 +259,6 @@ export const GamepadProvider = ({ children }) => {
           });
 
     });
-    
 
     useEffect(() => {
         window.addEventListener("keydown", (event) => {
@@ -328,6 +337,7 @@ export const GamepadProvider = ({ children }) => {
         });
     }, []);
 
+    // Function to allow custom functions on defined buttons/keybinds
     const setButtonAction = (keyOrButton, action) => {
         // if string, keyboard key, else gamepad button
         if (typeof keyOrButton === 'string') {
@@ -341,8 +351,7 @@ export const GamepadProvider = ({ children }) => {
                 }
             });
 
-        }
-        else {
+        } else {
             const gamepadIndex = keyOrButton; 
             setInterval(() => {
                 const currentGamepad = navigator.getGamepads()[gamepadIndex];
@@ -354,17 +363,16 @@ export const GamepadProvider = ({ children }) => {
                     });
                 }
             }, 100);    
-
         }
     };
 
-  return (
-    <GamepadContext.Provider value={{
-        gamepads, players, setPlayers, pressedButton, 
-        allPlayersConnected, setAllPlayersConnected, disconnectGamepad,
-        setButtonAction
-    }}>
-      {children}
-    </GamepadContext.Provider>
-  );
+    return (
+        <GamepadContext.Provider value={{
+            gamepads, players, setPlayers, pressedButton, 
+            allPlayersConnected, setAllPlayersConnected, disconnectGamepad,
+            setButtonAction
+        }}>
+            {children}
+        </GamepadContext.Provider>
+    );
 };

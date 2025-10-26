@@ -22,13 +22,15 @@ mod game_dev_api;
 
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_autostart::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_autostart::init(
             MacosLauncher::LaunchAgent,
             Some(vec![""]),
         ))
         .setup(|app| {
             let db_path = app
-                .path_resolver()
+                .path()
                 .app_data_dir()
                 .unwrap()
                 .join("local")
