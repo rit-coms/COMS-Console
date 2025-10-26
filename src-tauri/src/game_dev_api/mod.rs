@@ -3,7 +3,7 @@ use std::sync::Arc;
 use axum::{routing::post, Router};
 use axum_macros::FromRef;
 use tokio::sync::{watch::Receiver, Notify, RwLock};
-use v1_handlers::{get_leaderboard_v1, get_save_data_v1, set_leaderboard_v1, set_save_data_v1};
+use v1_handlers::{get_leaderboard, get_save_data, set_leaderboard, set_save_data};
 
 pub mod v1_handlers;
 mod v2_handlers;
@@ -115,11 +115,11 @@ pub async fn create_router(db_path: &str, game_state: GameStateShared) -> Router
     Router::new()
         .route(
             "/api/v1/leaderboard",
-            post(set_leaderboard_v1).get(get_leaderboard_v1),
+            post(set_leaderboard).get(get_leaderboard),
         )
         .route(
             "/api/v1/save-data",
-            post(set_save_data_v1).get(get_save_data_v1),
+            post(set_save_data).get(get_save_data),
         )
         .with_state(app_state)
 }
