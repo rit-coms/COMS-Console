@@ -129,8 +129,8 @@ pub async fn create_router(db_path: &str, game_state: GameStateShared) -> Router
             get(v2_handlers::get_save_data_info)
         )
         .route(
-            "/api/v2/leaderboard/{player_slot}/{leaderboard_name}",
-            post(v2_handlers::insert_leaderboard_entry)
+            "/api/v2/leaderboard/{leaderboard_name}/{player_slot}",
+            post(v2_handlers::insert_leaderboard_entry).get(v2_handlers::get_leaderboard_player_slot)
         )
         .route(
             "/api/v2/leaderboard/global/{leaderboard_name}",
@@ -139,10 +139,6 @@ pub async fn create_router(db_path: &str, game_state: GameStateShared) -> Router
         .route(
             "/api/v2/leaderboard/global/{leaderboard_name}/{user_id}",
             get(v2_handlers::get_leaderboard_user)
-        )
-        .route(
-            "/api/v2/leaderboard/{leaderboard_name}/{player_slot}",
-            get(v2_handlers::get_leaderboard_player_slot)
         )
         .with_state(app_state)
 }
