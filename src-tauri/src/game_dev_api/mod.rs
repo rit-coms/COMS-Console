@@ -1,14 +1,32 @@
-use axum::{routing::post, Router};
-use handlers::{
-    get_leaderboard, get_save_data, set_leaderboard, set_save_data, ApiState, AppState,
-    GameStateShared,
-};
 use std::sync::Arc;
-use tokio::sync::Notify;
 
-const VERSION: u8 = 1;
+use axum::{routing::{get, post}, Router};
+use axum_macros::FromRef;
+use tokio::sync::{watch::Receiver, Notify, RwLock};
 
-pub mod handlers;
+pub mod v1_handlers;
+pub mod v2_handlers;
+
+// TODO: rename to not be confused with the managed tauri app state
+#[derive(Clone, FromRef)]
+pub struct AppState {
+    pub api_state: ApiState,
+    pub game_state: GameStateShared,
+}
+
+#[derive(Clone)]
+pub struct ApiState {
+    pub database_path: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct GameState {
+    pub id: Arc<RwLock<Option<u64>>>, // The current game ID, if any
+    pub notifier: Arc<Notify>,
+    pub channel: Receiver<Option<u64>>,
+}
+
+pub type GameStateShared = Arc<GameState>;
 
 /// Listens to and updates the current shared game state
 /// by synchronizing the current game ID with the latest from a watch channel
@@ -58,7 +76,7 @@ async fn handle_game_state_updates(game_state: GameStateShared) {
 ///
 /// ```rust
 /// use quackbox_backend::game_dev_api::create_router;
-/// use quackbox_backend::game_dev_api::handlers::GameState;
+/// use quackbox_backend::game_dev_api::GameState;
 /// use std::sync::Arc;
 /// use tokio::sync::{Mutex, RwLock, watch, Notify};
 ///
@@ -79,7 +97,6 @@ async fn handle_game_state_updates(game_state: GameStateShared) {
 /// }
 /// ```
 pub async fn create_router(db_path: &str, game_state: GameStateShared) -> Router {
-    let route_prefix: String = format!("/api/v{}", VERSION.to_string());
     let api_state = ApiState {
         database_path: db_path.to_owned(),
     };
@@ -96,13 +113,32 @@ pub async fn create_router(db_path: &str, game_state: GameStateShared) -> Router
 
     Router::new()
         .route(
-            &format!("{}/leaderboard", route_prefix),
-            post(set_leaderboard).get(get_leaderboard),
+            "/api/v1/leaderboard",
+            post(v1_handlers::set_leaderboard).get(v1_handlers::get_leaderboard),
         )
-        // .with_state(app_state.clone()) // TODO: wrap the state in an ARC to avoid cloning???
         .route(
-            &format!("{}/save-data", route_prefix),
-            post(set_save_data).get(get_save_data),
+            "/api/v1/save-data",
+            post(v1_handlers::set_save_data).get(v1_handlers::get_save_data),
+        )
+        .route(
+            "/api/v2/save-data/player_slots/{player_slot}",
+            post(v2_handlers::upsert_save_data).get(v2_handlers::get_save_data)
+        )
+        .route(
+            "/api/v2/save-data/player_slots/{player_slot}/info",
+            get(v2_handlers::get_save_data_info)
+        )
+        .route(
+            "/api/v2/leaderboard/{leaderboard_name}/{player_slot}",
+            post(v2_handlers::insert_leaderboard_entry).get(v2_handlers::get_leaderboard_player_slot)
+        )
+        .route(
+            "/api/v2/leaderboard/global/{leaderboard_name}",
+            get(v2_handlers::get_leaderboard_global)
+        )
+        .route(
+            "/api/v2/leaderboard/global/{leaderboard_name}/{user_id}",
+            get(v2_handlers::get_leaderboard_user)
         )
         .with_state(app_state)
 }
@@ -121,10 +157,12 @@ pub async fn setup_game_dev_api(db_path: String, game_state: GameStateShared) {
 
 #[cfg(test)]
 mod test {
-    use crate::game_dev_api::handlers::GameState;
+    use std::sync::Arc;
+
+    use crate::game_dev_api::GameState;
 
     use super::*;
-    use tokio::sync::{watch, RwLock};
+    use tokio::sync::{watch, Notify, RwLock};
 
     #[tokio::test]
     async fn game_state_change() {

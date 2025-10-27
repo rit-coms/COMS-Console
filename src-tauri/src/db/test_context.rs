@@ -2,10 +2,7 @@ use std::{fs::remove_file, sync::Arc};
 
 use crate::{
     db::establish_connection,
-    game_dev_api::{
-        create_router,
-        handlers::{GameState, GameStateShared},
-    },
+    game_dev_api::{create_router, GameState, GameStateShared},
 };
 use axum::Router;
 use axum_test::TestServer;

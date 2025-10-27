@@ -5,36 +5,11 @@ use axum::{
     response::IntoResponse,
     Json,
 };
-use axum_macros::FromRef;
 use serde::{Deserialize, Serialize};
-use serde_json::{from_str, Value};
-use std::sync::Arc;
-use std::{option::Option, path::PathBuf};
-use tokio::{
-    sync::watch::Receiver,
-    sync::{Notify, RwLock},
-};
+use serde_json::Value;
+use std::option::Option;
 
-// TODO: rename to not be confused with the managed tauri app state
-#[derive(Clone, FromRef)]
-pub struct AppState {
-    pub api_state: ApiState,
-    pub game_state: GameStateShared,
-}
-
-#[derive(Clone)]
-pub struct ApiState {
-    pub database_path: String,
-}
-
-#[derive(Debug, Clone)]
-pub struct GameState {
-    pub id: Arc<RwLock<Option<u64>>>,
-    pub notifier: Arc<Notify>,
-    pub channel: Receiver<Option<u64>>,
-}
-
-pub type GameStateShared = Arc<GameState>;
+use super::{ApiState, GameStateShared};
 
 #[derive(Deserialize, Serialize)]
 pub struct LeaderboardPost {
@@ -57,11 +32,7 @@ pub async fn set_leaderboard(
     State(game_state): State<GameStateShared>,
     Json(payload): Json<LeaderboardPost>,
 ) -> impl IntoResponse {
-    // TODO: Get game_id and user_id
-    println!("Setting Laaderboard data");
-    // let game_id = "1";
-    let game_id = game_state.id.read().await.unwrap().to_string();
-    drop(game_state);
+    let game_id = game_state.id.read().await.unwrap().to_string(); drop(game_state);
     let user_id = payload.player_slot.to_string();
 
     // Save entry to database
@@ -150,7 +121,6 @@ pub async fn set_save_data(
     State(game_state): State<GameStateShared>,
     Json(payload): Json<SaveDataPost>,
 ) -> impl IntoResponse {
-    // let game_id = "0";x
     let game_id = game_state.id.read().await.unwrap().to_string();
     drop(game_state);
     let user_id = payload.player_slot.to_string();
@@ -174,7 +144,7 @@ pub async fn set_save_data(
 }
 
 #[derive(Deserialize, Serialize)]
-pub struct SaveDataGetParams {
+pub struct SaveDataGetParamsV1 {
     pub file_name: Option<String>,
     pub regex: Option<String>,
     pub player_slot: Option<i16>,
@@ -186,7 +156,7 @@ pub struct SaveDataGetParams {
 pub async fn get_save_data(
     State(state): State<ApiState>,
     State(game_state): State<GameStateShared>,
-    params: Query<SaveDataGetParams>,
+    params: Query<SaveDataGetParamsV1>,
 ) -> impl IntoResponse {
     println!("Getting save data!");
     let game_id = game_state.id.read().await.unwrap().to_string();
@@ -202,6 +172,9 @@ pub async fn get_save_data(
         &user_id_s,
         &params.file_name,
         &params.regex,
+        None,
+        None,
+        None,
         &state.database_path,
     )
     .await;

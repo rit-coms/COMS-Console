@@ -4,9 +4,8 @@ use quackbox_backend::{
         test_context::{setup_initial_data, TestContext},
     },
     game_dev_api::{
-        create_router,
-        handlers::{
-            GameStateShared, LeaderboardGetParams, LeaderboardPost, SaveDataGetParams, SaveDataPost,
+        v1_handlers::{
+            LeaderboardGetParams, LeaderboardPost, SaveDataGetParamsV1, SaveDataPost,
         },
     },
 };
@@ -130,7 +129,7 @@ async fn read_and_write_save_data() {
     let get_filename_response: axum_test::TestResponse = test_context
         .server
         .get(SAVE_DATA_PATH)
-        .add_query_params(SaveDataGetParams {
+        .add_query_params(SaveDataGetParamsV1 {
             file_name: Some(file_name.clone()),
             regex: None,
             player_slot: Some(1),
@@ -192,7 +191,7 @@ async fn get_save_data_error() {
     let get_invalid_regex_error_response: axum_test::TestResponse = test_context
         .server
         .get(save_data_path)
-        .add_query_params(SaveDataGetParams {
+        .add_query_params(SaveDataGetParamsV1 {
             file_name: None,
             regex: Some(String::from(r"\")),
             player_slot: Some(player_slot),
@@ -204,7 +203,7 @@ async fn get_save_data_error() {
     let get_invalid_params_error_response: axum_test::TestResponse = test_context
         .server
         .get(save_data_path)
-        .add_query_params(SaveDataGetParams {
+        .add_query_params(SaveDataGetParamsV1 {
             file_name: Some(String::from("test")),
             regex: Some(String::from("test")),
             player_slot: Some(player_slot),
@@ -270,7 +269,7 @@ async fn upsert_save_data() {
 
     setup_initial_data(test_context.get_db_path()).await;
 
-    test_context.current_game_tx.send(Some(0));
+    test_context.current_game_tx.send(Some(0)).expect("All receivers have been dropped");
     test_context.notifier.notified().await;
 
     let file_name: String = String::from("test data");
@@ -322,7 +321,7 @@ async fn upsert_save_data() {
     let get_updated_data_response: axum_test::TestResponse = test_context
         .server
         .get(SAVE_DATA_PATH)
-        .add_query_params(SaveDataGetParams {
+        .add_query_params(SaveDataGetParamsV1 {
             file_name: Some(file_name.clone()),
             regex: None,
             player_slot: Some(1),

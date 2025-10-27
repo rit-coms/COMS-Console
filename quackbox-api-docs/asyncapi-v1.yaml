@@ -1,0 +1,333 @@
+asyncapi: 3.0.0
+info:
+  title: Quackbox API
+  version: 1.0.0
+  description: |-
+    This is the API documentation for the Quackbox local web server based on the AsyncAPI 3.0.0 specification.
+
+    Some useful links:
+    - [Quackbox GitHub Repository](https://github.com/rit-coms/COMS-Console)
+    - [The source API definition for the Quackbox](TODO)
+  license:
+    name: MIT License
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  contact:
+    email: coms@rit.edu
+    name: Computing Organization for Multicultural Students
+defaultContentType: application/json
+servers:
+  QuackboxAPI:
+    host: localhost:6174/api/v1
+    protocol: http
+    description: Local web server for interacting with the Quackbox.
+    tags:
+      - name: Leaderboard
+        description: Access to leaderboard data
+      - name: Save Data
+        description: Read and write save data
+channels:
+  save_data:
+    address: /save-data
+    messages:
+      save_data_entry:
+        $ref: "#/components/messages/save_data_entry"
+      new_save_data:
+        $ref: "#/components/messages/new_save_data"
+      save_data_entries:
+        $ref: "#/components/messages/save_data_entries"
+      get:
+        $ref: "#/components/messages/get"
+  leaderboard:
+    address: /leaderboard
+    messages:
+      leaderboard_entry:
+        $ref: "#/components/messages/leaderboard_entry"
+      new_leaderboard_entry:
+        $ref: "#/components/messages/new_leaderboard_entry"
+      get:
+        $ref: "#/components/messages/get"
+operations:
+  upsert_save_data:
+    action: send
+    channel:
+      $ref: "#/channels/save_data"
+    summary: >-
+      Create or update the save data for the current user with the data contained within the request body. 
+      This will create a new save data entry or update an existing one with the same file name.
+      The reply contains the newly created save data entry.
+    messages:
+      - $ref: "#/channels/save_data/messages/new_save_data"
+    reply:
+      channel: 
+        $ref: "#/channels/save_data"
+      messages:
+        - $ref: "#/components/messages/save_data_entry"
+    bindings:
+      http:
+        method: POST
+  get_save_data:
+    action: send
+    channel:
+      $ref: "#/channels/save_data"
+    summary: >- 
+      Retrieve the save data for the current user. This will return a list of JSON objects with the save data.
+    messages:
+      - $ref: "#/channels/save_data/messages/get"
+    reply:
+      channel: 
+        $ref: "#/channels/save_data"
+      messages:
+        - $ref: "#/components/messages/save_data_entries"
+    bindings:
+      http:
+        method: GET
+        query:
+          type: object
+          properties:
+            player_slot:
+              type: string
+              description: >-
+                The player slot to retrieve save data for. This is the slot number of the player.
+                If not provided, player slot 1 will be used.
+            regex:
+              type: string
+              description: >-
+                A regular expression to filter the save data files by name. This will only return files that match the regex. If not provided, no filter will be applied
+            file_name:
+              type: string
+              description: >-
+                The name of the save data file to retrieve. If not provided, all save data files will be retrieved.
+          additionalProperties: false
+  insert_leaderboard_entry:
+    action: send
+    channel:
+      $ref: "#/channels/leaderboard"
+    summary: >-
+      Create a new leaderboard entry for the current user with the data contained within the request body. 
+      This will create a new leaderboard entry or update an existing one with the same file name.
+      The reply contains the newly created leaderboard entry.
+    messages:
+      - $ref: "#/channels/leaderboard/messages/new_leaderboard_entry"
+    reply:
+      channel: 
+        $ref: "#/channels/leaderboard"
+      messages:
+        - $ref: "#/components/messages/leaderboard_entry"
+    bindings:
+      http:
+        method: POST
+  get_leaderboard:
+    action: send
+    channel:
+      $ref: "#/channels/leaderboard"
+    summary: >- 
+      Retrieve leaderboard data. This will return a list of JSON objects with the leaderboard entries.
+    messages:
+      - $ref: "#/channels/leaderboard/messages/get"
+    reply:
+      channel: 
+        $ref: "#/channels/leaderboard"
+      messages:
+        - $ref: "#/components/messages/leaderboard_entry"
+    bindings:
+      http:
+        method: GET
+        query:
+          type: object
+          properties:
+            count:
+              type: integer
+              description: >-
+                The number of leaderboard entries to retrieve. This will limit the number of entries returned.
+                If not provided, 100 leaderboard entries will be retrieved. 100 is the maximum number of entries that can be retrieved.
+            ascending:
+              type: boolean
+              description: >-
+                Whether to sort the leaderboard entries in ascending order. If not provided, descending order will be used.
+            value_name:
+              type: string
+              description: >-
+                The name of the leaderboard value to retrieve. This is the title that should be displayed on the leaderboard.
+                If not provided, all leaderboard values will be retrieved.
+            offset:
+              type: integer
+              description: >-
+                The offset to start retrieving leaderboard entries from. This will skip the first N entries.
+                If not provided, no offset will be applied.
+            player_slot:
+              type: string
+              description: >-
+                The player slot to retrieve leaderboard entries for. This is the slot number of the player.
+                If not provided, global leaderboard entries will be retrieved.
+          additionalProperties: false
+components:
+  messages:
+    save_data_entry:
+      name: save_data_entry
+      title: Save Data Entry
+      summary: >-
+        Contains information about a save data entry
+      contentType: application/json 
+      payload:
+        $ref: "#/components/schemas/save_data_payload"
+      description: >-
+        Containts a timestamp of when the save data entry was created, the file name of the save data entry, and the save data itself.
+      bindings:
+        http:
+          statusCode: 200
+          headers:
+            type: object
+            Content-Type:
+              type: string
+              enum: ['application/json']
+    save_data_entries:
+      name: save_data_entries
+      title: Save Data Entries
+      summary: >-
+        Contains a list of save data entries
+      contentType: application/json
+      payload:
+        type: array
+        items:
+          $ref: "#/components/schemas/save_data_payload"
+      description: >-
+        Contains a list of save data entries. This will be a JSON array with the save data entries as defined by the game developer.
+      bindings:
+        http:
+          statusCode: 200
+          headers:
+            type: object
+            Content-Type:
+              type: string
+              enum: ['application/json']
+    new_save_data:
+      name: new_save_data
+      title: New Save Data
+      summary: Represents a new save data entry to be inserted into the Quackbox database
+      contentType: application/json
+      payload:
+        type: object
+        additionalProperties: true
+        description: >-
+          The save data for the current user. This will be a JSON object with the save data as defined by the game developer.
+    leaderboard_entry:
+      name: leaderboard_entry
+      title: Leaderboard Entry
+      summary: >-
+        Contains information about a leaderboard entry
+      contentType: application/json 
+      payload:
+        $ref: "#/components/schemas/leaderboard_payload"
+      description: >-
+        Contains the name, value, and player slot of the leaderboard entry.
+      bindings:
+        http:
+          statusCode: 200
+          headers:
+            type: object
+            Content-Type:
+              type: string
+              enum: ['application/json']
+    leaderboard_entries:
+      name: leaderboard_entries
+      title: Leaderboard Entries
+      summary: >-
+        Contains a list of leaderboard entries
+      contentType: application/json
+      payload:
+        type: array
+        items:
+          $ref: "#/components/schemas/leaderboard_payload_timestamp"
+      description: >-
+        Contains a list of leaderboard entries. This will be a JSON array of leaderboard objects.
+      bindings:
+        http:
+          statusCode: 200
+          headers:
+            type: object
+            Content-Type:
+              type: string
+              enum: ['application/json']
+    new_leaderboard_entry:
+      name: new_leaderboard_entry
+      title: New Leaderboard Entry
+      summary: >-
+        Represents a new leaderboard entry to be inserted into the Quackbox database.
+        This will not overwrite existing leaderboard entries.
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          value_name:
+            type: string
+            description: The name of the leaderboard value. This is the title that should be displayed on the leaderboard.
+          value_num:
+            type: number
+            description: The value of the leaderboard entry. This is the score or other value that is being tracked on the leaderboard.
+          player_slot:
+            type: string
+            description: The controller slot of the user who achieved this score.
+        additionalProperties: false
+    get:
+      name: get
+      title: GET request
+      summary: >-
+        Represents a GET request. Refer to the HTTP query parameters above for more information.
+      contentType: application/json
+  schemas:
+    time_stamp:
+      type: string
+      format: date-time
+      description: Date and time this entry was saved.
+    save_data_payload:
+      type: object
+      properties:
+        data:
+          type: object
+          additionalProperties: true
+          description: The save data for the current user. This will be a JSON object with the save data as defined by the game developer.
+        time_stamp:
+          $ref: "#/components/schemas/time_stamp"
+        file_name:
+          type: string
+          description: The file name of the save data entry.
+      additionalProperties: false
+    leaderboard_payload:
+      type: object
+      properties:
+        value_name:
+          type: string
+          description: The name of the leaderboard value. This is the title that should be displayed on the leaderboard.
+        value_num:
+          type: number
+          description: The value of the leaderboard entry. This is the score or other value that is being tracked on the leaderboard.
+        player_slot:
+          type: string
+          description: The controller slot of the user who achieved this score
+      additionalProperties: false
+    leaderboard_payload_timestamp:
+      type: object
+      properties:
+        value_name:
+          type: string
+          description: The name of the leaderboard value. This is the title that should be displayed on the leaderboard.
+        value_num:
+          type: number
+          description: The value of the leaderboard entry. This is the score or other value that is being tracked on the leaderboard.
+        player_slot:
+          type: string
+          description: The controller slot of the user who achieved this score
+        time_stamp:
+          $ref: "#/components/schemas/time_stamp"
+  parameters:
+    streetlight_id:
+      description: The ID of the streetlight.
+  messageTraits:
+    commonHeaders:
+      headers:
+        type: object
+        properties:
+          my-app-header:
+            type: integer
+            minimum: 0
+            maximum: 100
