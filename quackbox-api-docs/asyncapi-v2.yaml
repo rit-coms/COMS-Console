@@ -97,12 +97,12 @@ channels:
     servers:
       - $ref: "#/servers/QuackboxHTTP"
   leaderboard_player_slots:
-    address: /leaderboard/{player_slot}/{leaderboard_name}
+    address: /leaderboard/{leaderboard_name}/{player_slot}
     parameters:
-      player_slot:
-        $ref: "#/components/parameters/player_slot"
       leaderboard_name:
         $ref: "#/components/parameters/leaderboard_name"
+      player_slot:
+        $ref: "#/components/parameters/player_slot"
     messages:
       leaderboard_entry:
         $ref: "#/components/messages/leaderboard_entry"
