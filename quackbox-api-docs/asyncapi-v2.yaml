@@ -83,12 +83,12 @@ channels:
     servers:
       - $ref: "#/servers/QuackboxHTTP"
   leaderboard_user:
-    address: /leaderboard/global/{user_id}/{leaderboard_name}
+    address: /leaderboard/global/{leaderboard_name}/{user_id}
     parameters:
-      user_id:
-        $ref: "#/components/parameters/user_id"
       leaderboard_name:
         $ref: "#/components/parameters/leaderboard_name"
+      user_id:
+        $ref: "#/components/parameters/user_id"
     messages:
       leaderboard_entry:
         $ref: "#/components/messages/leaderboard_entry"
