@@ -492,9 +492,6 @@ components:
       payload:
         type: object
         properties:
-          leaderboard_name:
-            type: string
-            description: The name of the leaderboard value. This is the title that should be displayed on the leaderboard.
           value_num:
             type: number
             description: The value of the leaderboard entry. This is the score or other value that is being tracked on the leaderboard.
@@ -612,6 +609,7 @@ components:
         - leaderboard_name
         - value_num
         - user_id
+        - time_stamp
       properties:
         leaderboard_name:
           type: string
@@ -622,6 +620,8 @@ components:
         user_id:
           type: string
           description: The unique identifier for the user.
+        time_stamp:
+          $ref: "#/components/schemas/time_stamp"
       additionalProperties: false
     leaderboard_list_query_params:
       type: object
