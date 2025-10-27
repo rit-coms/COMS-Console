@@ -42,6 +42,19 @@ async fn read_and_write_save_data() {
     assert_eq!(post_response_entry.file_name, file_name);
     assert_eq!(post_response_entry.data, data);
 
+    let get_save_info_response = test_context
+        .server
+        .get(&(SAVE_DATA_PATH.to_owned() + "/player_slots/1/info"))
+        .add_query_params(SaveDataGetParams {
+            regex: Some(file_name.clone()),
+            limit: None,
+            offset: None,
+            ascending: None
+        })
+        .await;
+
+    get_save_info_response.assert_text_contains(&"[{\"file_name\":\"test data\",");
+        
     let get_filename_response: axum_test::TestResponse = test_context
         .server
         .get(&(SAVE_DATA_PATH.to_owned() + "/player_slots/1"))
