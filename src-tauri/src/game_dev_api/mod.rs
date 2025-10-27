@@ -3,10 +3,9 @@ use std::sync::Arc;
 use axum::{routing::post, Router};
 use axum_macros::FromRef;
 use tokio::sync::{watch::Receiver, Notify, RwLock};
-use v1_handlers::{get_leaderboard, get_save_data, set_leaderboard, set_save_data};
 
 pub mod v1_handlers;
-mod v2_handlers;
+pub mod v2_handlers;
 
 // TODO: rename to not be confused with the managed tauri app state
 #[derive(Clone, FromRef)]
@@ -115,11 +114,15 @@ pub async fn create_router(db_path: &str, game_state: GameStateShared) -> Router
     Router::new()
         .route(
             "/api/v1/leaderboard",
-            post(set_leaderboard).get(get_leaderboard),
+            post(v1_handlers::set_leaderboard).get(v1_handlers::get_leaderboard),
         )
         .route(
             "/api/v1/save-data",
-            post(set_save_data).get(get_save_data),
+            post(v1_handlers::set_save_data).get(v1_handlers::get_save_data),
+        )
+        .route(
+            "/api/v2/save-data/player_slots/{player_slot}",
+            post(v2_handlers::upsert_save_data).get(v2_handlers::get_save_data)
         )
         .with_state(app_state)
 }

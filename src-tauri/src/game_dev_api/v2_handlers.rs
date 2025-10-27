@@ -3,17 +3,19 @@ use axum::{
     http::StatusCode,
     response::IntoResponse, Json,
 };
+use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
-use crate::db::{self, models::Save};
+use crate::{db::{self, models::Save, }, frontend_api::GameSenderState, game_dev_api::GameState};
 
 use super::{ApiState, GameStateShared};
 
+#[derive(Deserialize, Serialize)]
 pub struct SaveDataGetParams {
-    regex: Option<String>,
-    limit: Option<i64>,
-    offset: Option<i64>,
-    ascending: Option<bool>,
+    pub regex: Option<String>,
+    pub limit: Option<i64>,
+    pub offset: Option<i64>,
+    pub ascending: Option<bool>,
 }
 
 pub async fn get_save_data_info(
@@ -55,9 +57,10 @@ pub async fn get_save_data_info(
     }
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct SaveDataPost {
-    data: serde_json::Value,
-    file_name: String
+    pub data: serde_json::Value,
+    pub file_name: String
 }
 
 pub async fn upsert_save_data(
@@ -90,7 +93,7 @@ pub async fn get_save_data(
     State(state): State<ApiState>,
     State(game_state): State<GameStateShared>,
     Path(player_slot): Path<i16>,
-    params: Query<SaveDataGetParams>
+    Query(params): Query<SaveDataGetParams>
 ) -> impl IntoResponse {
     println!("Getting save data!");
     let game_id = game_state.id.read().await.unwrap().to_string();
