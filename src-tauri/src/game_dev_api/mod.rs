@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use axum::{routing::post, Router};
+use axum::{routing::{get, post}, Router};
 use axum_macros::FromRef;
 use tokio::sync::{watch::Receiver, Notify, RwLock};
 
@@ -123,6 +123,26 @@ pub async fn create_router(db_path: &str, game_state: GameStateShared) -> Router
         .route(
             "/api/v2/save-data/player_slots/{player_slot}",
             post(v2_handlers::upsert_save_data).get(v2_handlers::get_save_data)
+        )
+        .route(
+            "/api/v2/save-data/player_slots/{player_slot}/info",
+            get(v2_handlers::get_save_data_info)
+        )
+        .route(
+            "/api/v2/leaderboard/{player_slot}/{leaderboard_name}",
+            post(v2_handlers::insert_leaderboard_entry)
+        )
+        .route(
+            "/api/v2/leaderboard/global/{leaderboard_name}",
+            get(v2_handlers::get_leaderboard_global)
+        )
+        .route(
+            "/api/v2/leaderboard/global/{leaderboard_name}/{user_id}",
+            get(v2_handlers::get_leaderboard_user)
+        )
+        .route(
+            "/api/v2/leaderboard/{leaderboard_name}/{player_slot}",
+            get(v2_handlers::get_leaderboard_player_slot)
         )
         .with_state(app_state)
 }

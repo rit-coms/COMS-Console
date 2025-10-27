@@ -1,12 +1,13 @@
 use axum::{
     extract::{Path, Query, State},
     http::StatusCode,
-    response::IntoResponse, Json,
+    response::IntoResponse,
+    Json,
 };
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
+use serde_json::Value;
 
-use crate::{db::{self, models::Save, schema::leaderboard::value_name, }, frontend_api::GameSenderState, game_dev_api::GameState};
+use crate::db::{self, models::Save};
 
 use super::{ApiState, GameStateShared};
 
@@ -60,14 +61,14 @@ pub async fn get_save_data_info(
 #[derive(Serialize, Deserialize)]
 pub struct SaveDataPost {
     pub data: serde_json::Value,
-    pub file_name: String
+    pub file_name: String,
 }
 
 pub async fn upsert_save_data(
     State(state): State<ApiState>,
     State(game_state): State<GameStateShared>,
     Path(player_slot): Path<i16>,
-    Json(payload): Json<SaveDataPost>
+    Json(payload): Json<SaveDataPost>,
 ) -> impl IntoResponse {
     let game_id = game_state.id.read().await.unwrap().to_string();
     drop(game_state);
@@ -93,7 +94,7 @@ pub async fn get_save_data(
     State(state): State<ApiState>,
     State(game_state): State<GameStateShared>,
     Path(player_slot): Path<i16>,
-    Query(params): Query<SaveDataGetParams>
+    Query(params): Query<SaveDataGetParams>,
 ) -> impl IntoResponse {
     println!("Getting save data!");
     let game_id = game_state.id.read().await.unwrap().to_string();
@@ -132,16 +133,17 @@ pub async fn get_save_data(
 
 #[derive(Deserialize, Serialize)]
 pub struct LeaderboardPost {
-    pub value_num: f64
+    pub value_num: f64,
 }
 
 pub async fn insert_leaderboard_entry(
     State(state): State<ApiState>,
     State(game_state): State<GameStateShared>,
     Path((player_slot, leaderboard_name)): Path<(i16, String)>,
-    Json(payload): Json<LeaderboardPost>
+    Json(payload): Json<LeaderboardPost>,
 ) -> impl IntoResponse {
-    let game_id = game_state.id.read().await.unwrap().to_string(); drop(game_state);
+    let game_id = game_state.id.read().await.unwrap().to_string();
+    drop(game_state);
     let user_id = player_slot.to_string();
 
     db::insert_leaderboard_entry(
@@ -160,6 +162,7 @@ pub async fn insert_leaderboard_entry(
     }))
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct LeaderboardGetParams {
     limit: Option<i64>,
     offset: Option<i64>,
@@ -170,7 +173,7 @@ pub async fn get_leaderboard_global(
     State(state): State<ApiState>,
     State(game_state): State<GameStateShared>,
     Path(leaderboard_name): Path<String>,
-    params: Query<LeaderboardGetParams>
+    params: Query<LeaderboardGetParams>,
 ) -> impl IntoResponse {
     let game_id = game_state.id.read().await.unwrap().to_string();
     drop(game_state);
@@ -204,7 +207,7 @@ pub async fn get_leaderboard_user(
     State(state): State<ApiState>,
     State(game_state): State<GameStateShared>,
     Path((user_id, leaderboard_name)): Path<(String, String)>,
-    params: Query<LeaderboardGetParams>
+    params: Query<LeaderboardGetParams>,
 ) -> impl IntoResponse {
     let game_id = game_state.id.read().await.unwrap().to_string();
     drop(game_state);
@@ -238,7 +241,7 @@ pub async fn get_leaderboard_player_slot(
     State(state): State<ApiState>,
     State(game_state): State<GameStateShared>,
     Path((player_slot, leaderboard_name)): Path<(String, String)>,
-    params: Query<LeaderboardGetParams>
+    params: Query<LeaderboardGetParams>,
 ) -> impl IntoResponse {
     let game_id = game_state.id.read().await.unwrap().to_string();
     drop(game_state);
@@ -268,4 +271,3 @@ pub async fn get_leaderboard_player_slot(
 
     Json(json_response).into_response()
 }
-
