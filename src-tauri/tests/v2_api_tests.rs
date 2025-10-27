@@ -1,4 +1,7 @@
-use quackbox_backend::{db::test_context::{setup_initial_data, TestContext}, game_dev_api::v2_handlers::{self, LeaderboardGetParams, LeaderboardPost, SaveDataGetParams }};
+use quackbox_backend::{
+    db::test_context::{setup_initial_data, TestContext},
+    game_dev_api::v2_handlers::{self, LeaderboardGetParams, LeaderboardPost, SaveDataGetParams},
+};
 use serde_json::json;
 
 const SAVE_DATA_PATH: &str = "/api/v2/save-data";
@@ -39,7 +42,8 @@ async fn read_and_write_save_data() {
         .await;
 
     post_response.assert_status_ok();
-    let post_response_entry: v2_handlers::SaveDataPost = post_response.json::<v2_handlers::SaveDataPost>();
+    let post_response_entry: v2_handlers::SaveDataPost =
+        post_response.json::<v2_handlers::SaveDataPost>();
 
     assert_eq!(post_response_entry.file_name, file_name);
     assert_eq!(post_response_entry.data, data);
@@ -51,14 +55,14 @@ async fn read_and_write_save_data() {
             regex: Some(file_name.clone()),
             limit: None,
             offset: None,
-            ascending: None
+            ascending: None,
         })
         .await;
 
     get_save_info_response.assert_json_contains(&json!([{
         "file_name": "test data"
     }]));
-        
+
     let get_filename_response: axum_test::TestResponse = test_context
         .server
         .get(&(SAVE_DATA_PATH.to_owned() + "/player_slots/1"))
@@ -66,7 +70,7 @@ async fn read_and_write_save_data() {
             regex: Some(file_name.clone()),
             limit: None,
             offset: None,
-            ascending: None
+            ascending: None,
         })
         .await;
 
@@ -127,5 +131,73 @@ async fn read_and_write_leaderboard_data() {
             "value_num": value_num,
             "user_id": "1",
     }]));
+}
 
+#[tokio::test]
+async fn test_global_leaderboard() {
+    let test_context = TestContext::new("global_leaderboard_data_v2").await;
+
+    setup_initial_data(test_context.get_db_path()).await;
+
+    // set game id to 0
+    test_context
+        .current_game_tx
+        .send(Some(0))
+        .expect("No subscriber to the current game sender");
+    test_context.notifier.notified().await;
+
+    let get_response: axum_test::TestResponse = test_context
+        .server
+        .get(&(LEADERBOARD_PATH.to_owned() + "/global/Score"))
+        .add_query_params(LeaderboardGetParams {
+            limit: None,
+            offset: None,
+            ascending: None,
+        })
+        .await;
+
+    get_response.assert_status_ok();
+    get_response.assert_json_contains(&json!([
+    {
+        "leaderboard_name": "Score",
+        "value_num": 125.0,
+        "user_id": "2",
+    },
+    {
+        "leaderboard_name": "Score",
+        "value_num": 100.0,
+        "user_id": "1",
+    },
+    ]));
+}
+
+#[tokio::test]
+async fn test_user_leaderboard() {
+    let test_context = TestContext::new("user_leaderboard_data_v2").await;
+
+    setup_initial_data(test_context.get_db_path()).await;
+
+    // set game id to 0
+    test_context
+        .current_game_tx
+        .send(Some(0))
+        .expect("No subscriber to the current game sender");
+    test_context.notifier.notified().await;
+
+    let get_response: axum_test::TestResponse = test_context
+        .server
+        .get(&(LEADERBOARD_PATH.to_owned() + "/global/Money/1"))
+        .add_query_params(LeaderboardGetParams {
+            limit: None,
+            offset: None,
+            ascending: None,
+        })
+        .await;
+
+    get_response.assert_status_ok();
+    get_response.assert_json_contains(&json!([{
+        "leaderboard_name": "Money",
+        "value_num": 423.5,
+        "user_id": "1",
+    }]));
 }

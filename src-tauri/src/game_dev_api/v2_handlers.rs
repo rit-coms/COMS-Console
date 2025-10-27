@@ -195,7 +195,7 @@ pub async fn get_leaderboard_global(
         json_response.push(serde_json::json!({
             "leaderboard_name": entry.value_name,
             "value_num": entry.value_num,
-            "user_id": str::parse::<i16>(&entry.user_id).unwrap(),
+            "user_id": &entry.user_id,
             "time_stamp": entry.time_stamp
         }));
     }
@@ -206,7 +206,7 @@ pub async fn get_leaderboard_global(
 pub async fn get_leaderboard_user(
     State(state): State<ApiState>,
     State(game_state): State<GameStateShared>,
-    Path((user_id, leaderboard_name)): Path<(String, String)>,
+    Path((leaderboard_name, user_id)): Path<(String, String)>,
     params: Query<LeaderboardGetParams>,
 ) -> impl IntoResponse {
     let game_id = game_state.id.read().await.unwrap().to_string();
@@ -227,9 +227,9 @@ pub async fn get_leaderboard_user(
 
     for entry in leaderboard_entries {
         json_response.push(serde_json::json!({
-            "value_name": entry.value_name,
+            "leaderboard_name": entry.value_name,
             "value_num": entry.value_num,
-            "player_slot": str::parse::<i16>(&entry.user_id).unwrap(),
+            "user_id": entry.user_id,
             "time_stamp": entry.time_stamp
         }));
     }
