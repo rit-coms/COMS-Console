@@ -139,7 +139,7 @@ pub struct LeaderboardPost {
 pub async fn insert_leaderboard_entry(
     State(state): State<ApiState>,
     State(game_state): State<GameStateShared>,
-    Path((player_slot, leaderboard_name)): Path<(i16, String)>,
+    Path((leaderboard_name, player_slot)): Path<(String, i16)>,
     Json(payload): Json<LeaderboardPost>,
 ) -> impl IntoResponse {
     let game_id = game_state.id.read().await.unwrap().to_string();
@@ -164,9 +164,9 @@ pub async fn insert_leaderboard_entry(
 
 #[derive(Serialize, Deserialize)]
 pub struct LeaderboardGetParams {
-    limit: Option<i64>,
-    offset: Option<i64>,
-    ascending: Option<bool>,
+    pub limit: Option<i64>,
+    pub offset: Option<i64>,
+    pub ascending: Option<bool>,
 }
 
 pub async fn get_leaderboard_global(
@@ -240,7 +240,7 @@ pub async fn get_leaderboard_user(
 pub async fn get_leaderboard_player_slot(
     State(state): State<ApiState>,
     State(game_state): State<GameStateShared>,
-    Path((player_slot, leaderboard_name)): Path<(String, String)>,
+    Path((leaderboard_name, player_slot)): Path<(String, i16)>,
     params: Query<LeaderboardGetParams>,
 ) -> impl IntoResponse {
     let game_id = game_state.id.read().await.unwrap().to_string();
@@ -262,9 +262,9 @@ pub async fn get_leaderboard_player_slot(
 
     for entry in leaderboard_entries {
         json_response.push(serde_json::json!({
-            "value_name": entry.value_name,
+            "leaderboard_name": entry.value_name,
             "value_num": entry.value_num,
-            "player_slot": str::parse::<i16>(&entry.user_id).unwrap(),
+            "user_id": entry.user_id,
             "time_stamp": entry.time_stamp
         }));
     }
