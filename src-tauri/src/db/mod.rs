@@ -2,7 +2,7 @@ use anyhow::{Error, Ok};
 use diesel::{expression::is_aggregate::No, insert_into, prelude::*, sql_types::Nullable};
 use models::*;
 use regex::Regex;
-use std::option::Option;
+use std::{fs, option::Option, path::Path};
 
 pub mod models;
 pub mod schema;
@@ -12,6 +12,11 @@ use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
 
 pub fn setup_db(db_path: &str) {
+    let path = Path::new(db_path);
+    if !path.exists() {
+        fs::create_dir_all(path.parent().unwrap()).expect("Failed to create database folder");
+    }
+
     let mut connection = &mut establish_connection(db_path);
 
     connection
