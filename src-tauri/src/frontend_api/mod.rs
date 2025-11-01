@@ -185,7 +185,7 @@ async fn get_game_info_list(
     // generating app data directory and games folder if it doesn't exist
     let app_data_dir = app_handle.path().app_data_dir()?.join("games");
 
-    println!("{:?}", app_data_dir);
+    // println!("{:?}", app_data_dir);
 
     fs::create_dir_all(app_data_dir.clone())?;
 
@@ -250,7 +250,7 @@ async fn get_game_info_list(
         game_metadata.cover_image = game_metadata
             .cover_image
             .map(|cover_image: PathBuf| {
-                println!("{:?}", &cover_image);
+                // println!("{:?}", &cover_image);
                 fs::canonicalize(&cover_image)
             })
             .transpose()?;
@@ -258,7 +258,7 @@ async fn get_game_info_list(
         games_list.push(game_metadata);
     }
 
-    println!("{}", serde_json::to_string_pretty(games_list).unwrap());
+    // println!("{}", serde_json::to_string_pretty(games_list).unwrap());
 
     Ok(state.games_list.clone())
 }
@@ -463,15 +463,15 @@ pub async fn play_game(
         .find(|g| g.id == id)
         .ok_or("Game ID not found")?;
     game_sender_state.game_watch_tx.send(Some(id))?;
-    println!("sending id: {}", id);
+    // println!("sending id: {}", id);
     game_sender_state.notifier.notified().await;
-    println!("Recieved notification, starting game");
+    // println!("Recieved notification, starting game");
 
     window.minimize()?;
 
     let exec_url = Url::parse(&game_info.exec);
 
-    println!("{:#?}", exec_url);
+    // println!("{:#?}", exec_url);
 
     // check if exec_url is using http or https protocols and is valid
     match exec_url
@@ -499,15 +499,15 @@ pub async fn play_game(
             if path.try_exists()? == false {
                 return Err("Exec path does not exist")?;
             }
-            println!("{:#?}", path);
+            // println!("{:#?}", path);
 
             let game_process = Command::new(path)
                 .current_dir(&game_info.file_path)
                 .output()?;
 
-            println!("{}", String::from_utf8(game_process.stdout)?);
-            println!("{}", String::from_utf8(game_process.stderr)?);
-            println!("exit code status: {}", game_process.status);
+            // println!("{}", String::from_utf8(game_process.stdout)?);
+            // println!("{}", String::from_utf8(game_process.stderr)?);
+            // println!("exit code status: {}", game_process.status);
         }
     }
 
@@ -516,7 +516,7 @@ pub async fn play_game(
     window.set_focus()?;
     window.set_fullscreen(true)?;
     game_sender_state.notifier.notified().await;
-    println!("Recieved notification, game closed");
+    // println!("Recieved notification, game closed");
     Ok(())
 }
 

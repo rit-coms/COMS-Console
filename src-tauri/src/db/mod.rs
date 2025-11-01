@@ -17,7 +17,7 @@ pub fn setup_db(db_path: &str) {
     connection
         .run_pending_migrations(MIGRATIONS)
         .expect("Failed to run migrations");
-    println!("Pending migrations ran successfully");
+    // println!("Pending migrations ran successfully");
 }
 
 pub fn establish_connection(db_path: &str) -> SqliteConnection {
