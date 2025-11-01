@@ -6,6 +6,7 @@ use frontend_api::{get_game_info, get_leaderboard_data, play_game, AppState, Gam
 use game_dev_api::handlers::GameState;
 use game_dev_api::handlers::GameStateShared;
 use game_dev_api::setup_game_dev_api;
+use quackbox_backend::db::create_default_game;
 use quackbox_backend::db::create_default_guest;
 use tauri::Manager;
 use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
@@ -42,6 +43,7 @@ fn main() {
             // tauri::async_runtime::spawn(db::test_db());
 
             let (current_game_tx, current_game_rx) = watch::channel(None);
+            current_game_tx.send(Some(1))?;
             let notify = Arc::new(Notify::new());
             app.manage(GameSenderState {
                 game_watch_tx: current_game_tx,
@@ -56,6 +58,7 @@ fn main() {
             tauri::async_runtime::spawn({
                 setup_db(db_path.as_str());
                 create_default_guest(db_path.as_str());
+                create_default_game(db_path.as_str());
                 setup_game_dev_api(db_path, game_state_shared)
             });
             if cfg!(feature = "autostart") {

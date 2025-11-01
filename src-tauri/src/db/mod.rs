@@ -204,6 +204,10 @@ pub fn create_default_guest(db_path: &str) -> Vec<User> {
         .expect("Could not make sure Guest user exists")
 }
 
+pub fn create_default_game(db_path: &str) {
+    insert_game("1", "Hackathon game", true, db_path);
+}
+
 pub fn create_user(id_s: &str, name_s: &str, db_path: &str) -> User {
     use self::schema::users::dsl::*;
     let connection = &mut establish_connection(db_path);
