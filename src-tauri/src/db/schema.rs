@@ -43,4 +43,9 @@ diesel::joinable!(leaderboard -> users (user_id));
 diesel::joinable!(saves -> games (game_id));
 diesel::joinable!(saves -> users (user_id));
 
-diesel::allow_tables_to_appear_in_same_query!(games, leaderboard, saves, users,);
+diesel::allow_tables_to_appear_in_same_query!(
+    games,
+    leaderboard,
+    saves,
+    users,
+);

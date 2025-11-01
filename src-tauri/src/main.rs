@@ -69,9 +69,6 @@ fn main() {
             play_game,
             get_leaderboard_data
         ])
-        .on_page_load(|window, _| {
-            window.show().expect("Failed to show window");
-        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

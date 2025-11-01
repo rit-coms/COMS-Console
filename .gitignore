@@ -9,3 +9,4 @@ games
 pnpm-lock.yaml
 .env
 src-tauri/gen/
+target/
