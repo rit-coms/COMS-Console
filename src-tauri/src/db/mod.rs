@@ -2,7 +2,7 @@ use anyhow::{Error, Ok};
 use diesel::{expression::is_aggregate::No, insert_into, prelude::*, sql_types::Nullable};
 use models::*;
 use regex::Regex;
-use std::option::Option;
+use std::{fs, option::Option, path::Path};
 
 pub mod models;
 pub mod schema;
@@ -12,12 +12,17 @@ use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
 
 pub fn setup_db(db_path: &str) {
+    let path = Path::new(db_path);
+    if !path.exists() {
+        fs::create_dir_all(path.parent().unwrap()).expect("Failed to create database folder");
+    }
+
     let mut connection = &mut establish_connection(db_path);
 
     connection
         .run_pending_migrations(MIGRATIONS)
         .expect("Failed to run migrations");
-    println!("Pending migrations ran successfully");
+    // println!("Pending migrations ran successfully");
 }
 
 pub fn establish_connection(db_path: &str) -> SqliteConnection {
@@ -202,6 +207,10 @@ pub fn create_default_guest(db_path: &str) -> Vec<User> {
         .set((name.eq(NAME_S), rit_id.eq::<Option<&str>>(None)))
         .load::<User>(connection)
         .expect("Could not make sure Guest user exists")
+}
+
+pub fn create_default_game(db_path: &str) {
+    insert_game("1", "Hackathon game", true, db_path);
 }
 
 pub fn create_user(id_s: &str, name_s: &str, db_path: &str) -> User {

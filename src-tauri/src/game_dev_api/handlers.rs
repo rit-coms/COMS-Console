@@ -36,14 +36,14 @@ pub struct GameState {
 
 pub type GameStateShared = Arc<GameState>;
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct LeaderboardPost {
     pub value_name: String,
     pub value_num: f64,
     pub player_slot: i16,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct SaveDataPost {
     pub file_name: String,
     pub data: serde_json::Value, // This data should be stored in the database as BSON data, is this the correct type?
@@ -58,7 +58,8 @@ pub async fn set_leaderboard(
     Json(payload): Json<LeaderboardPost>,
 ) -> impl IntoResponse {
     // TODO: Get game_id and user_id
-    println!("Setting Laaderboard data");
+    println!("Setting Leaderboard data:");
+    println!("{:?}\n", payload);
     // let game_id = "1";
     let game_id = game_state.id.read().await.unwrap().to_string();
     drop(game_state);
@@ -97,6 +98,7 @@ pub async fn get_leaderboard(
     State(game_state): State<GameStateShared>,
     params: Query<LeaderboardGetParams>,
 ) -> impl IntoResponse {
+    println!("Getting leaderboard data!");
     // let game_id: String = String::from("1"); // Example for now
     let game_id = game_state.id.read().await.unwrap().to_string();
     drop(game_state);
@@ -140,7 +142,8 @@ pub async fn get_leaderboard(
             "time_stamp": entry.time_stamp
         }));
     }
-
+    
+    println!("{:?}\n", json_response);
     Json(json_response).into_response()
 }
 
@@ -151,6 +154,8 @@ pub async fn set_save_data(
     Json(payload): Json<SaveDataPost>,
 ) -> impl IntoResponse {
     // let game_id = "0";x
+    println!("Setting save data:");
+    println!("{:?}\n", payload);
     let game_id = game_state.id.read().await.unwrap().to_string();
     drop(game_state);
     let user_id = payload.player_slot.to_string();
@@ -220,6 +225,7 @@ pub async fn get_save_data(
                             "time_stamp": entry.time_stamp
                         }));
             }
+            println!("{:?}\n", json_response);
             return Json(json_response).into_response();
         }
         Err(e) => (StatusCode::BAD_REQUEST, e.to_string()).into_response(),

@@ -6,9 +6,9 @@ use frontend_api::{get_game_info, get_leaderboard_data, play_game, AppState, Gam
 use game_dev_api::handlers::GameState;
 use game_dev_api::handlers::GameStateShared;
 use game_dev_api::setup_game_dev_api;
+use quackbox_backend::db::create_default_game;
 use quackbox_backend::db::create_default_guest;
 use tauri::Manager;
-use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 use tokio::sync::watch;
 use tokio::sync::Mutex;
 use tokio::sync::Notify;
@@ -22,12 +22,6 @@ mod game_dev_api;
 
 fn main() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_autostart::Builder::new().build())
-        .plugin(tauri_plugin_process::init())
-        .plugin(tauri_plugin_autostart::init(
-            MacosLauncher::LaunchAgent,
-            Some(vec![""]),
-        ))
         .setup(|app| {
             let db_path = app
                 .path()
@@ -42,6 +36,7 @@ fn main() {
             // tauri::async_runtime::spawn(db::test_db());
 
             let (current_game_tx, current_game_rx) = watch::channel(None);
+            current_game_tx.send(Some(1))?;
             let notify = Arc::new(Notify::new());
             app.manage(GameSenderState {
                 game_watch_tx: current_game_tx,
@@ -56,12 +51,9 @@ fn main() {
             tauri::async_runtime::spawn({
                 setup_db(db_path.as_str());
                 create_default_guest(db_path.as_str());
+                create_default_game(db_path.as_str());
                 setup_game_dev_api(db_path, game_state_shared)
             });
-            if cfg!(feature = "autostart") {
-                // Only enable autolaunch on raspberry pi
-                app.autolaunch().enable()?;
-            }
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -69,6 +61,7 @@ fn main() {
             play_game,
             get_leaderboard_data
         ])
+        .on_page_load(|window, _| {window.close();})
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
