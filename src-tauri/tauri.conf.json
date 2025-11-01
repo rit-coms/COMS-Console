@@ -43,13 +43,17 @@
         "depends": []
       }
     },
-    "createUpdaterArtifacts": "v1Compatible"
+    "createUpdaterArtifacts": false
   },
   "productName": "coms-console-launcher",
   "mainBinaryName": "coms-console-launcher",
   "version": "1.0.0",
   "identifier": "coms-console",
-  "plugins": {},
+  "plugins": {
+    "updater": {
+      "active": false
+    }
+  },
   "app": {
     "windows": [
       {
