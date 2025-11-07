@@ -1,0 +1,252 @@
+openapi: 3.0.4
+info:
+  title: Quackbox API
+  version: 1.0.0
+  description: |-
+    This is the API documentation for the Quackbox local web server based on the OpenAPI 3.0.4 specification.
+
+    Some useful links:
+    - [Quackbox GitHub Repository](https://github.com/rit-coms/COMS-Console)
+    - [The source API definition for the Quackbox](TODO)
+  license:
+    name: MIT License
+    url: https://mit-license.org/
+  contact:
+    email: coms@rit.edu
+    name: Computing Organization for Multicultural Students
+servers:
+  - url: http://localhost:6174/api/v1
+    description: Local web server for interacting with the Quackbox
+tags:
+  - name: Leaderboard
+    description: Access to leaderboard data
+  - name: Save Data
+    description: Read and write save data
+paths:
+  /save-data:
+    post:
+      tags:
+        - Save Data
+      summary: Create or update save data
+      description: |-
+        Create or update the save data for the current user with the data contained within the request body. 
+        This will create a new save data entry or update an existing one with the same file name.
+        The response contains the newly created save data entry.
+      operationId: upsertSaveData
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewSaveData'
+      responses:
+        '200':
+          description: Save data entry created or updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaveDataEntry'
+    get:
+      tags:
+        - Save Data
+      summary: Retrieve save data
+      description: |-
+        Retrieve the save data for the current user. This will return a list of JSON objects with the save data.
+      operationId: getSaveData
+      parameters:
+        - name: player_slot
+          in: query
+          description: |-
+            The player slot to retrieve save data for. This is the slot number of the player.
+            If not provided, player slot 1 will be used.
+          required: false
+          schema:
+            type: string
+        - name: regex
+          in: query
+          description: |-
+            A regular expression to filter the save data files by name. This will only return files that match the regex. If not provided, no filter will be applied.
+          required: false
+          schema:
+            type: string
+        - name: file_name
+          in: query
+          description: |-
+            The name of the save data file to retrieve. If not provided, all save data files will be retrieved.
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Save data retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SaveDataEntry'
+  /leaderboard:
+    post:
+      tags:
+        - Leaderboard
+      summary: Create a new leaderboard entry
+      description: |-
+        Create a new leaderboard entry for the current user with the data contained within the request body. 
+        This will create a new leaderboard entry or update an existing one with the same file name.
+        The response contains the newly created leaderboard entry.
+      operationId: insertLeaderboardEntry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewLeaderboardEntry'
+      responses:
+        '200':
+          description: Leaderboard entry created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeaderboardEntry'
+    get:
+      tags:
+        - Leaderboard
+      summary: Retrieve leaderboard data
+      description: |-
+        Retrieve leaderboard data. This will return a list of JSON objects with the leaderboard entries.
+      operationId: getLeaderboard
+      parameters:
+        - name: count
+          in: query
+          description: |-
+            The number of leaderboard entries to retrieve. This will limit the number of entries returned.
+            If not provided, 100 leaderboard entries will be retrieved. 100 is the maximum number of entries that can be retrieved.
+          required: false
+          schema:
+            type: integer
+        - name: ascending
+          in: query
+          description: |-
+            Whether to sort the leaderboard entries in ascending order. If not provided, descending order will be used.
+          required: false
+          schema:
+            type: boolean
+        - name: value_name
+          in: query
+          description: |-
+            The name of the leaderboard value to retrieve. This is the title that should be displayed on the leaderboard.
+            If not provided, all leaderboard values will be retrieved.
+          required: false
+          schema:
+            type: string
+        - name: offset
+          in: query
+          description: |-
+            The offset to start retrieving leaderboard entries from. This will skip the first N entries.
+            If not provided, no offset will be applied.
+          required: false
+          schema:
+            type: integer
+        - name: player_slot
+          in: query
+          description: |-
+            The player slot to retrieve leaderboard entries for. This is the slot number of the player.
+            If not provided, global leaderboard entries will be retrieved.
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Leaderboard entries retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LeaderboardEntryWithTimestamp'
+components:
+  schemas:
+    SaveDataEntry:
+      type: object
+      description: Contains a timestamp of when the save data entry was created, the file name of the save data entry, and the save data itself.
+      properties:
+        data:
+          type: object
+          additionalProperties: true
+          description: The save data for the current user. This will be a JSON object with the save data as defined by the game developer.
+        time_stamp:
+          type: string
+          format: date-time
+          description: Date and time this entry was saved.
+        file_name:
+          type: string
+          description: The file name of the save data entry.
+      additionalProperties: false
+    NewSaveData:
+      type: object
+      description: Represents a new save data entry to be inserted into the Quackbox database.
+      properties:
+        data:
+          type: object
+          additionalProperties: true
+          description: The save data to be saved. This will be a JSON object with the save data as defined by the game developer.
+        file_name:
+          type: string
+          description: The file name of the save data entry.
+        player_slot:
+          type: string
+          description: The controller slot of the user to associate the save data with.
+      required:
+        - data
+        - file_name
+    LeaderboardEntry:
+      type: object
+      description: Contains the name, value, and player slot of the leaderboard entry.
+      properties:
+        value_name:
+          type: string
+          description: The name of the leaderboard value. This is the title that should be displayed on the leaderboard.
+        value_num:
+          type: number
+          description: The value of the leaderboard entry. This is the score or other value that is being tracked on the leaderboard.
+        player_slot:
+          type: string
+          description: The controller slot of the user who achieved this score.
+      additionalProperties: false
+    LeaderboardEntryWithTimestamp:
+      type: object
+      description: Contains the name, value, player slot, and timestamp of the leaderboard entry.
+      properties:
+        value_name:
+          type: string
+          description: The name of the leaderboard value. This is the title that should be displayed on the leaderboard.
+        value_num:
+          type: number
+          description: The value of the leaderboard entry. This is the score or other value that is being tracked on the leaderboard.
+        player_slot:
+          type: string
+          description: The controller slot of the user who achieved this score.
+        time_stamp:
+          type: string
+          format: date-time
+          description: Date and time this entry was saved.
+      additionalProperties: false
+    NewLeaderboardEntry:
+      type: object
+      description: |-
+        Represents a new leaderboard entry to be inserted into the Quackbox database.
+        This will not overwrite existing leaderboard entries.
+      properties:
+        value_name:
+          type: string
+          description: The name of the leaderboard value. This is the title that should be displayed on the leaderboard.
+        value_num:
+          type: number
+          description: The value of the leaderboard entry. This is the score or other value that is being tracked on the leaderboard.
+        player_slot:
+          type: string
+          description: The controller slot of the user who achieved this score.
+      required:
+        - value_name
+        - value_num
+      additionalProperties: false
