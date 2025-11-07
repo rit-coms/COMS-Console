@@ -1,0 +1,524 @@
+openapi: 3.0.4
+info:
+  title: Quackbox API
+  version: 2.0.0
+  description: |-
+    This is the API documentation for the Quackbox local web server based on the OpenAPI 3.0.4 specification.
+
+    Some useful links:
+    - [Quackbox GitHub Repository](https://github.com/rit-coms/COMS-Console)
+    - [The source API definition for the Quackbox](TODO)
+    
+    **Note:** This specification covers HTTP REST endpoints. WebSocket events for controller slots are documented separately in the AsyncAPI specification.
+  license:
+    name: MIT License
+    url: https://mit-license.org/
+  contact:
+    email: coms@rit.edu
+    name: Computing Organization for Multicultural Students
+servers:
+  - url: http://localhost:6174/api/v2
+    description: Local web server for interacting with the Quackbox
+  - url: ws://localhost:6174/api/v2
+    description: WebSocket server for real-time interactions with the Quackbox
+tags:
+  - name: Leaderboard
+    description: Access to leaderboard data
+  - name: Save Data
+    description: Read and write save data
+  - name: Controller Slots
+    description: Access to controller slot connections (WebSocket handshake endpoint)
+paths:
+  /controller-slots:
+    get:
+      tags:
+        - Controller Slots
+      summary: WebSocket handshake endpoint
+      description: |-
+        Upgrade to WebSocket connection for real-time controller slot updates.
+        
+        Once connected, the WebSocket will:
+        - Send `controller_slot_update` messages when a controller connects, becomes stale, or disconnects
+        - Send `controller_slots_state` messages with the full state of all 8 controller slots
+        - Accept `controller_slot_swap` messages to swap two controller slots
+        
+        See the AsyncAPI specification for detailed WebSocket message schemas.
+      operationId: controllerSlotsWebSocket
+      responses:
+        '101':
+          description: Switching Protocols - WebSocket connection established
+        '400':
+          description: Bad Request - Invalid WebSocket upgrade request
+  /save-data/player_slots/{player_slot}/info:
+    get:
+      tags:
+        - Save Data
+      summary: Get save data information
+      description: |-
+        Retrieve the save data information for a specific player slot. 
+        This returns a list of file names and timestamps without the actual save data content.
+      operationId: getSaveDataInfo
+      parameters:
+        - $ref: '#/components/parameters/PlayerSlotPath'
+        - name: regex
+          in: query
+          description: |-
+            A regular expression to filter the save data files by name. 
+            This will only return files that match the regex. If not provided, no filter will be applied.
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: The maximum number of entries to return.
+          required: false
+          schema:
+            type: integer
+            default: 100
+        - name: offset
+          in: query
+          description: The number of entries to skip before returning results.
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: ascending
+          in: query
+          description: |-
+            Whether to sort the results in ascending order by time saved. 
+            If not provided, the default is false (most recent first).
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Save data information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SaveDataInfo'
+              examples:
+                example:
+                  summary: Example Save Data Info
+                  value:
+                    - file_name: "save1.json"
+                      time_stamp: "2023-10-01T12:00:00Z"
+                    - file_name: "save2.json"
+                      time_stamp: "2023-10-02T12:00:00Z"
+  /save-data/player_slots/{player_slot}:
+    post:
+      tags:
+        - Save Data
+      summary: Create or update save data
+      description: |-
+        Create or update the save data for a specific player slot with the data contained within the request body. 
+        This will create a new save data entry or update an existing one with the same file name.
+        The response contains the newly created save data entry.
+      operationId: upsertSaveData
+      parameters:
+        - $ref: '#/components/parameters/PlayerSlotPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewSaveData'
+            examples:
+              example:
+                summary: Example New Save Data
+                value:
+                  data:
+                    level: 5
+                    score: 1000
+                    items:
+                      - name: "Sword"
+                        quantity: 1
+                      - name: "Shield"
+                        quantity: 1
+                      - name: "Potion"
+                        quantity: 3
+                  file_name: "save1.json"
+      responses:
+        '200':
+          description: Save data entry created or updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaveDataEntry'
+              examples:
+                example:
+                  summary: Example Save Data Entry
+                  value:
+                    data:
+                      level: 5
+                      score: 1000
+                      items:
+                        - name: "Sword"
+                          quantity: 1
+                        - name: "Shield"
+                          quantity: 1
+                        - name: "Potion"
+                          quantity: 3
+                    time_stamp: "2023-10-01T12:00:00Z"
+                    file_name: "save1.json"
+    get:
+      tags:
+        - Save Data
+      summary: Retrieve save data
+      description: |-
+        Retrieve the save data for a specific player slot. 
+        This returns a JSON object with the save data as defined by the game developer.
+      operationId: getSaveData
+      parameters:
+        - $ref: '#/components/parameters/PlayerSlotPath'
+        - name: regex
+          in: query
+          description: |-
+            A regular expression to filter the save data files by name. 
+            This will only return files that match the regex. If not provided, no filter will be applied.
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: The maximum number of entries to return.
+          required: false
+          schema:
+            type: integer
+            default: 100
+        - name: offset
+          in: query
+          description: The number of entries to skip before returning results.
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: ascending
+          in: query
+          description: |-
+            Whether to sort the results in ascending order by time saved. 
+            If not provided, the default is false (most recent first).
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Save data retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SaveDataEntry'
+              examples:
+                example:
+                  summary: Example Save Data Entries
+                  value:
+                    - data:
+                        level: 5
+                        score: 1000
+                        items:
+                          - name: "Sword"
+                            quantity: 1
+                          - name: "Shield"
+                            quantity: 1
+                          - name: "Potion"
+                            quantity: 3
+                      time_stamp: "2023-10-01T12:00:00Z"
+                      file_name: "save1.json"
+                    - data:
+                        level: 6
+                        score: 1500
+                        items:
+                          - name: "Bow"
+                            quantity: 1
+                      time_stamp: "2023-10-02T12:00:00Z"
+                      file_name: "save2.json"
+  /leaderboard/global/{leaderboard_name}:
+    get:
+      tags:
+        - Leaderboard
+      summary: Get global leaderboard
+      description: |-
+        Retrieve leaderboard data from all users for a specific leaderboard sorted by value (score, time, etc.). 
+        This returns a list of JSON objects with the leaderboard entries.
+      operationId: getLeaderboardGlobal
+      parameters:
+        - $ref: '#/components/parameters/LeaderboardName'
+        - name: limit
+          in: query
+          description: The maximum number of entries to return.
+          required: false
+          schema:
+            type: integer
+            default: 100
+        - name: offset
+          in: query
+          description: The number of entries to skip before returning results.
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: ascending
+          in: query
+          description: |-
+            Whether to sort the results in ascending order. 
+            If not provided, the default is descending order.
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Leaderboard entries retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LeaderboardEntry'
+              examples:
+                example:
+                  summary: Example Leaderboard Entries
+                  value:
+                    - leaderboard_name: "High Scores"
+                      value_num: 1500
+                      user_id: "user123"
+                    - leaderboard_name: "High Scores"
+                      value_num: 1200
+                      user_id: "user456"
+  /leaderboard/global/{user_id}/{leaderboard_name}:
+    get:
+      tags:
+        - Leaderboard
+      summary: Get user leaderboard
+      description: |-
+        Retrieve leaderboard data for a specific user and leaderboard sorted by value (score, time, etc). 
+        This returns a list of JSON objects with the leaderboard entries.
+      operationId: getLeaderboardUser
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/LeaderboardName'
+        - name: limit
+          in: query
+          description: The maximum number of entries to return.
+          required: false
+          schema:
+            type: integer
+            default: 100
+        - name: offset
+          in: query
+          description: The number of entries to skip before returning results.
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: ascending
+          in: query
+          description: |-
+            Whether to sort the results in ascending order. 
+            If not provided, the default is descending order.
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Leaderboard entries retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LeaderboardEntry'
+  /leaderboard/{player_slot}/{leaderboard_name}:
+    post:
+      tags:
+        - Leaderboard
+      summary: Create a new leaderboard entry
+      description: |-
+        Create a new leaderboard entry for the user connected to the given player slot with the data 
+        contained within the request payload. The response contains the newly created leaderboard entry.
+      operationId: insertLeaderboardEntry
+      parameters:
+        - $ref: '#/components/parameters/PlayerSlotPath'
+        - $ref: '#/components/parameters/LeaderboardName'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewLeaderboardEntry'
+            examples:
+              example:
+                summary: Example New Leaderboard Entry
+                value:
+                  leaderboard_name: "High Scores"
+                  value_num: 1500
+      responses:
+        '200':
+          description: Leaderboard entry created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeaderboardEntry'
+              examples:
+                example:
+                  summary: Example Leaderboard Entry
+                  value:
+                    leaderboard_name: "High Scores"
+                    value_num: 1500
+                    user_id: "user123"
+    get:
+      tags:
+        - Leaderboard
+      summary: Get player slot leaderboard
+      description: |-
+        Retrieve leaderboard data for a specific player slot and leaderboard sorted by value (score, time, etc). 
+        This returns a list of JSON objects with the leaderboard entries.
+      operationId: getLeaderboardPlayerSlot
+      parameters:
+        - $ref: '#/components/parameters/PlayerSlotPath'
+        - $ref: '#/components/parameters/LeaderboardName'
+        - name: limit
+          in: query
+          description: The maximum number of entries to return.
+          required: false
+          schema:
+            type: integer
+            default: 100
+        - name: offset
+          in: query
+          description: The number of entries to skip before returning results.
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: ascending
+          in: query
+          description: |-
+            Whether to sort the results in ascending order. 
+            If not provided, the default is descending order.
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Leaderboard entries retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LeaderboardEntry'
+components:
+  parameters:
+    PlayerSlotPath:
+      name: player_slot
+      in: path
+      description: |-
+        The player slot to retrieve data for. This is the controller slot number of the player, ranging from 1 to 8.
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 8
+        enum: [1, 2, 3, 4, 5, 6, 7, 8]
+    UserId:
+      name: user_id
+      in: path
+      description: The unique identifier for the user.
+      required: true
+      schema:
+        type: string
+    LeaderboardName:
+      name: leaderboard_name
+      in: path
+      description: |-
+        The name of the leaderboard value to retrieve. This is the title that should be displayed on the leaderboard.
+      required: true
+      schema:
+        type: string
+  schemas:
+    SaveDataInfo:
+      type: object
+      description: Contains file name and timestamp information for a save data entry.
+      properties:
+        file_name:
+          type: string
+          description: The file name of the save data entry.
+        time_stamp:
+          type: string
+          format: date-time
+          description: Date and time this entry was saved.
+      additionalProperties: false
+    SaveDataEntry:
+      type: object
+      description: Contains a timestamp of when the save data entry was created, the file name of the save data entry, and the save data itself.
+      properties:
+        data:
+          type: object
+          additionalProperties: true
+          description: The save data for the current user. This will be a JSON object with the save data as defined by the game developer.
+        time_stamp:
+          type: string
+          format: date-time
+          description: Date and time this entry was saved.
+        file_name:
+          type: string
+          description: The file name of the save data entry.
+      additionalProperties: false
+    NewSaveData:
+      type: object
+      description: Represents a new save data entry to be inserted into the Quackbox database.
+      properties:
+        data:
+          type: object
+          additionalProperties: true
+          description: The save data to be saved. This will be a JSON object with the save data as defined by the game developer.
+        file_name:
+          type: string
+          description: The file name of the save data entry.
+      required:
+        - data
+        - file_name
+      additionalProperties: false
+    LeaderboardEntry:
+      type: object
+      description: Contains the name, value, and user ID of the leaderboard entry.
+      properties:
+        leaderboard_name:
+          type: string
+          description: The name of the leaderboard value. This is the title that should be displayed on the leaderboard.
+        value_num:
+          type: number
+          description: The value of the leaderboard entry. This is the score or other value that is being tracked on the leaderboard.
+        user_id:
+          type: string
+          description: The unique identifier for the user.
+      required:
+        - leaderboard_name
+        - value_num
+        - user_id
+      additionalProperties: false
+    NewLeaderboardEntry:
+      type: object
+      description: |-
+        Represents a new leaderboard entry to be inserted into the Quackbox database.
+        This will not overwrite existing leaderboard entries.
+      properties:
+        leaderboard_name:
+          type: string
+          description: The name of the leaderboard value. This is the title that should be displayed on the leaderboard.
+        value_num:
+          type: number
+          description: The value of the leaderboard entry. This is the score or other value that is being tracked on the leaderboard.
+      required:
+        - leaderboard_name
+        - value_num
+      additionalProperties: false

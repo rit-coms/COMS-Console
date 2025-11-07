@@ -1,0 +1,212 @@
+asyncapi: 2.6.0
+info:
+  title: Quackbox WebSocket API - Controller Slots
+  version: 2.0.0
+  description: |-
+    This is the WebSocket API documentation for the Quackbox controller slot connections based on the AsyncAPI 2.6.0 specification.
+    
+    This specification covers real-time WebSocket messaging for controller slot management, including:
+    - Individual controller slot state updates
+    - Full controller slots state broadcasts
+    - Controller slot swap operations
+    
+    Some useful links:
+    - [Quackbox GitHub Repository](https://github.com/rit-coms/COMS-Console)
+    - [Quackbox REST API Documentation](TODO)
+  license:
+    name: MIT License
+    url: https://mit-license.org/
+  contact:
+    email: coms@rit.edu
+    name: Computing Organization for Multicultural Students
+servers:
+  production:
+    url: ws://localhost:6174/api/v2
+    protocol: ws
+    description: WebSocket server for real-time controller slot interactions
+defaultContentType: application/json
+channels:
+  /controller-slots/state:
+    description: |-
+      Channel for receiving the complete state of all 8 controller slots.
+      The server broadcasts the full state whenever any controller slot changes.
+    subscribe:
+      summary: Receive full controller slots state
+      description: |-
+        Subscribe to receive the complete state of all 8 controller slots.
+        This message is broadcast to all connected clients whenever:
+        - A controller connects to any slot
+        - A controller disconnects from any slot
+        - A controller becomes stale (recently disconnected)
+        - Two controller slots are swapped
+      operationId: receiveControllerSlotsState
+      message:
+        $ref: '#/components/messages/ControllerSlotsState'
+      tags:
+        - name: Controller Slots
+          description: Real-time controller slot state management
+  /controller-slots/updates:
+    description: |-
+      Channel for receiving individual controller slot updates.
+      The server sends a message whenever a specific controller slot changes state.
+    subscribe:
+      summary: Receive individual controller slot updates
+      description: |-
+        Subscribe to receive updates when individual controller slots change state.
+        Each message indicates which slot changed and its new state (connected, stale, or disconnected).
+      operationId: receiveControllerSlotUpdate
+      message:
+        $ref: '#/components/messages/ControllerSlotUpdate'
+      tags:
+        - name: Controller Slots
+          description: Real-time controller slot state management
+  /controller-slots/swap:
+    description: |-
+      Channel for sending controller slot swap requests.
+      Clients can swap two controller slots by sending a swap message.
+    publish:
+      summary: Request to swap two controller slots
+      description: |-
+        Send a request to swap two controller slots.
+        The server will swap the users connected to the specified slots and broadcast
+        the updated state to all connected clients via the state and updates channels.
+      operationId: swapControllerSlots
+      message:
+        $ref: '#/components/messages/ControllerSlotSwap'
+      tags:
+        - name: Controller Slots
+          description: Real-time controller slot state management
+components:
+  messages:
+    ControllerSlotsState:
+      name: ControllerSlotsState
+      title: Controller Slots State
+      summary: Complete state of all 8 controller slots
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/ControllerSlotsStatePayload'
+      examples:
+        - name: AllConnected
+          summary: Example with all slots connected
+          payload:
+            - connected
+            - connected
+            - connected
+            - connected
+            - connected
+            - connected
+            - connected
+            - connected
+        - name: MixedStates
+          summary: Example with mixed connection states
+          payload:
+            - connected
+            - connected
+            - stale
+            - disconnected
+            - disconnected
+            - disconnected
+            - disconnected
+            - disconnected
+    ControllerSlotUpdate:
+      name: ControllerSlotUpdate
+      title: Controller Slot Update
+      summary: Update for a single controller slot
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/ControllerSlotUpdatePayload'
+      examples:
+        - name: SlotConnected
+          summary: Controller connected to slot 1
+          payload:
+            player_slot: 1
+            state: connected
+        - name: SlotDisconnected
+          summary: Controller disconnected from slot 3
+          payload:
+            player_slot: 3
+            state: disconnected
+        - name: SlotStale
+          summary: Controller slot 2 became stale
+          payload:
+            player_slot: 2
+            state: stale
+    ControllerSlotSwap:
+      name: ControllerSlotSwap
+      title: Controller Slot Swap Request
+      summary: Request to swap two controller slots
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/ControllerSlotSwapPayload'
+      examples:
+        - name: SwapSlots1And2
+          summary: Swap controllers in slots 1 and 2
+          payload:
+            from_slot: 1
+            to_slot: 2
+        - name: SwapSlots4And7
+          summary: Swap controllers in slots 4 and 7
+          payload:
+            from_slot: 4
+            to_slot: 7
+  schemas:
+    ControllerSlotsStatePayload:
+      type: array
+      description: |-
+        Array containing the state of all 8 controller slots in order (slots 1-8).
+        Each element represents the connection state of that controller slot.
+      minItems: 8
+      maxItems: 8
+      items:
+        $ref: '#/components/schemas/ControllerState'
+    ControllerSlotUpdatePayload:
+      type: object
+      description: |-
+        Represents an update to a single controller slot.
+        Sent when a controller slot changes state (connected, stale, or disconnected).
+      required:
+        - player_slot
+        - state
+      properties:
+        player_slot:
+          $ref: '#/components/schemas/PlayerSlot'
+        state:
+          $ref: '#/components/schemas/ControllerState'
+      additionalProperties: false
+    ControllerSlotSwapPayload:
+      type: object
+      description: |-
+        Request to swap the users connected to two controller slots.
+        Both slots must be valid (1-8) and different from each other.
+      required:
+        - from_slot
+        - to_slot
+      properties:
+        from_slot:
+          $ref: '#/components/schemas/PlayerSlot'
+          description: The first controller slot to swap
+        to_slot:
+          $ref: '#/components/schemas/PlayerSlot'
+          description: The second controller slot to swap
+      additionalProperties: false
+    PlayerSlot:
+      type: integer
+      description: Controller slot number, ranging from 1 to 8
+      minimum: 1
+      maximum: 8
+      example: 1
+    ControllerState:
+      type: string
+      description: |-
+        The connection state of a controller slot:
+        - `connected`: Controller is actively connected
+        - `stale`: Controller was recently disconnected (grace period)
+        - `disconnected`: No controller connected to this slot
+      enum:
+        - connected
+        - stale
+        - disconnected
+      example: connected
+tags:
+  - name: Controller Slots
+    description: Real-time controller slot state management and swap operations
