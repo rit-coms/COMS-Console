@@ -1,0 +1,40 @@
+
+.pill {
+    border: var(--border-stroke-sm) solid var(--color-blue);
+    border-radius: var(--border-radius);
+    padding: 1vh 1.5vw;
+    font-family: var(--font-family);
+
+    &.primary {
+        background-color: var(--color-blue);
+    }
+
+    &.secondary {
+        background-color: var(--color-white);
+    }
+
+    &.tertiary {
+        background-color: unset;
+    }
+
+    &.text {
+        background-color: unset;
+        border: none;
+    }
+
+    &.small {
+        font-size: var(--font-size-sm);
+    }
+
+    &.medium {
+        font-size: var(--font-size-md);
+    }
+
+    &.large {
+        font-size: var(--font-size-lg);
+    }
+
+    &.xlarge {
+        font-size: var(--font-size-xl);
+    }
+}

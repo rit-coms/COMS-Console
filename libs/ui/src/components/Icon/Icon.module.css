@@ -1,0 +1,29 @@
+
+.icon {
+    background-color: unset;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: var(--border-stroke-md) solid var(--color-blue);
+    border-radius: var(--border-radius); 
+    box-sizing: border-box;
+    padding: calc(0.25em + 0.5vh) calc(0.25em + 0.5vw);
+    font-size: var(--font-size);
+
+    &.primary {
+        background-color: var(--color-blue);
+    }
+
+    &.secondary {
+        background-color: var(--color-white);
+    }
+
+    &.tertiary {
+        background-color: unset;
+    }
+
+    &.text {
+        background-color: unset;
+        border: none;
+    }
+}

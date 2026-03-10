@@ -1,0 +1,22 @@
+
+.playerTile {
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+    width: fit-content;
+    height: fit-content;
+
+    .playerIcon {
+        background-color: var(--color-white);
+        border: var(--border-stroke-md) solid var(--color-blue);
+        border-radius: var(--border-radius);
+        width: calc(80vw / var(--num-players, 2));
+        height: calc(80vw / var(--num-players, 2));
+
+        .playerImg {
+            background-color: var(--color-blue);
+            width: inherit;
+            height: inherit;
+        }
+    } 
+}

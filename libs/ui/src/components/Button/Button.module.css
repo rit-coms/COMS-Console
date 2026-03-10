@@ -1,0 +1,77 @@
+
+@import "../../styles/globals.css";
+
+.button {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: var(--border-stroke-md) solid var(--color-blue);
+    border-radius: var(--border-radius);
+    box-sizing: border-box;
+    padding: calc(0.75em + 0.5vh) calc(0.75em + 0.5vw);
+    font-size: var(--font-size);
+    
+    &.primary {
+        background-color: var(--color-blue);
+    }
+
+    &.secondary {
+        background-color: var(--color-white);
+    }
+
+    &.tertiary {
+        background-color: unset;
+    }
+
+    &.text {
+        background-color: unset;
+        border: none;
+    }
+
+    &:hover:not(:disabled, .disabled) {
+        background-color: var(--color-blue-60);
+        cursor: pointer;
+    }
+
+    &.primary:active:not(:disabled, .disabled) {
+        background-color: var(--color-dark-blue-90);
+    }
+
+    &.secondary:active:not(:disabled, .disabled),
+    &.tertiary:active:not(:disabled, .disabled),
+    &.text:active:not(:disabled, .disabled) {
+        background-color: var(--color-dark-blue-75);
+    }
+
+    &:focus:not(:disabled, .disabled) {
+        outline: var(--border-stroke-md) solid var(--color-player, var(--color-black));
+        outline-offset: 4px;
+        z-index: 10;
+    }
+
+    &:disabled, &.disabled {
+        background-color: var(--color-blue-disabled);
+        color: var(--color-black-50);
+        cursor: not-allowed;
+    }
+
+    &.block {
+        width: 4em;
+    }
+
+    &.stretch {
+        width: 100%;
+    }
+
+    &.small {
+        height: 1em;
+    }
+
+    &.medium {
+        height: 3em;
+    }
+
+    &.large {
+        height: 5em;
+    }
+}

@@ -1,0 +1,16 @@
+
+.playerContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    gap: 8vh;
+    width: 100%;
+    height: 100%;
+    
+    &.grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(20vw, 1fr));
+        justify-items: center;
+        align-items: center;
+    }
+}

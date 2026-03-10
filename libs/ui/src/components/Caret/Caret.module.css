@@ -1,0 +1,26 @@
+
+.caret {
+    width: fit-content;
+    height: fit-content;
+
+    .icon {
+        color: var(--color-blue);
+        padding: 0px 0.1vh;
+        transition: transform 0.15s ease;
+        
+        &:hover {
+            cursor: pointer;
+            stroke: #65c1cd;
+            filter: drop-shadow(0px 16px 32px rgba(6, 18, 19, 0.25)) 
+                    drop-shadow(0px 8px 16px rgba(6, 18, 19, 0.2));
+        }
+
+        &:active.left {
+            transform: scale(0.9) translateX(-2vh);
+        }
+
+        &:active.right {
+            transform: scale(0.9) translateX(2vh);
+        }
+    }
+}

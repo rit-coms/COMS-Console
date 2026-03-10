@@ -1,0 +1,10 @@
+
+@import url("../Button/Button.module.css");
+
+.iconButton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    font-size: var(--font-size-md);
+}

@@ -1,0 +1,56 @@
+
+.actionButton {
+
+    /* ACTION BUTTON VARIANTS */
+    &.info {
+        background-color: var(--color-info);
+        border: var(--border-stroke-md) solid var(--color-info-outline);
+
+        &:hover {
+            background-color: var(--color-info-60);
+        }
+
+        &:active {
+            background-color: var(--color-info-active);
+        }
+    }
+
+    &.success {
+        background-color: var(--color-success);
+        border: var(--border-stroke-md) solid var(--color-success-outline);
+
+        &:hover {
+            background-color: var(--color-success-60);
+        }
+
+        &:active {
+            background-color: var(--color-success-active);
+        }
+    }
+
+    &.warning {
+        background-color: var(--color-warning);
+        border: var(--border-stroke-md) solid var(--color-warning-outline);
+
+        &:hover {
+            background-color: var(--color-warning-60);
+        }
+
+        &:active {
+            background-color: var(--color-warning-active);
+        }
+    }
+
+    &.danger {
+        background-color: var(--color-danger);
+        border: var(--border-stroke-md) solid var(--color-danger-outline);
+
+        &:hover {
+            background-color: var(--color-danger-60);
+        }
+
+        &:active {
+            background-color: var(--color-danger-active);
+        }
+    }
+}

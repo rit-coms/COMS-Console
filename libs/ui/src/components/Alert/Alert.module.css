@@ -1,0 +1,144 @@
+
+.alert {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    width: 90vw;
+    top: var(--edge-offset);
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 1rem 1rem;
+    font-family: var(--font-family);
+    font-size: calc(var(--font-size-sm) + 0.25rem);
+    text-wrap: nowrap;
+    
+    /* ALERT POSITIONS */
+    &.top-right {
+        top: var(--edge-offset);
+        right: var(--edge-offset);
+    }
+
+    &.bottom-right {
+        bottom: var(--edge-offset);
+        right: var(--edge-offset);
+    }
+
+    &.bottom-left {
+        bottom: var(--edge-offset);
+        left: var(--edge-offset);
+    }
+
+    &.top-left {
+        top: var(--edge-offset);
+        left: var(--edge-offset);
+    }
+
+    /* ALERT VARIANTS */
+    &.info {
+        background-color: var(--color-info);
+        color: var(--color-info-outline);
+        border: var(--border-stroke-md) solid var(--color-info-outline);
+        
+        & path {
+            stroke: var(--color-info-outline);
+        }
+    }
+
+    &.success {
+        background-color: var(--color-success);
+        color: var(--color-success-outline);
+        border: var(--border-stroke-md) solid var(--color-success-outline);
+        
+        & path {
+            stroke: var(--color-success-outline);
+        }
+    }
+
+    &.warning {
+        background-color: var(--color-warning);
+        color: var(--color-warning-outline);
+        border: var(--border-stroke-md) solid var(--color-warning-outline);
+
+        & path {
+            stroke: var(--color-warning-outline);
+        }
+    }
+
+    &.danger {
+        background-color: var(--color-danger);
+        color: var(--color-danger-outline);
+        border: var(--border-stroke-md) solid var(--color-danger-outline);
+
+        & path {
+            stroke: var(--color-danger-outline);
+        }
+    }
+
+    .alertContent {
+        display: flex;
+        align-items: center;
+
+        .alertClose {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: auto;
+            height: 5vh;
+
+            /* ALERT CLOSE VARIANTS */
+            .info &:hover {
+                background-color: var(--color-info-outline-30);
+                & path {
+                    stroke: var(--color-black);
+                }
+            }
+
+            .info &:active {
+                background-color: var(--color-info-outline-60) !important;
+            }
+
+            .success &:hover {
+                background-color: var(--color-success-outline-30);
+                & path {
+                    stroke: var(--color-black);
+                }
+            }
+
+            .success &:active {
+                background-color: var(--color-success-outline-60) !important;
+            }
+
+            .warning &:hover {
+                background-color: var(--color-warning-outline-30);
+                & path {
+                    stroke: var(--color-black);
+                }
+            }
+
+            .warning &:active {
+                background-color: var(--color-warning-outline-60) !important;
+            }
+
+            .danger &:hover {
+                background-color: var(--color-danger-outline-30);
+                & path {
+                    stroke: var(--color-black);
+                }
+            }
+
+            .danger &:active {
+                background-color: var(--color-danger-outline-60) !important;
+            }
+        }
+
+        .alertMessage {
+            display: block;
+            width: 70vw;
+            overflow-x: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+    }
+}

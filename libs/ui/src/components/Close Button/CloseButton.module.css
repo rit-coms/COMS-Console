@@ -1,0 +1,28 @@
+
+.closeButton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    font-size: var(--font-size-md);
+
+    &.top-right {
+        top: var(--edge-offset);
+        right: var(--edge-offset);
+    }
+
+    &.bottom-right {
+        bottom: var(--edge-offset);
+        right: var(--edge-offset);
+    }
+
+    &.bottom-left {
+        bottom: var(--edge-offset);
+        left: var(--edge-offset);
+    }
+
+    &.top-left {
+        top: var(--edge-offset);
+        left: var(--edge-offset);
+    }
+}

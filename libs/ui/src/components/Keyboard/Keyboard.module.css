@@ -1,0 +1,79 @@
+
+:root {
+    --gap: 1vw;
+    --size: 9vw;
+}
+
+.keyboard {
+    background-color: var(--color-blue);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap);
+    width: fit-content;
+    height: 100%;
+    border-radius: var(--border-radius);
+    padding: 1.5vw;
+
+    .keyboardRow {
+        display: flex;
+        gap: var(--gap);
+        width: 100%;
+    
+        .keyboardKey {
+            background-color: var(--color-white);
+            color: var(--color-black-75);
+            display: flex;
+            flex-grow: 1;
+            flex-basis: var(--size);
+            justify-content: center;
+            align-items: center;
+            min-width: var(--size);
+            max-width: var(--size);
+            height: calc(var(--size) - 2vw);
+            border: none;
+            border-radius: var(--border-radius);
+            box-sizing: border-box;
+            padding: 10px;
+            font-size: var(--font-size-md);
+            text-align: center;
+
+            .icon {
+                display: flex;
+                justify-content: center;
+                font-size: var(--font-size-md);  
+            }
+        
+            &.span3 {
+                flex-grow: 3;
+                flex-basis: calc(var(--size) * 3 + (2 * var(--gap)));
+                max-width: calc(var(--size) * 3 + (2 * var(--gap)));
+            }
+        
+            &.span2 {
+                align-self: flex-start;
+                flex-grow: 2;
+                flex-basis: calc(var(--size) * 2 + var(--gap));
+                max-width: calc(var(--size) * 2 + var(--gap));
+            }
+
+            &:hover {
+                background-color: var(--color-white-90);
+                color: var(--color-black);
+                transform: scale(0.95);
+                box-shadow: var(--box-shadow);
+                cursor: pointer;
+            }
+
+            &:active {
+                background-color: var(--color-blue-disabled) !important;
+            }
+
+            &:focus {
+                outline: var(--border-stroke-md) solid var(--color-player, var(--color-black));
+                outline-offset: 4px;
+                z-index: 10;
+            }
+        }
+    }
+}

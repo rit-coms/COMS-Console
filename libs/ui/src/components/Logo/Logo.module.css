@@ -1,0 +1,21 @@
+
+.logo {
+    display: flex;
+    align-items: center;
+    width: fit-content;
+
+    .logoImage {
+        width: auto;
+        max-height: calc(var(--font-size-lg) + 2.0rem);
+    }
+
+    .logoText {
+        color: var(--color-blue);
+        font-family: var(--logo-font-family);
+        font-size: calc(var(--font-size-lg) + 1.0rem);
+    }
+
+    .logoImage + .logoText {
+        margin-left: calc(var(--font-size-lg) - 2.5rem);
+    }
+}

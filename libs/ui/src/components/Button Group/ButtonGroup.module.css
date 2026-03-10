@@ -1,0 +1,75 @@
+
+.buttonGroup {
+    display: flex;
+
+    & > button {
+        border-radius: unset;
+    }
+
+    &.bL > button, &.bLFirst > button, &.bRLast > button {
+        border: unset;
+    }
+
+    &.bL > button {
+        border-radius: 0px 0px 0px 6px !important;
+    }
+
+    &.bR > button {
+        border-radius: 0px 0px 6px 0px !important;
+    }
+
+    &.bL > button, &.bR > button {
+        border-radius: 0px 0px 6px 6px !important;
+    }
+
+    &.bLFirst > button:first-child {
+        border-radius: 0px 0px 0px 6px !important;
+    }
+
+    &.bLFirstUnset > button:first-child, 
+    &.bRLastUnset > button:last-child {
+        border-radius: unset !important;
+    }
+
+    &.bRLast > button:last-child {
+        border-radius: 0px 0px 6px 0px !important;
+    }
+
+    &.bR.bLFirstUnset > button {
+        border-radius: 0px 0px 6px 0px !important;
+    }
+
+    &.bL.bRLastUnset > button {
+        border-radius: 0px 0px 0px 6px !important;
+    }
+
+    &.row {
+        flex-direction: row;
+    }
+
+    &.row > button:first-child {
+        border-radius: 8px 0px 0px 8px;
+    }
+
+    &.row > button:last-child {
+        border-radius: 0px 8px 8px 0px;
+    }
+
+    &.column {
+        flex-direction: column;
+    }
+
+    &.column > button:first-child {
+        border-radius: 8px 8px 0px 0px;
+    }
+
+    &.column > button:last-child {
+        border-radius: 0px 0px 8px 8px;
+    }
+
+    &.disabled > button {
+        background-color: var(--color-blue-disabled);
+        color: var(--color-black-50);
+        cursor: not-allowed;
+    }
+}

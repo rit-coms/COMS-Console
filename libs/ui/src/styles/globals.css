@@ -1,0 +1,81 @@
+
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Unbounded&display=swap");
+
+:root {
+    --font-family: "Poppins", sans-serif;
+    --logo-font-family: "Unbounded", sans-serif;
+
+    --font-size: 1em;
+    --font-size-sm: calc(var(--font-size) - 0.2em);
+    --font-size-md: calc(var(--font-size) + 0.2em);
+    --font-size-lg: calc(var(--font-size) + 0.4em);
+    --font-size-xl: calc(var(--font-size) + 0.6em);
+
+    --color-blue: #99DED6;
+    --color-blue-60: rgba(153, 222, 214, 0.6);
+    --color-blue-50: rgba(153, 222, 214, 0.5);
+    --color-blue-40: rgba(153, 222, 214, 0.4);
+    --color-blue-30: rgba(153, 222, 214, 0.3);
+    --color-blue-20: rgba(153, 222, 214, 0.2);
+    --color-blue-10: rgba(153, 222, 214, 0.1);
+    --color-blue-disabled: #C5E8EC;
+
+    --color-dark-blue: #65C1CD;
+    --color-dark-blue-90: rgba(101, 193, 205, 0.9);
+    --color-dark-blue-75: rgba(101, 193, 205, 0.75);
+
+    --color-white: #FFFDF8;
+    --color-white-90: rgba(255, 253, 248, 0.9);
+
+    --color-black: #061213;
+    --color-black-75: rgba(6, 18, 19, 0.75);
+    --color-black-50: rgba(6, 18, 19, 0.5);
+    --color-black-30: rgba(6, 18, 19, 0.3);
+    
+    --color-grey: #C4C4C4;
+
+    --color-info: #84A8E2;
+    --color-info-60: rgba(132, 168, 226, 0.6);
+    --color-info-active: #5a8ad8;
+    --color-info-outline: #214D93;
+    --color-info-outline-60: rgba(33, 77, 147, 0.6);
+    --color-info-outline-30: rgba(33, 77, 147, 0.3);
+
+    --color-success: #A7E6A3;
+    --color-success-60:rgba(167, 230, 163, 0.6);
+    --color-success-active: #67d35f;
+    --color-success-outline: #279321;
+    --color-success-outline-60: rgba(39, 147, 33, 0.6);
+    --color-success-outline-30: rgba(39, 147, 33, 0.3);
+
+    --color-warning: #F9E5A4;
+    --color-warning-60: rgba(249, 229, 164, 0.6);
+    --color-warning-active: #f6d66f;
+    --color-warning-outline: #D5A60A;
+    --color-warning-outline-60: rgba(213, 166, 10, 0.6);
+    --color-warning-outline-30: rgba(213, 166, 10, 0.3);
+
+    --color-danger: #F1A3A3;
+    --color-danger-60: rgba(241, 163, 163, 0.6);
+    --color-danger-active: #e86464;
+    --color-danger-outline: #D50A0A;
+    --color-danger-outline-60: rgba(213, 10, 10, 0.6);
+    --color-danger-outline-30: rgba(213, 10, 10, 0.3);
+
+    --border-radius: 8px;
+    --border-stroke-sm: 1px;
+    --border-stroke-md: 2px;
+    --border-stroke-lg: 4px;
+
+    --box-shadow: 0px 12px 24px rgba(6, 18, 19, 0.15), 
+        0px 6px 12px rgba(6, 18, 19, 0.1);
+
+    --edge-offset: 12px;
+
+}
+
+* {
+    padding: 0;
+    margin: 0;
+    font-display: swap;
+}
