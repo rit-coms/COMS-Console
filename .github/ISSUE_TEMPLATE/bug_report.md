@@ -1,23 +1,30 @@
 ---
 name: Bug report
 about: Create a bug report to help us improve
-title: "[BUG] title of bug"
+title: "[BUG:Project] title of bug"
 labels: bug
-assignees: ''
-
+assignees: ""
 ---
 
 ### Describe the bug
+
 A short 1-2 sentences describing briefly what the bug is.
 
 ### Bug Description
+
 #### To Reproduce
+
 - List the steps you took to find the issue (preferably from fresh install, but also just from application startup is fine)
+
 #### Expected behavior
+
 - List what the expected behavior is
+
 ### Screenshots
+
 Desktop
-    OS: *Insert your OS here*
+OS: _Insert your OS here_
 
 ### Additional context
+
 Write additional notes, or things you noticed / might be different about your setup
