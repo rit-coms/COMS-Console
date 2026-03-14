@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Toast } from 'quackbox-design-system';
+import { Toast } from '@coms-console/quackbox-design-system';
 import { useToastContext } from './contexts';
 
 import duck from '../assets/duck.png'

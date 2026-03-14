@@ -1,5 +1,5 @@
 import React from "react";
-import { Button } from "quackbox-design-system";
+import { Button } from "@coms-console/quackbox-design-system";
 import "../styles/Footer.css";
 
 export default function Footer() {

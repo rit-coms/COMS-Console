@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
-  Link,
+  // Link,
   Modal,
   Pill,
   Tab,
@@ -9,7 +9,7 @@ import {
   TableRow,
   Tabs,
   Text,
-} from "quackbox-design-system";
+} from "@coms-console/quackbox-design-system";
 import "../styles/GameInfoModal.css";
 import { invoke } from "@tauri-apps/api/core";
 import { usePageContext } from "../context/contexts";

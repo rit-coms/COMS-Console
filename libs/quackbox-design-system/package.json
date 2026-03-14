@@ -1,5 +1,5 @@
 {
-  "name": "quackbox-design-system",
+  "name": "@coms-console/quackbox-design-system",
   "version": "5.0.3",
   "description": "A UI Component library and design system for the RIT COMS QuackBox",
   "author": "Makenzie Dorsey <@m-dorsey> of RIT COMS <@rit-coms>",
@@ -43,11 +43,11 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "react": "catalog:",
+    "react-dom": "catalog:",
     "@typescript-eslint/eslint-plugin": "^8.26.0",
     "@typescript-eslint/parser": "^8.26.0",
-    "eslint-plugin-react": "^7.37.4",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "eslint-plugin-react": "^7.37.4"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^3.2.4",
@@ -69,7 +69,7 @@
     "globals": "^15.14.0",
     "postcss-nesting": "^13.0.1",
     "react-icons": "^5.4.0",
-    "storybook": "^8.5.3",
+    "storybook": "^8.6.18",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.22.0",
     "vite": "^6.1.0",

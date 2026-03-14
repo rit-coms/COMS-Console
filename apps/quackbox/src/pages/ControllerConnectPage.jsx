@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useGamepadContext, usePageContext, useToastContext } from "../context/contexts";
-import { Modal, PlayerContainer, PlayerTile } from "quackbox-design-system";
+import { Modal, PlayerContainer, PlayerTile } from "@coms-console/quackbox-design-system";
 import duck_connected from '../assets/duck_connected.png'
 
 export default function ControllerConnectPage() {

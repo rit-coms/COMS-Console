@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useNavigationContext } from "../context/contexts";
-import { Keyboard, Modal, Search } from "quackbox-design-system";
+import { Keyboard, Modal, Search } from "@coms-console/quackbox-design-system";
 import "../styles/SearchModal.css";
 
 export default function SearchModal({showModal, closeModal}) {

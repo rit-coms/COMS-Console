@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useModal } from "../hooks/useModal"; 
 import { useNavigationContext, usePageContext } from "../context/contexts";
 import GameInfoModal from "./GameInfoModal";
-import { Carousel, Header, Text } from "quackbox-design-system";
+import { Carousel, Header, Text } from "@coms-console/quackbox-design-system";
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import "../styles/GameGallery.css";
 

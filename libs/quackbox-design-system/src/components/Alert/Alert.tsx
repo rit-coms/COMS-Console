@@ -39,7 +39,7 @@ export const Alert = ({
     }
 
     useEffect(() => {
-        const timer: number = setTimeout(() => {
+        const timer = setTimeout(() => {
             setIsVisible(false)
             if (onClose) onClose() 
             else handleOnClose()

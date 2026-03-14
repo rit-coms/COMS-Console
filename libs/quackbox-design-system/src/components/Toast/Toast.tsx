@@ -43,7 +43,7 @@ export const Toast = ({
     const [isVisible, setIsVisible] = useState<boolean>(true)
 
     useEffect(() => {
-        const timer: number = setTimeout(() => {
+        const timer = setTimeout(() => {
             setIsVisible(false)
         }, duration)
         return () => clearTimeout(timer)

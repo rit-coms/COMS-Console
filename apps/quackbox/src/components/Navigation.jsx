@@ -2,7 +2,7 @@ import React from "react";
 import { useModal } from "../hooks/useModal";
 import { useNavigationContext, usePageContext } from "../context/contexts";
 import SearchModal from "./SearchModal";
-import { IconButton, Logo, Search } from "quackbox-design-system";
+import { IconButton, Logo, Search } from "@coms-console/quackbox-design-system";
 import "../styles/Navigation.css";
 
 import duck from '../assets/duck.png'
