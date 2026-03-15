@@ -13,7 +13,7 @@ pub mod handlers;
 /// Listens to and updates the current shared game state
 /// by synchronizing the current game ID with the latest from a watch channel
 async fn handle_game_state_updates(game_state: GameStateShared) {
-    println!("Started listener to watch in the router");
+    // println!("Started listener to watch in the router");
     let current_game = game_state.id.clone();
     let mut watch = game_state.channel.clone();
     let mut i = 0;
@@ -24,10 +24,10 @@ async fn handle_game_state_updates(game_state: GameStateShared) {
     loop {
         let mut game_id = current_game.write().await;
         *game_id = *watch.borrow_and_update();
-        println!("set game_id {:?}: {:?}", i, game_id);
+        // println!("set game_id {:?}: {:?}", i, game_id);
         drop(game_id);
         game_state.notifier.notify_one();
-        println!("Sent notification");
+        // println!("Sent notification");
         if watch.changed().await.is_err() {
             // the watch channel transmitter should never
             // be destroyed before the application closes
@@ -87,7 +87,7 @@ pub async fn create_router(db_path: &str, game_state: GameStateShared) -> Router
 
     tokio::spawn(handle_game_state_updates(game_state.clone()));
     game_state.notifier.notified().await; // wait for the first notification
-    println!("Received first notification");
+    // println!("Received first notification");
 
     let app_state = AppState {
         api_state,

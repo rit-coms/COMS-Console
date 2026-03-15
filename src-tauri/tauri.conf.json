@@ -43,22 +43,21 @@
         "depends": []
       }
     },
-    "createUpdaterArtifacts": "v1Compatible"
+    "createUpdaterArtifacts": false
   },
   "productName": "coms-console-launcher",
   "mainBinaryName": "coms-console-launcher",
   "version": "1.0.0",
   "identifier": "coms-console",
-  "plugins": {},
+  "plugins": {
+    "updater": {
+      "active": false
+    }
+  },
   "app": {
     "windows": [
       {
         "visible": false,
-        "fullscreen": true,
-        "height": 600,
-        "resizable": true,
-        "title": "COMS Console",
-        "width": 800,
         "useHttpsScheme": true
       }
     ],
