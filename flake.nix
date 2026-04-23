@@ -5,6 +5,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
     import-tree.url = "github:vic/import-tree";
+    naersk.url = "github:nix-community/naersk";
   };
 
   outputs = {self, ...} @ inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (

@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "workspaces": {
     "packages": [
-      "apps/**",
-      "libs/**"
+      "apps/*",
+      "libs/*"
     ],
     "catalog": {
       "react": "^19.1.1",

@@ -12,10 +12,10 @@
   "author": "Kenzie & Matt",
   "license": "ISC",
   "dependencies": {
-    "@tauri-apps/api": "^2.8.0",
+    "@coms-console/quackbox-design-system": "workspace:*",
+    "@tauri-apps/api": "^2.10.1",
     "@tauri-apps/plugin-autostart": "~2.5.0",
     "@tauri-apps/plugin-process": "~2.3.0",
-    "@coms-console/quackbox-design-system": "workspace:*",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-icons": "catalog:",

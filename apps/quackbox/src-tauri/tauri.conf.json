@@ -53,7 +53,7 @@
   "app": {
     "windows": [
       {
-        "visible": false,
+        "visible": true,
         "fullscreen": true,
         "height": 600,
         "resizable": true,
