@@ -34,9 +34,13 @@
         webkitgtk_4_1
         openssl
 
+        pkgs.postgresql
+        pkgs.libpq
+
       ];
       env.RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
       env.GIO_MODULE_DIR = "${pkgs.glib-networking}/lib/gio/modules/";
+      env.LD_LIBRARY_PATH = "${pkgs.postgresql.lib}/lib:$LD_LIBRARY_PATH";
     };
     
   };
