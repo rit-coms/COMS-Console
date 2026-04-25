@@ -11,7 +11,7 @@ pub mod test_context;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
 use crate::{
-    db::schema::multiplayer,
+    db::schema::{multiplayer, rit_login, users},
     game_dev_api::handlers::{LeaderboardEntryPostPayload, SavePostPayload},
 };
 
@@ -74,7 +74,10 @@ pub async fn get_all_games(db_path: &str) -> Vec<Game> {
         .expect("Failed to fetch all games")
 }
 
-pub async fn insert_multiplayer(multiplayer: &Multiplayer, db_path: &str) -> QueryResult<Multiplayer> {
+pub async fn insert_multiplayer(
+    multiplayer: &Multiplayer,
+    db_path: &str,
+) -> QueryResult<Multiplayer> {
     use self::schema::multiplayer::dsl;
     let connection = &mut establish_connection(db_path);
 
@@ -247,6 +250,17 @@ pub async fn get_user(user_id: i32, db_path: &str) -> User {
         .filter(dsl::user_id.eq(user_id))
         .first(connection)
         .expect("Error loading user data")
+}
+
+pub async fn get_uid_usernames(uid: String, db_path: &str) -> String {
+    use crate::db::users::dsl;
+    let connection = &mut establish_connection(db_path);
+    rit_login::table
+        .inner_join(dsl::users.on(users::user_id.eq(rit_login::user_id)))
+        .filter(rit_login::rit_uid.eq(uid))
+        .select((users::username))
+        .first(connection)
+        .expect("Failed to find username for given uuid")
 }
 
 pub async fn set_save(save: &SavePostPayload, db_path: &str) -> Save {

@@ -15,7 +15,9 @@ use tauri::{AppHandle, Listener, Manager, State};
 use tokio::sync::{oneshot, watch::Sender, Mutex, Notify};
 use url::Url;
 
-use crate::db::{self, get_all_games, get_leaderboard_entries, get_username, models::Game};
+use crate::db::{
+    self, get_all_games, get_leaderboard_entries, get_uid_usernames, get_username, models::Game,
+};
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(try_from = "GameInfoJS")]
@@ -279,6 +281,15 @@ pub async fn get_game_info(
 ) -> Result<Vec<GameInfo>, ErrorType> {
     let games = get_game_info_list(&state, &app_handle).await?;
     Ok(games)
+}
+
+#[tauri::command]
+pub async fn get_user_info(
+    state: State<'_, Mutex<AppState>>,
+    uid: String,
+) -> Result<String, ErrorType> {
+    let db_path = &state.lock().await.db_path;
+    Ok(get_uid_usernames(uid, db_path).await)
 }
 
 #[derive(Serialize, Debug)]
