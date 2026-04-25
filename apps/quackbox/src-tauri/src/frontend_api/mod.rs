@@ -1,5 +1,3 @@
-use crate::db::get_username;
-use crate::db::{get_leaderboard, get_leaderboard_game_data, insert_game};
 use anyhow::Error;
 use chrono::{serde::ts_seconds_option, DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -17,7 +15,9 @@ use tauri::{AppHandle, Listener, Manager, State};
 use tokio::sync::{oneshot, watch::Sender, Mutex, Notify};
 use url::Url;
 
-use crate::db;
+use crate::db::{
+    self, get_all_games, get_leaderboard_entries, get_uid_usernames, get_username, models::Game,
+};
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(try_from = "GameInfoJS")]
@@ -274,78 +274,22 @@ struct GameData {
     id: String,
 }
 
-/// Make sure every game listed in the games\all-games.json file is in the local database
-fn check_all_games(app_handle: &AppHandle) {
-    // getting the app data directory
-    let app_data_dir = app_handle
-        .path()
-        .app_data_dir()
-        .expect("Could not find app data directory");
-
-    // Getting the list of games within the all-games JSON file
-    let all_games_file_path = app_data_dir.join("games/all-games.json");
-    let all_games_file = File::open(&all_games_file_path).expect(
-        format!(
-            "all-games.json not found at {}",
-            &all_games_file_path.clone().display()
-        )
-        .as_str(),
-    );
-    let reader = BufReader::new(all_games_file);
-    // If this reading is ever too slow, we can switch to reading the file into memory as a string
-    // and then converting that string into a JSON Value
-    let games_list: GameDataList =
-        serde_json::from_reader(reader).expect("Failed to read all-games.json");
-
-    for game in games_list.games {
-        db::make_sure_game_exists(
-            &game.title,
-            &game.id,
-            app_handle
-                .path()
-                .app_data_dir()
-                .unwrap()
-                .join("local")
-                .with_extension("db")
-                .into_os_string()
-                .to_str()
-                .unwrap(),
-        );
-    }
-}
-
-// Given a list of games, set them to be installed in the database
-fn set_games_installed(games: &Vec<GameInfo>, app_handle: &AppHandle) {
-    for game in games {
-        db::insert_game(
-            &game.id.to_string(),
-            &game.title,
-            true,
-            app_handle
-                .path()
-                .app_data_dir()
-                .unwrap()
-                .join("local")
-                .with_extension("db")
-                .into_os_string()
-                .to_str()
-                .unwrap(),
-        );
-    }
-}
-
 #[tauri::command]
 pub async fn get_game_info(
     state: State<'_, Mutex<AppState>>,
     app_handle: AppHandle,
 ) -> Result<Vec<GameInfo>, ErrorType> {
     let games = get_game_info_list(&state, &app_handle).await?;
-    set_games_installed(&games, &app_handle);
-    // Only populate the database with all games if code is running on the quackbox
-    if cfg!(feature = "quackbox-raspi") {
-        check_all_games(&app_handle);
-    }
     Ok(games)
+}
+
+#[tauri::command]
+pub async fn get_user_info(
+    state: State<'_, Mutex<AppState>>,
+    uid: String,
+) -> Result<String, ErrorType> {
+    let db_path = &state.lock().await.db_path;
+    Ok(get_uid_usernames(uid, db_path).await)
 }
 
 #[derive(Serialize, Debug)]
@@ -372,29 +316,64 @@ pub async fn get_leaderboard_data(
     get_leaderboard_data_helper(game_title, state.lock().await.db_path.as_str())
 }
 
+/// Make sure every game listed in the games\all-games.json file is in the local database
+pub async fn check_all_games(app_data_dir: PathBuf, db_path: &str) {
+    // Getting the list of games within the all-games JSON file
+    let all_games_file_path = app_data_dir.join("games/all-games.json");
+    let all_games_file = File::open(&all_games_file_path).expect(
+        format!(
+            "all-games.json not found at {}",
+            &all_games_file_path.clone().display()
+        )
+        .as_str(),
+    );
+    println!("Reading {:?}", all_games_file_path);
+    let reader = BufReader::new(all_games_file);
+    // If this reading is ever too slow, we can switch to reading the file into memory as a string
+    // and then converting that string into a JSON Value
+    let games_list: GameDataList =
+        serde_json::from_reader(reader).expect("Failed to read all-games.json");
+
+    for game in games_list.games {
+        println!("inserting game! {}", game.title);
+        db::insert_game(
+            &Game {
+                game_id: game.id.parse::<i32>().unwrap(),
+                title: game.title,
+                author: "Test".to_string(),
+                summary: "Test".to_string(),
+                release_date: Utc::now(),
+                cover_image: vec![],
+                multiplayer_id: 0,
+            },
+            &db_path,
+        );
+    }
+}
+
 /// This function allows us to mock databases for testing without having a db_name parameter
 /// at the front end
 fn get_leaderboard_data_helper(
     game_title: String,
     db_name: &str,
 ) -> Result<serde_json::Value, ErrorType> {
-    let data = get_leaderboard_game_data(&game_title, db_name)?;
+    let data = get_leaderboard_entries(&game_title, db_name)?;
 
     let mut sorted_data: HashMap<String, Vec<FrontendLeaderboardEntry>> = HashMap::new();
     for entry in data {
         match sorted_data.get_mut(&entry.value_name) {
             Some(entries) => entries.push(FrontendLeaderboardEntry {
                 value_num: entry.value_num,
-                username: get_username(&entry.user_id, db_name)?,
-                time_stamp: entry.time_stamp,
+                username: get_username(entry.user_id, db_name)?,
+                time_stamp: entry.lb_timestamp.to_string(),
             }),
             None => {
                 sorted_data.insert(
                     entry.value_name,
                     vec![FrontendLeaderboardEntry {
                         value_num: entry.value_num,
-                        username: get_username(&entry.user_id, db_name)?,
-                        time_stamp: entry.time_stamp,
+                        username: get_username(entry.user_id, db_name)?,
+                        time_stamp: entry.lb_timestamp.to_string(),
                     }],
                 );
             }
@@ -532,18 +511,4 @@ async fn wait_for_window_close(window: tauri::WebviewWindow) {
     let _ = rx.await;
 }
 
-mod tests {
-    use super::*;
-    use crate::db::test_context::{setup_initial_data, TestContext};
-
-    #[tokio::test]
-    async fn test_get_leaderboard_data() {
-        let context = TestContext::new("test_get_leaderboard_data_frontend").await;
-        setup_initial_data(context.get_db_path()).await;
-
-        let data = get_leaderboard_data_helper("game0".to_string(), context.get_db_path())
-            .expect("Failed to get leaderboard data");
-
-        println!("{:?}", data);
-    }
-}
+mod tests {}

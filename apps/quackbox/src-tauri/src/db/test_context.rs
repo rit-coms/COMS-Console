@@ -4,11 +4,12 @@ use crate::{
     db::establish_connection,
     game_dev_api::{
         create_router,
-        handlers::{GameState, GameStateShared},
+        handlers::{GameState, GameStateShared, LeaderboardEntryPostPayload},
     },
 };
 use axum::Router;
 use axum_test::TestServer;
+use chrono::{DateTime, Utc};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use tempfile::NamedTempFile;
 use tokio::sync::{
@@ -89,85 +90,76 @@ impl TestContext {
 pub async fn setup_initial_user_data(db_path: &str) {
     let users = vec![
         User {
-            id: String::from("1"),
-            name: String::from("user1"),
-            rit_id: None,
+            user_id: 1,
+            username: "User 1".into(),
+            about_me: None,
+            profile_pic: None,
+            crumbs: 67,
         },
         User {
-            id: String::from("2"),
-            name: String::from("user2"),
-            rit_id: None,
+            user_id: 2,
+            username: "User 2".into(),
+            about_me: Some("Yeah".into()),
+            profile_pic: None,
+            crumbs: 2,
         },
     ];
 
-    for user in users {
-        create_user(&user.id, &user.name, db_path);
-    }
+    users.iter().map(|user| create_user(user, db_path));
 }
 
-pub fn setup_initial_game_data(db_path: &str) {
+pub fn setup_initial_game_data(db_path: &str, date_time: DateTime<Utc>) {
     let games = vec![
         Game {
-            id: String::from("1"),
-            name: String::from("game1"),
-            installed: true,
+            game_id: 1,
+            title: "Good Game".into(),
+            author: "Me".into(),
+            summary: "Just a good game".into(),
+            release_date: date_time,
+            cover_image: vec![0, 1, 2],
+            multiplayer_id: 1,
         },
         Game {
-            id: String::from("0"),
-            name: String::from("game0"),
-            installed: true,
+            game_id: 2,
+            title: "Better Game".into(),
+            author: "You".into(),
+            summary: "Just a better game".into(),
+            release_date: date_time,
+            cover_image: vec![0, 1, 2, 3],
+            multiplayer_id: 2,
         },
     ];
 
-    for game in games {
-        insert_game(&game.id, &game.name, game.installed, db_path);
-    }
+    games.iter().for_each(|game| {
+        insert_game(game, db_path);
+    });
 }
 
-pub fn setup_initial_leaderboard_data(db_path: &str) {
-    let entries = vec![
-        LeaderboardEntry {
-            user_id: "1".to_string(),
-            game_id: "0".to_string(),
+pub fn setup_initial_leaderboard_data(db_path: &str, date_time: DateTime<Utc>) {
+    let leaderboard_entries = vec![
+        LeaderboardEntryPostPayload {
+            user_id: 1,
+            game_id: 1,
             value_name: "Score".to_string(),
-            time_stamp: "timestamp".to_string(),
             value_num: 100.0,
-            row_id: 0, // placeholder
         },
-        LeaderboardEntry {
-            user_id: "2".to_string(),
-            game_id: "0".to_string(),
-            value_name: "Score".to_string(),
-            time_stamp: "timestamp".to_string(),
-            value_num: 125.0,
-            row_id: 0, // placeholder
-        },
-        LeaderboardEntry {
-            user_id: "1".to_string(),
-            game_id: "0".to_string(),
-            value_name: "Money".to_string(),
-            time_stamp: "timestamp".to_string(),
-            value_num: 423.50,
-            row_id: 0, // placeholder
+        LeaderboardEntryPostPayload {
+            user_id: 2,
+            game_id: 2,
+            value_name: "High Score".to_string(),
+            value_num: 250.0,
         },
     ];
 
-    for entry in entries {
-        insert_leaderboard_entry(
-            &entry.user_id,
-            &entry.game_id,
-            &entry.value_name,
-            entry.value_num,
-            db_path,
-        )
-        .expect("Failed to insert leaderboard entry");
-    }
+    leaderboard_entries.iter().for_each(|entry| {
+        insert_leaderboard_entry(entry, db_path);
+    });
 }
 
-pub async fn setup_initial_data(db_path: &str) {
-    setup_initial_game_data(db_path);
+pub async fn setup_initial_data(db_path: &str, date_time: DateTime<Utc>) {
+    setup_initial_game_data(db_path, date_time);
     setup_initial_user_data(db_path).await;
-    setup_initial_leaderboard_data(db_path);
+    setup_initial_leaderboard_data(db_path, date_time);
     println!("Setup initial data!")
 }
 
