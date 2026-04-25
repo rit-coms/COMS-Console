@@ -78,7 +78,7 @@ pub struct LocalLogin {
     pub salthash: String,
 }
 
-#[derive(Queryable, Selectable, Debug, Serialize)]
+#[derive(Queryable, Selectable, Debug, Serialize, Insertable)]
 #[diesel(table_name = crate::db::schema::multiplayer)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Multiplayer {

@@ -15,7 +15,7 @@ use tauri::{AppHandle, Listener, Manager, State};
 use tokio::sync::{oneshot, watch::Sender, Mutex, Notify};
 use url::Url;
 
-use crate::db::{self, get_all_games, get_leaderboard_entries, get_username};
+use crate::db::{self, get_all_games, get_leaderboard_entries, get_username, models::Game};
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(try_from = "GameInfoJS")]
@@ -303,6 +303,41 @@ pub async fn get_leaderboard_data(
     state: State<'_, Mutex<AppState>>,
 ) -> Result<serde_json::Value, ErrorType> {
     get_leaderboard_data_helper(game_title, state.lock().await.db_path.as_str())
+}
+
+/// Make sure every game listed in the games\all-games.json file is in the local database
+pub async fn check_all_games(app_data_dir: PathBuf, db_path: &str) {
+    // Getting the list of games within the all-games JSON file
+    let all_games_file_path = app_data_dir.join("games/all-games.json");
+    let all_games_file = File::open(&all_games_file_path).expect(
+        format!(
+            "all-games.json not found at {}",
+            &all_games_file_path.clone().display()
+        )
+        .as_str(),
+    );
+    println!("Reading {:?}", all_games_file_path);
+    let reader = BufReader::new(all_games_file);
+    // If this reading is ever too slow, we can switch to reading the file into memory as a string
+    // and then converting that string into a JSON Value
+    let games_list: GameDataList =
+        serde_json::from_reader(reader).expect("Failed to read all-games.json");
+
+    for game in games_list.games {
+        println!("inserting game! {}", game.title);
+        db::insert_game(
+            &Game {
+                game_id: game.id.parse::<i32>().unwrap(),
+                title: game.title,
+                author: "Test".to_string(),
+                summary: "Test".to_string(),
+                release_date: Utc::now(),
+                cover_image: vec![],
+                multiplayer_id: 0,
+            },
+            &db_path,
+        );
+    }
 }
 
 /// This function allows us to mock databases for testing without having a db_name parameter

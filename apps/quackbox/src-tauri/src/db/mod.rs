@@ -10,7 +10,10 @@ pub mod test_context;
 
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
-use crate::game_dev_api::handlers::{LeaderboardEntryPostPayload, SavePostPayload};
+use crate::{
+    db::schema::multiplayer,
+    game_dev_api::handlers::{LeaderboardEntryPostPayload, SavePostPayload},
+};
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
 
@@ -69,6 +72,16 @@ pub async fn get_all_games(db_path: &str) -> Vec<Game> {
         .select(Game::as_select())
         .get_results(connection)
         .expect("Failed to fetch all games")
+}
+
+pub async fn insert_multiplayer(multiplayer: &Multiplayer, db_path: &str) -> QueryResult<Multiplayer> {
+    use self::schema::multiplayer::dsl;
+    let connection = &mut establish_connection(db_path);
+
+    insert_into(dsl::multiplayer)
+        .values(multiplayer)
+        .on_conflict_do_nothing()
+        .get_result(connection)
 }
 
 pub fn insert_leaderboard_entry(
@@ -211,6 +224,7 @@ pub fn create_guest_user(db_path: &str) -> Vec<User> {
     let connection = &mut establish_connection(db_path);
     insert_into(users)
         .values((username.eq(NAME_S), crumbs.eq(0)))
+        .on_conflict_do_nothing()
         .load::<User>(connection)
         .expect("Could not make sure Guest user exists")
 }
