@@ -1,6 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use card_reader::start_id_recv;
 use db::setup_db;
 use frontend_api::{get_game_info, get_leaderboard_data, play_game, AppState, GameSenderState};
 use game_dev_api::handlers::GameState;
@@ -9,6 +10,7 @@ use game_dev_api::setup_game_dev_api;
 use quackbox_backend::db::create_default_guest;
 use tauri::Manager;
 use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
+use tokio::sync::mpsc;
 use tokio::sync::watch;
 use tokio::sync::Mutex;
 use tokio::sync::Notify;
@@ -16,6 +18,7 @@ use tokio::sync::RwLock;
 
 use std::sync::Arc;
 
+mod card_reader;
 mod db;
 mod frontend_api;
 mod game_dev_api;
@@ -42,6 +45,7 @@ fn main() {
             // tauri::async_runtime::spawn(db::test_db());
 
             let (current_game_tx, current_game_rx) = watch::channel(None);
+            let (card_reader_tx, card_reader_rx) = mpsc::channel::<[u8; 7]>(10);
             let notify = Arc::new(Notify::new());
             app.manage(GameSenderState {
                 game_watch_tx: current_game_tx,
@@ -53,6 +57,7 @@ fn main() {
                 notifier: Arc::clone(&notify),
                 channel: current_game_rx.clone(),
             });
+            tauri::async_runtime::spawn(start_id_recv(card_reader_tx));
             tauri::async_runtime::spawn({
                 setup_db(db_path.as_str());
                 create_default_guest(db_path.as_str());
