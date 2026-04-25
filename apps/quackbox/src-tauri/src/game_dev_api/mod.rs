@@ -1,7 +1,6 @@
 use axum::{routing::post, Router};
 use handlers::{
-    get_leaderboard, get_save_data, set_leaderboard, set_save_data, ApiState, AppState,
-    GameStateShared,
+    get_leaderboard, set_leaderboard, set_save_data, ApiState, AppState, GameStateShared,
 };
 use std::sync::Arc;
 use tokio::sync::Notify;
@@ -100,10 +99,7 @@ pub async fn create_router(db_path: &str, game_state: GameStateShared) -> Router
             post(set_leaderboard).get(get_leaderboard),
         )
         // .with_state(app_state.clone()) // TODO: wrap the state in an ARC to avoid cloning???
-        .route(
-            &format!("{}/save-data", route_prefix),
-            post(set_save_data).get(get_save_data),
-        )
+        .route(&format!("{}/save-data", route_prefix), post(set_save_data))
         .with_state(app_state)
 }
 

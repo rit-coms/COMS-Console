@@ -5,5 +5,5 @@ create table Leaderboard_Entry(
     game_id int not null references Game(game_id) on delete cascade,
     value_num double precision not null,
     value_name varchar(150) not null,
-    lb_timestamp timestamptz not null
+    lb_timestamp timestamptz not null default now()
 );

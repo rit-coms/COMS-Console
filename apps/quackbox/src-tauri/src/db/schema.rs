@@ -112,7 +112,8 @@ diesel::table! {
 }
 
 diesel::table! {
-    saves (filename, user_id, game_id) {
+    saves (save_id) {
+        save_id -> Int4,
         #[max_length = 200]
         filename -> Varchar,
         user_id -> Int4,
